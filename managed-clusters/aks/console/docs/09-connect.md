@@ -1,30 +1,32 @@
-# Connect to Cluster
+# Kết nối tới Cluster
 
-We will connect to the cluster using the Azure CloudShell.
+Chúng ta sẽ kết nối tới cluster bằng Azure CloudShell.
 
 ![image](../images/09-connect.png)
 
-When you click on **Connect**, it will pop up a window to the right. Click on the **Open Cloud Shell** link
+Khi bạn bấm vào **Connect**, một cửa sổ sẽ bật ra ở bên phải. Bấm vào link **Open Cloud Shell**
 
-1. At the popup that opens, select `Bash`
-1. At the next popup, select the following
+1. Tại popup mở ra, chọn `Bash`
+1. Tại popup tiếp theo, chọn như sau
     * Mount storage account
-    * Subscription - select from the drop-down. There should be only one choice, something like `azurekmlprod`
-    * Press `Apply`
-1. At the `Mount Storage Account` popup, select `I want to create a storage account` and press `Next`
-1. Now select the following from the `Create storage account` popup
-    * `Subscription` - Do not change this.
-    * `Resource gorup` - select from the drop-down. There should be only one choice.
-    * `Storage account name` - Anything you like or random characters typed from your keyboard. At least 16.
-    * `File share` - Anything you like or random characters typed from your keyboard. At least 16.
-    * `Region` - Select `(US) East US` from the dropdown
-    * Press `Create`, wait for it to deploy, then for the bash prompt to appear.
+    * Subscription - chọn từ danh sách thả xuống. Chỉ nên có một lựa chọn, đại loại như `azurekmlprod`
+    * Bấm `Apply`
+1. Tại popup `Mount Storage Account`, chọn `I want to create a storage account` và bấm `Next`
+1. Bây giờ chọn như sau trong popup `Create storage account`
+    * `Subscription` - Không thay đổi trường này.
+    * `Resource gorup` - chọn từ danh sách thả xuống. Chỉ nên có một lựa chọn.
+    * `Storage account name` - Tên bất kỳ bạn thích hoặc các ký tự ngẫu nhiên gõ từ bàn phím. Ít nhất 16 ký tự.
+    * `File share` - Tên bất kỳ bạn thích hoặc các ký tự ngẫu nhiên gõ từ bàn phím. Ít nhất 16 ký tự.
+    * `Region` - Chọn `(US) East US` từ danh sách thả xuống
+    * Bấm `Create`, chờ triển khai xong, rồi chờ dấu nhắc lệnh bash xuất hiện.
 
-The cloud shell window will open at the bottom of your browser window and will automatically run the two commands that are required to set up cluster connectivity.
+Cửa sổ cloud shell sẽ mở ở phía dưới cửa sổ trình duyệt và sẽ tự động chạy hai lệnh cần thiết để thiết lập kết nối tới cluster.
 
 ![image](../images/09c-cloudshell.png)
 
-Now you can run commands against the cluster, and you're done!
+> 💡 **Bổ sung:** Hai lệnh đó thường là `az account set --subscription <subscription-id>` (chọn subscription) và `az aks get-credentials --resource-group <resource-group> --name kodekloud-demo` (tải thông tin xác thực của cluster và ghép vào file `~/.kube/config`). Nếu chúng không tự chạy, bạn có thể tự chạy lại - lấy lệnh chính xác từ cửa sổ **Connect**.
+
+Bây giờ bạn có thể chạy lệnh với cluster, và thế là xong!
 
 ```text
 odl_user [ ~ ]$ kubectl get nodes
@@ -39,4 +41,4 @@ nginx   1/1     Running   0          8s
 odl_user [ ~ ]$ 
 ```
 
-
+> 💡 **Bổ sung:** Lưu ý `kubectl get nodes` chỉ hiển thị các worker node - control plane do Azure quản lý nên bạn sẽ không thấy master node nào. Khi thực hành xong trên tài khoản Azure thật, hãy xóa cluster (ví dụ `az aks delete --resource-group <resource-group> --name kodekloud-demo`) để tránh phát sinh chi phí.

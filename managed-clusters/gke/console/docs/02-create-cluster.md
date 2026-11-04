@@ -1,17 +1,19 @@
-# Provisioning the Cluster
+# Khởi tạo Cluster
 
-There is no longer any need to select project, or set up routes or firewall rules as directed by the [original guide published on the Community Forum](https://kodekloud.com/community/t/playground-series-how-to-create-a-managed-kubernetes-cluster-with-google-kubernetes-engine/230314). These are now all in place when you start, therefore you can get straight onto configuring the cluster.
+Bây giờ không còn cần chọn project, hay thiết lập route hoặc firewall rule như được hướng dẫn trong [bản hướng dẫn gốc đăng trên Community Forum](https://kodekloud.com/community/t/playground-series-how-to-create-a-managed-kubernetes-cluster-with-google-kubernetes-engine/230314) nữa. Tất cả những thứ này đã được thiết lập sẵn khi bạn bắt đầu, vì vậy bạn có thể bắt tay ngay vào việc cấu hình cluster.
 
-Note that as you navigate around the GCP site, various blue information pop-ups may appear. Dismiss these if they do.
+Lưu ý rằng khi bạn di chuyển qua lại trên trang GCP, nhiều popup thông tin màu xanh có thể xuất hiện. Hãy tắt chúng đi nếu có.
 
-If using a small monitor, some top menu items may be hidden behind a vertical ellipsis - `⋮`. Check for this if some options shown in the screenshots can't be found.<br/><br/>![vert-ellipsis](../images/02-vert-ellipsis.png)
+Nếu dùng màn hình nhỏ, một số mục trên menu phía trên có thể bị ẩn sau dấu ba chấm dọc - `⋮`. Hãy kiểm tra chỗ này nếu không tìm thấy một số tùy chọn được hiển thị trong ảnh chụp màn hình.<br/><br/>![vert-ellipsis](../images/02-vert-ellipsis.png)
 
-1. In the menu on the left, select `Kubernetes Engine`. You don't need to select any item from the submenu that pops up.<br/><br/>![engine](../images/02-engine.png)
-1. On the following screen, press the `CREATE CLUSTER` button. You will arrive at the Cluster Basics screen.<br/><br/>![create](../images/02-create.png)
-1. Near the top right of this screen, click on `SWITCH TO STANDARD CLUSTER`, and confirm this is what you want to do in the dialog that pops up<br/><br/>![standard](../images/02-standard.png)
-1. Edit the cluster name as shown below. Other names *should* be ok, but if you have issues, use this one. Ensure that you select `Regional`, and set the region to `us-west1`. Leave all other fields as defaults<br/><br/> ![basics](../images/02-cluster-basics.png)
+1. Trong menu bên trái, chọn `Kubernetes Engine`. Bạn không cần chọn mục nào trong submenu bật ra.<br/><br/>![engine](../images/02-engine.png)
+1. Ở màn hình tiếp theo, bấm nút `CREATE CLUSTER`. Bạn sẽ tới màn hình Cluster Basics.<br/><br/>![create](../images/02-create.png)
+1. Gần góc trên bên phải của màn hình này, bấm vào `SWITCH TO STANDARD CLUSTER`, và xác nhận đây là điều bạn muốn làm trong hộp thoại bật ra<br/><br/>![standard](../images/02-standard.png)
+1. Sửa tên cluster như hình dưới. Các tên khác *hẳn là* vẫn được, nhưng nếu gặp vấn đề, hãy dùng tên này. Đảm bảo bạn chọn `Regional`, và đặt region là `us-west1`. Giữ nguyên mặc định cho tất cả các trường khác<br/><br/> ![basics](../images/02-cluster-basics.png)
 
-We've started configuring the cluster, but still have additional things we need to set, so don't click the CREATE button at the bottom of this screen just yet.  Before that, we'll configure the node pool on the next page...
+> 💡 **Bổ sung:** GKE có hai chế độ: **Autopilot** (Google quản lý cả node, bạn chỉ trả tiền theo tài nguyên Pod yêu cầu) và **Standard** (bạn tự cấu hình node pool). Playground chỉ cho phép chế độ Standard với cấu hình giới hạn. Cluster **Regional** có control plane và node được nhân bản trên nhiều zone trong region, giúp tăng tính sẵn sàng so với cluster **Zonal** (chỉ một zone).
 
-Prev: [Sign in](./01-sign-in.md)<br/>
-Next: [Node Setup](./03-node-setup.md)
+Chúng ta đã bắt đầu cấu hình cluster, nhưng vẫn còn vài thứ cần thiết lập, vì vậy đừng bấm nút CREATE ở cuối màn hình này vội. Trước đó, chúng ta sẽ cấu hình node pool ở trang tiếp theo...
+
+Trước: [Đăng nhập](./01-sign-in.md)<br/>
+Tiếp theo: [Thiết lập Node](./03-node-setup.md)

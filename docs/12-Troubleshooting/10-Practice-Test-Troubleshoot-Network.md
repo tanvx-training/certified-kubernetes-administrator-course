@@ -1,47 +1,49 @@
-# Solution Troubleshoot Network
+# Lời giải Troubleshoot Network
 
-Lets have a look at the [Practice Test](https://kodekloud.com/topic/practice-test-troubleshoot-network/) of the Troubleshoot Network
+Cùng xem lời giải cho [Practice Test](https://kodekloud.com/topic/practice-test-troubleshoot-network/) về Troubleshoot Network
 
-Note that this lab is sequential. You must solve test 1 completely before you can solve test 2, i.e. you cannot skip test 1 and do test 2 only.
+Lưu ý rằng lab này mang tính tuần tự. Bạn phải giải xong hoàn toàn test 1 thì mới giải được test 2, nghĩa là không thể bỏ qua test 1 để chỉ làm test 2.
 
 1. <details>
    <summary>Troubleshooting Test 1</summary>
 
-   We are asked to ensure all the components are working, so first let's examine the cluster to see what state it is in.
+   Đề bài yêu cầu đảm bảo tất cả các thành phần đều hoạt động, vì vậy trước tiên hãy kiểm tra cluster xem nó đang ở trạng thái nào.
 
-   How many nodes, and their status?
+   Có bao nhiêu node, và trạng thái của chúng?
 
    ```
    kubectl get nodes
    ```
 
-   Seems OK...
+   Có vẻ ổn...
 
-   Next, the pods
+   Tiếp theo, các Pod
 
    ```
    kubectl get pods -A
    ```
 
-   Now we see that the `webapp` and `mysql` pods are stuck at `ContainerCreating`. We need to describe the pods and check the errors.
+   Giờ ta thấy các Pod `webapp` và `mysql` bị kẹt ở trạng thái `ContainerCreating`. Cần describe các Pod và kiểm tra lỗi.
 
-   You will note that they are complaining about `plugin type="weave-net" name="weave" failed (add): unable to allocate IP address`, so clearly we have a networking issue and it's related to Weave.
+   Bạn sẽ thấy chúng báo lỗi `plugin type="weave-net" name="weave" failed (add): unable to allocate IP address`, vậy rõ ràng là có vấn đề về mạng và nó liên quan tới Weave.
 
-   When you did the `get pods` above, did you see any evidence of network support containers, like `weave`?
+   Khi chạy `get pods` ở trên, bạn có thấy dấu hiệu nào của các container hỗ trợ mạng, như `weave`, không?
 
-   No - so we need to install networking support.
+   Không — vậy ta cần cài đặt giải pháp mạng (CNI plugin).
 
-   Let's install `Weave`
+   Hãy cài đặt `Weave`
 
    ```
    kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
    ```
 
-   Now wait for a minute or so for it to initialize, then check the application pods
+   Giờ đợi khoảng một phút để nó khởi tạo, rồi kiểm tra các Pod của ứng dụng
 
    ```
    kubectl get pods -n triton
    ```
+
+   > 💡 **Bổ sung:** Lỗi ở giai đoạn `ContainerCreating` liên quan tới "sandbox"/"network plugin" gần như luôn là lỗi CNI. Những chỗ cần kiểm tra trên node: file cấu hình CNI trong `/etc/cni/net.d/` và binary plugin trong `/opt/cni/bin/`. Lưu ý Weave Net đã ngừng phát triển (công ty Weaveworks đóng cửa đầu năm 2024, repository đã được archive) nên các cluster mới thường dùng Calico, Cilium hoặc Flannel; tuy nhiên trong lab này vẫn dùng Weave. Khi đi thi, nếu được yêu cầu cài CNI, đề bài thường cung cấp sẵn link/manifest cần dùng.
 
    </details>
 
@@ -49,77 +51,79 @@ Note that this lab is sequential. You must solve test 1 completely before you ca
 1. <details>
    <summary>Troubleshooting Test 2</summary>
 
-   Once again let's examine the cluster to see what state it is in.
+   Một lần nữa, hãy kiểm tra cluster xem nó đang ở trạng thái nào.
 
-   How many nodes, and their status?
+   Có bao nhiêu node, và trạng thái của chúng?
 
    ```
    kubectl get nodes
    ```
 
-   Seems OK...
+   Có vẻ ổn...
 
-   Next, the pods
+   Tiếp theo, các Pod
 
    ```
    kubectl get pods -A
    ```
 
-   The kube-proxy pod is not running. It is actually crash-looping which means it tries to start, then fails. As a result the rules needed to allow connectivity to the services have not been created. First place to look when diagnosing CrashLoopBackoff is the pod logs.
+   Pod kube-proxy không chạy. Thực tế là nó bị crash-loop, nghĩa là nó cố khởi động rồi thất bại, lặp đi lặp lại. Hệ quả là các rule (iptables/IPVS) cần thiết để cho phép kết nối tới các Service chưa được tạo ra. Nơi đầu tiên cần xem khi chẩn đoán CrashLoopBackoff là log của Pod.
 
-   1. Check the logs of the kube-proxy pod
+   1. Xem log của Pod kube-proxy
 
       ```
       kubectl -n kube-system logs <name_of_the_kube_proxy_pod>
       ```
 
-      We see that it cannot find a configuration file.
+      Ta thấy nó không tìm được file cấu hình.
 
-      Now try looking for the configuration in case it has a different name
+      Giờ thử tìm file cấu hình, phòng trường hợp nó có tên khác
 
       ```
       ls -l /var/lib/kube-proxy
       ```
 
-      The directory is not found!
+      Không tìm thấy thư mục này! (Vì thư mục đó chỉ tồn tại bên trong container, không phải trên node.)
 
-   1. Inspect the pod template spec in the `kube-proxy` daemonset.
+   1. Kiểm tra pod template spec trong DaemonSet `kube-proxy`.
 
       ```
       kubectl get ds -n kube-system kube-proxy -o yaml | less
       ```
 
-      Scroll around and check volumes and volume mounts. Notice that a config map is mounted at the path `/var/lib/kube-proxy` within the pod.
+      Cuộn qua và kiểm tra phần volumes và volume mounts. Để ý rằng có một ConfigMap được mount tại đường dẫn `/var/lib/kube-proxy` bên trong Pod.
 
-   1. Inspect the config map
+   1. Kiểm tra ConfigMap
 
       ```
       kubectl describe cm -n kube-system kube-proxy
       ```
 
-      Here we see that the files mounted by the config map are `config.conf` and `kubeconfig.conf`, but _not_ `configuration.conf`.
+      Ở đây ta thấy các file được ConfigMap mount vào là `config.conf` và `kubeconfig.conf`, nhưng _không có_ `configuration.conf`.
 
-      These two files are
+      Hai file này là
 
-      * `config.conf` - This is the actual configuration that kube-proxy needs to load. This file refers to `kubeconfig.conf`
-      * `kubeconfig.conf` - This is simply a kubeconfig file, same as you will find on the lab terminal in `~/.kube/config`. It is the credentials and address for kube-proxy to talk to the api server.
+      * `config.conf` - Đây là cấu hình thực sự mà kube-proxy cần tải. File này tham chiếu tới `kubeconfig.conf`
+      * `kubeconfig.conf` - Đây đơn giản là một file kubeconfig, giống như file bạn thấy trên terminal của lab tại `~/.kube/config`. Nó chứa thông tin xác thực và địa chỉ để kube-proxy giao tiếp với API server.
 
-   1. Fix the command line arguments to `kube-proxy`
+   1. Sửa tham số dòng lệnh của `kube-proxy`
 
       ```
       kubectl edit ds -n kube-system kube-proxy
       ```
 
-      Set the correct filename
+      Đặt lại đúng tên file
 
       ```
       --config=/var/lib/kube-proxy/config.conf
       ```
 
-      Finally, confirm it is running.
+      Cuối cùng, xác nhận rằng nó đang chạy.
 
       ```
       kubectl get pods -n kube-system
       ```
+
+      > 💡 **Bổ sung:** Sau khi sửa DaemonSet, các Pod kube-proxy sẽ được tạo lại tự động (rolling update của DaemonSet). Nếu Pod vẫn chưa được thay, có thể ép tạo lại bằng `kubectl -n kube-system rollout restart ds kube-proxy` hoặc `kubectl -n kube-system delete pod -l k8s-app=kube-proxy`. Ngoài kube-proxy, cũng nên kiểm tra CoreDNS (`kubectl get pods -n kube-system -l k8s-app=kube-dns`) khi gặp lỗi kết nối giữa các Service.
 
    </details>

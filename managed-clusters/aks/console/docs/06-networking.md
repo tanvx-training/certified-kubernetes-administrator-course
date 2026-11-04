@@ -1,15 +1,17 @@
 # Networking
 
-Now move on to the networking section
+Bây giờ chuyển sang phần networking
 
 ![image](../images/06-networking.png)
 
-Here we are required to set a DNS prefix. DNS prefixes should be globally unique, and you never know if somebody else is following this guide at the same time as you! Thus we cannot use a fixed name here.
+Ở đây chúng ta phải đặt một DNS prefix. DNS prefix phải là duy nhất trên toàn cầu, và bạn không thể biết liệu có ai khác đang làm theo hướng dẫn này cùng lúc với bạn hay không! Vì vậy chúng ta không thể dùng một tên cố định ở đây.
 
-We can create a unique enough name by using `kodekloud-demo-` followed by some random digits.
+Chúng ta có thể tạo một tên đủ độc nhất bằng cách dùng `kodekloud-demo-` theo sau là vài chữ số ngẫu nhiên.
 
 ![image](../images/06a-networking.png)
 
-Leave all other settings as default.
+Giữ nguyên mặc định cho tất cả các thiết lập khác.
 
-Next: [Monitoring](./07-monitoring.md)
+> 💡 **Bổ sung:** DNS prefix được dùng để tạo FQDN (tên miền đầy đủ) cho API server của cluster, ví dụ `kodekloud-demo-12345-xxxx.hcp.eastus.azmk8s.io`. Đây chính là địa chỉ `server:` sẽ xuất hiện trong file kubeconfig của bạn.
+
+Tiếp theo: [Monitoring](./07-monitoring.md)

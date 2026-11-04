@@ -1,10 +1,10 @@
 # kubeadm-generic
 
-This folder contains the generic steps to setting up a Kubeadm cluster irrespective of the virtual machine environment you are using.
+Thư mục này chứa các bước chung để dựng một cluster bằng Kubeadm, không phụ thuộc vào môi trường máy ảo mà bạn đang dùng.
 
-All the 3-node cluster builds link to here.
+Tất cả các bài dựng cluster 3 node đều dẫn tới đây.
 
-## Start Points
+## Điểm bắt đầu
 
 * [VirtualBox](../virtualbox/)
 * [Apple Silicon](../apple-silicon/)

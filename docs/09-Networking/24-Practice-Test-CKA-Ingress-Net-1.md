@@ -1,10 +1,10 @@
-# Practice Test CKA Ingress 1
+# Practice Test CKA Ingress 1 (Bài thực hành Ingress 1)
 
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-cka-ingress-networking-1/)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-cka-ingress-networking-1/)
 
-#### Solution 
+#### Lời giải
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
@@ -13,7 +13,7 @@
       ```
      </details>
   
-  2. Check the Solution
+  2. Xem lời giải
 
      <details>
 
@@ -22,7 +22,7 @@
       ```
      </details>
 
-  3. Check the Solution
+  3. Xem lời giải
 
      <details>
 
@@ -31,7 +31,7 @@
       ```
      </details>
 
-  4. Check the Solution
+  4. Xem lời giải
 
      <details>
 
@@ -40,7 +40,7 @@
       ```
      </details>
 
-  5. Check the Solution
+  5. Xem lời giải
 
      <details>
 
@@ -49,7 +49,7 @@
       ```
      </details>
 
-  6. Check the Solution
+  6. Xem lời giải
 
      <details>
 
@@ -58,7 +58,7 @@
       ```
      </details>
 
-  7. Check the Solution
+  7. Xem lời giải
 
      <details>
 
@@ -67,7 +67,7 @@
       ```
      </details>
 
-  8. Check the Solution
+  8. Xem lời giải
 
      <details>
 
@@ -76,7 +76,7 @@
       ```
      </details>
 
-  9. Check the Solution
+  9. Xem lời giải
 
      <details>
 
@@ -85,7 +85,7 @@
       ```
      </details>
 
-  10. Check the Solution
+  10. Xem lời giải
 
       <details>
 
@@ -94,7 +94,7 @@
        ```
       </details>
 
-  11. Check the Solution
+  11. Xem lời giải
 
       <details>
 
@@ -103,7 +103,7 @@
        ```
       </details>
 
-  12. Check the Solution
+  12. Xem lời giải
 
       <details>
 
@@ -112,7 +112,7 @@
        ```
       </details>
 
-  13. Check the Solution
+  13. Xem lời giải
 
       <details>
 
@@ -121,16 +121,19 @@
        ```
       </details>
 
-  14. Check the Solution
+  14. Xem lời giải
 
       <details>
  
         ```
         kubectl edit ingress --namespace app-space
         ```
-        Change the path from /watch to /stream
+
+        > 💡 **Lưu ý:** Đoạn YAML dưới đây là output cũ (`extensions/v1beta1`, `serviceName`/`servicePort`) từ phiên bản Kubernetes trước v1.22. Trên cluster hiện tại, `kubectl edit ingress ingress-wear-watch -n app-space` sẽ hiển thị dạng `networking.k8s.io/v1` với `backend.service.name` và `backend.service.port.number`; bạn chỉ cần đổi giá trị `path: /watch` thành `path: /stream`.
+
+        Đổi path từ /watch thành /stream
     
-        OR
+        HOẶC
  
         ```yaml
         apiVersion: v1
@@ -168,7 +171,7 @@
        ```
       </details>
 
-  15. Check the Solution
+  15. Xem lời giải
 
       <details>
 
@@ -177,7 +180,7 @@
        ```
       </details>
 
-  16. Check the Solution
+  16. Xem lời giải
 
       <details>
 
@@ -186,7 +189,7 @@
        ```
       </details>
 
-  17. Check the Solution
+  17. Xem lời giải
 
       <details>
 
@@ -195,13 +198,13 @@
        ```
       </details>
 
-  18. Check the Solution
+  18. Xem lời giải
 
       <details>
 
-        Run the command `kubectl edit ingress --namespace app-space` and add a new Path entry for the new service.
+        Chạy lệnh `kubectl edit ingress --namespace app-space` và thêm một mục path mới cho Service mới.
 
-        OR
+        HOẶC
 
        ```yaml
        apiVersion: v1
@@ -244,7 +247,7 @@
        ```
       </details>
 
-  19. Check the Solution
+  19. Xem lời giải
 
       <details>
 
@@ -253,16 +256,18 @@
        ```
       </details>
 
-  20. Check the Solution
+  20. Xem lời giải
 
       <details>
 
        ```
         CRITICAL-SPACE
        ```
+
+       > 💡 Tìm namespace chứa ứng dụng mới bằng `kubectl get deploy -A` (hoặc `kubectl get pods -A`).
       </details>
 
-  21. Check the Solution
+  21. Xem lời giải
 
       <details>
 
@@ -271,7 +276,7 @@
        ```
       </details>
 
-  22. Check the Solution
+  22. Xem lời giải
 
       <details>
 
@@ -296,9 +301,13 @@
                   port:
                     number: 8282 
        ```
+
+        > 💡 **Giải thích:** Ingress phải được tạo trong **cùng namespace** với Service backend (`critical-space`), vì Ingress chỉ tham chiếu được Service trong namespace của chính nó. Annotation `rewrite-target: /` cần thiết vì ứng dụng pay chỉ phục vụ tại `/`. Tạo nhanh bằng lệnh imperative:
+        `kubectl create ingress test-ingress -n critical-space --rule="/pay*=pay-service:8282" --annotation nginx.ingress.kubernetes.io/rewrite-target=/`
+        (thêm `--class=nginx` nếu cluster yêu cầu IngressClass). Kiểm tra port của Service bằng `kubectl get svc -n critical-space`.
         </details>
 
-  23. Check the Solution
+  23. Xem lời giải
 
       <details>
 

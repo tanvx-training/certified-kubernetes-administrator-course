@@ -1,8 +1,8 @@
-# Practice Test - Managing Application Logs
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-managing-application-logs/)
+# Practice Test - Managing Application Logs (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-managing-application-logs/)
   
-Solutions to practice test - managing application logs
-- We have deployed a POD hosting an application. Inspect it. Wait for it to start.
+Lời giải cho bài practice test - managing application logs
+- Chúng tôi đã triển khai một Pod chạy một ứng dụng. Hãy kiểm tra nó và đợi Pod khởi động.
 
   <details>
   
@@ -11,16 +11,18 @@ Solutions to practice test - managing application logs
   ```
   </details>
   
-- Inspect the logs of the POD
+- Kiểm tra log của Pod
   
   <details>
   
   ```
   $ kubectl logs webapp-1
   ```
+
+  > 💡 **Mẹo:** Đề thường hỏi người dùng nào gặp lỗi (vd bị khóa tài khoản). Có thể lọc nhanh bằng `kubectl logs webapp-1 | grep -i warning` hoặc `grep -i error`.
   </details>
   
-- We have deployed a new POD - 'webapp-2' - hosting an application. Inspect it. Wait for it to start.
+- Chúng tôi đã triển khai một Pod mới - 'webapp-2' - chạy một ứng dụng. Hãy kiểm tra nó và đợi Pod khởi động.
 
   <details>
   
@@ -29,16 +31,13 @@ Solutions to practice test - managing application logs
   ```
   </details>
   
-- Inspect the logs of the webapp in the POD
+- Kiểm tra log của webapp trong Pod
   
   <details>
   
   ```
   $ kubectl logs webapp-2
   ```
+
+  > 💡 **Bổ sung:** Pod `webapp-2` có nhiều hơn một container, nên cần chỉ định container cần xem log, ví dụ `kubectl logs webapp-2 -c simple-webapp`. Xem danh sách container của Pod bằng `kubectl describe pod webapp-2` hoặc `kubectl get pod webapp-2 -o jsonpath='{.spec.containers[*].name}'`.
   </details>
-
-
-
-
-

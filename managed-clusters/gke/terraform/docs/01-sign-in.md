@@ -1,23 +1,23 @@
-# Provision lab
+# Khởi tạo lab
 
 
-### IMPORTANT
+### QUAN TRỌNG
 
-Note that if you are already signed into your browser with a Google account, it may try to use that and you will get an error and/or sign yourself out of your Google account. If you already have a personal GCP account and you are signed into Google, then it *will use this automatically* and not connect you to the playground! If either of these apply to you, then use an incognito window to sign into the playground account.
+Lưu ý rằng nếu trình duyệt của bạn đã đăng nhập sẵn một tài khoản Google, nó có thể cố dùng tài khoản đó và bạn sẽ gặp lỗi và/hoặc bị đăng xuất khỏi tài khoản Google của mình. Nếu bạn đã có sẵn một tài khoản GCP cá nhân và đang đăng nhập Google, thì nó *sẽ tự động dùng tài khoản này* và không kết nối bạn tới playground! Nếu rơi vào một trong hai trường hợp trên, hãy dùng cửa sổ ẩn danh (incognito) để đăng nhập vào tài khoản playground.
 
-### Provision your GCP playground lab
+### Khởi tạo GCP playground lab
 
-Prerequisite: Premium KodeKloud subscription
+Điều kiện tiên quyết: có gói đăng ký KodeKloud Premium
 
-Access this link: https://kodekloud.com/playgrounds/playground-google-cloud and click `START LAB` to request a new GCP Playground instance. After a few seconds, you will receive your temporary GCP portal account like this:
+Truy cập link sau: https://kodekloud.com/playgrounds/playground-google-cloud và bấm `START LAB` để yêu cầu một GCP Playground instance mới. Sau vài giây, bạn sẽ nhận được một tài khoản GCP portal tạm thời như sau:
 
 ![image](../images/01-sign-in.png)
 
-Copy the **Console Link** by pressing the copy button to the right of it, paste to your browser and sign in with the given credentials. Provide the username given for the lab as `email or phone` in the sign-in dialog.
+Sao chép **Console Link** bằng cách bấm nút copy ở bên phải của nó, dán vào trình duyệt và đăng nhập bằng thông tin đăng nhập được cung cấp. Nhập username được cấp cho lab vào ô `email or phone` trong hộp thoại đăng nhập.
 
-In the dialog box that follows, select your country and agree to terms of service. Leave **Email updates** unchecked.
+Trong hộp thoại tiếp theo, chọn quốc gia của bạn và đồng ý với điều khoản dịch vụ (terms of service). Để trống (không tích) ô **Email updates**.
 
-Next: [Installing Terraform](./02-install-terraform.md)
+Tiếp theo: [Cài đặt Terraform](./02-install-terraform.md)
 
 
 

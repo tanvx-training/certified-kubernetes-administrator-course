@@ -1,18 +1,18 @@
-# Practice Test - Node Affinity
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-node-affinity-2/)
+# Practice Test - Node Affinity (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-node-affinity-2/)
 
-Solutions to practice test - node affinity
+Lời giải cho bài practice test - Node Affinity
 
 1.  <details>
-    <summary>How many Labels exist on node node01?</summary>
+    <summary>Node node01 có bao nhiêu label?</summary>
 
     ```
     kubectl describe node node01
     ```
 
-    Look under `Labels` section
+    Xem phần `Labels`
 
-    --- OR ---
+    --- HOẶC ---
 
     ```
     kubectl get node node01 --show-labels
@@ -21,13 +21,13 @@ Solutions to practice test - node affinity
     </details>
 
 1.  <details>
-    <summary>What is the value set to the label key beta.kubernetes.io/arch on node01?</summary>
+    <summary>Giá trị của label có key beta.kubernetes.io/arch trên node01 là gì?</summary>
 
-    From the output of Q1, find the answer there.
+    Tìm câu trả lời trong output của câu 1. (Label `beta.kubernetes.io/arch` đã deprecated, label hiện hành là `kubernetes.io/arch`, nhưng cả hai vẫn được đặt trên node với cùng giá trị, ví dụ `amd64`.)
     </details>
 
 1.  <details>
-    <summary>Apply a label color=blue to node node01</summary>
+    <summary>Gắn label color=blue cho node node01</summary>
 
     ```
     kubectl label node node01 color=blue
@@ -35,7 +35,7 @@ Solutions to practice test - node affinity
     </details>
 
 1.  <details>
-    <summary>Create a new deployment named blue with the nginx image and 3 replicas.</summary>
+    <summary>Tạo Deployment mới tên blue với image nginx và 3 replica.</summary>
 
     ```
     kubectl create deployment blue --image=nginx --replicas=3
@@ -43,10 +43,10 @@ Solutions to practice test - node affinity
     </details>
 
 1.  <details>
-    <summary>Which nodes can the pods for the blue deployment be placed on?</summary>
+    <summary>Các Pod của Deployment blue có thể được đặt lên những node nào?</summary>
 
 
-    Check if master and node01 have any taints on them that will prevent the pods to be scheduled on them. If there are no taints, the pods can be scheduled on either node.
+    Kiểm tra xem node controlplane và node01 có taint nào ngăn Pod được lập lịch lên không. Nếu không có taint, Pod có thể được đặt lên bất kỳ node nào.
 
     ```
     kubectl describe nodes controlplane | grep -i taints
@@ -55,14 +55,14 @@ Solutions to practice test - node affinity
     </details>
 
 1.  <details>
-    <summary>Set Node Affinity to the deployment to place the pods on node01 only.</summary>
-    Now we edit in place the deployment we created earlier. Remember that we labelled `node01` with `color=blue`? Now we are going to create an affinity to that label, which will "attract" the pods of the deployment to it.
+    <summary>Đặt Node Affinity cho Deployment để Pod chỉ được đặt lên node01.</summary>
+    Giờ ta sửa trực tiếp Deployment đã tạo ở trên. Nhớ là ta đã gắn label `color=blue` cho `node01` chứ? Bây giờ ta sẽ tạo affinity tới label đó, nó sẽ "hút" các Pod của Deployment về node này.
 
     1.
         ```
         $ kubectl edit deployment blue
         ```
-    1. Add the YAML below under the template.spec section, i.e. at the same level as `containers` as it is a POD setting. The affinity will be considered only during scheduling stage, however this edit will cause the deployment to roll out again.
+    1. Thêm đoạn YAML dưới đây vào phần `template.spec`, tức là cùng mức với `containers` vì đây là thiết lập của Pod. Affinity chỉ được xét ở giai đoạn lập lịch, tuy nhiên thay đổi này làm `template` của Deployment thay đổi nên Deployment sẽ rollout lại (tạo Pod mới), và các Pod mới sẽ được lập lịch theo affinity.
 
       ```yaml
         affinity:
@@ -78,7 +78,7 @@ Solutions to practice test - node affinity
     </details>
 
 1. <details>
-    <summary>Which nodes are the pods placed on now?</summary>
+    <summary>Bây giờ các Pod được đặt trên những node nào?</summary>
 
     ```
     $ kubectl get pods -o wide
@@ -86,18 +86,18 @@ Solutions to practice test - node affinity
     </details>
 
 1.  <details>
-    <summary>Create a new deployment named red with the nginx image and 2 replicas, and ensure it gets placed on the controlplane node only.</summary>
+    <summary>Tạo Deployment mới tên red với image nginx và 2 replica, đảm bảo Pod chỉ được đặt lên node controlplane.</summary>
 
-    1. Create a YAML template for the deploymemt
+    1. Tạo YAML mẫu cho Deployment
 
         ```
         kubectl create deployment red --image nginx --replicas 2 --dry-run=client -o yaml > red.yaml
         ```
-    1. Edit the file
+    1. Sửa file
         ```
         vi red.yaml
         ```
-    1.  Add the toleration using the label stated in the question, and placing it as before for the `blue` deployment
+    1.  Thêm node affinity (bản gốc ghi nhầm là toleration) sử dụng label mà đề bài nêu, đặt ở cùng vị trí như với Deployment `blue`. Label `node-role.kubernetes.io/control-plane` không có giá trị, nên dùng toán tử `Exists`.
       ```yaml
         affinity:
           nodeAffinity:
@@ -107,14 +107,16 @@ Solutions to practice test - node affinity
                 - key: node-role.kubernetes.io/control-plane
                   operator: Exists
       ```
-    1. Save, exit and create the deployment
+    1. Lưu, thoát và tạo Deployment
       ```
       kubectl create -f red.yaml
       ```
-    1. Check the result
+    1. Kiểm tra kết quả
       ```
       $ kubectl get pods -o wide
       ```
+
+    > 💡 **Lưu ý:** Nếu node controlplane có taint `node-role.kubernetes.io/control-plane:NoSchedule`, Pod sẽ `Pending` dù affinity đúng — khi đó cần thêm cả toleration tương ứng. Trong lab này controlplane không có taint (đã kiểm tra ở câu 5), nên chỉ cần affinity.
     </details>
 
 

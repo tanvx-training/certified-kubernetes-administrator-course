@@ -1,12 +1,14 @@
-# Deploy the cluster
+# Triển khai cluster
 
-1. Export the project ID to terraform. The project ID is provided as an environment variable by Cloudshell. We need to set the appropriate terraform environment variable from it:
+1. Export project ID cho terraform. Project ID được Cloudshell cung cấp dưới dạng một biến môi trường. Chúng ta cần thiết lập biến môi trường tương ứng cho terraform từ giá trị đó:
 
     ```bash
      export TF_VAR_project_id=$GOOGLE_CLOUD_PROJECT
      ```
 
-1. Now we can deploy the cluster
+    > 💡 **Bổ sung:** Terraform tự động đọc các biến môi trường có tiền tố `TF_VAR_`, nên `TF_VAR_project_id` sẽ trở thành giá trị của input variable `project_id` trong cấu hình. Bạn có thể kiểm tra giá trị bằng `echo $GOOGLE_CLOUD_PROJECT` - nếu trống, hãy chọn project bằng `gcloud config set project <project-id>`.
+
+1. Bây giờ chúng ta có thể triển khai cluster
 
     ```bash
     terraform init
@@ -14,22 +16,26 @@
     terraform apply
     ```
 
-    This will take at least 5 minutes to complete. In the console, if you navigate to `Kubernetes Engine` you can see it creating.
+    Quá trình này sẽ mất ít nhất 5 phút. Trong console, nếu bạn vào `Kubernetes Engine` bạn có thể thấy cluster đang được tạo.
 
-1. Connect to the cluster.
+    > 💡 **Bổ sung:** `terraform apply` sẽ hiển thị kế hoạch và hỏi xác nhận - gõ `yes` rồi Enter để tiếp tục.
 
-    Run the following command in the Cloudshell to authenticate kubectl to use the cluster
+1. Kết nối tới cluster.
+
+    Chạy lệnh sau trong Cloudshell để xác thực cho kubectl sử dụng cluster
 
     ```bash
     gcloud container clusters get-credentials kodekloud-demo-cluster --region us-west1 --project $GOOGLE_CLOUD_PROJECT
     ```
 
-1. Check nodes
+1. Kiểm tra các node
 
     ```bash
     kubectl get nodes
     ```
 
-Once all nodes are showing ready, the cluster is ready to use!
+Khi tất cả các node đều hiển thị trạng thái ready, cluster đã sẵn sàng để sử dụng!
 
-Prev: [Install terraform](./02-install-terraform.md)
+> ⚠️ **Lưu ý:** Khi thực hành xong (đặc biệt trên tài khoản GCP thật), hãy chạy `terraform destroy` trong cùng thư mục (với biến `TF_VAR_project_id` vẫn được thiết lập) để xóa toàn bộ tài nguyên đã tạo và tránh phát sinh chi phí.
+
+Trước: [Cài đặt terraform](./02-install-terraform.md)

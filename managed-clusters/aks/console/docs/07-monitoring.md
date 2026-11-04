@@ -1,11 +1,13 @@
 # Monitoring
 
-Proceed directly to **Monitoring**. There is nothing to be set for **Integrations**
+Chuyển thẳng tới **Monitoring**. Không có gì cần thiết lập ở **Integrations**
 
 ![image](../images/07-monitoring.png)
 
-De-select *all* checkboxes to turn off monitoring.
+Bỏ chọn *tất cả* các checkbox để tắt monitoring.
 
 ![image](../images/07a-monitoring.png)
 
-Next: [Review and Create](./08-review-and-create.md)
+> 💡 **Bổ sung:** Tắt monitoring (Azure Monitor/Container Insights, Managed Prometheus, Grafana) giúp tránh tạo thêm tài nguyên tốn phí và tránh vượt quá quyền hạn của playground.
+
+Tiếp theo: [Review and Create](./08-review-and-create.md)

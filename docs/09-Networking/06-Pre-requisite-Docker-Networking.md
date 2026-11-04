@@ -1,34 +1,40 @@
-# Pre-requisite Docker Networking
+# Kiến thức nền tảng: Docker Networking
 
-  - Take me to [Lecture](https://kodekloud.com/topic/prerequsite-docker-networking/)
+  - Đi tới [Lecture](https://kodekloud.com/topic/prerequsite-docker-networking/)
 
-In this section, we will take a look at **Docker Networking**
+Trong phần này, chúng ta sẽ tìm hiểu **Docker Networking**
 
 ## None Network
 
-- Running docker container with `none` network
+- Chạy container Docker với network `none`
 
 ```
 $ docker run --network none nginx
 ```
 
+> 💡 **Bổ sung:** Với `none`, container không được gắn vào mạng nào (chỉ có loopback): không ra ngoài được và bên ngoài cũng không truy cập vào được.
+
 ## Host Network
 
-- Running docker container with `host` network
+- Chạy container Docker với network `host`
 
 ```
 $ docker run --network host nginx
 ```
 
+> 💡 **Bổ sung:** Với `host`, container dùng chung network namespace với host, không có cô lập mạng. Ứng dụng lắng nghe port 80 trong container sẽ lắng nghe thẳng trên port 80 của host, nên không thể chạy hai container cùng dùng một port. Trong Kubernetes tương đương là `hostNetwork: true` trong Pod spec (các Pod hệ thống như kube-proxy, nhiều CNI agent dùng chế độ này).
+
 ## Bridge Network
 
-- Running docker container with `bridge` network
+- Chạy container Docker với network `bridge`
 
 ```
 $ docker run --network bridge nginx
 ```
 
-## List the Docker Network
+> 💡 **Bổ sung:** `bridge` là chế độ mặc định. Docker tạo một mạng riêng nội bộ (mặc định `172.17.0.0/16`) trên host, mỗi container được cấp một IP trong mạng này và nối vào bridge `docker0`.
+
+## Liệt kê các Docker Network
 
 ```
 $ docker network ls
@@ -39,7 +45,7 @@ a4b19b17d2c5        none                null                local
 
 ```
 
-## To view the Network Device on the Host  
+## Xem thiết bị mạng trên host
 
 ```
 $ ip link
@@ -49,13 +55,15 @@ $ ip link show docker0
     link/ether 02:42:cf:c3:df:f5 brd ff:ff:ff:ff:ff:ff
 ```
 
-- With the help of `ip link add` command to type set `bridge` to `docker0`
+- Về bản chất, Docker tạo `docker0` giống như dùng lệnh `ip link add` với type `bridge`
 
 ```
 $ ip link add docker0 type bridge
 ```
 
-## To view the IP Addr of the interface docker0
+> 💡 **Bổ sung:** Network tên `bridge` trong `docker network ls` chính là interface `docker0` trên host. Bạn không cần tự chạy lệnh trên — Docker đã tạo sẵn; lệnh chỉ minh họa rằng `docker0` là một Linux bridge giống phần Network Namespace.
+
+## Xem địa chỉ IP của interface docker0
 
 ```
 $ ip addr
@@ -67,13 +75,15 @@ $ ip addr show docker0
        valid_lft forever preferred_lft forever
 ```
 
-## Run the command to create a Docker Container
+## Chạy lệnh tạo một container Docker
 
 ```
 $ docker run nginx
 ```
 
-## To list the Network Namespace
+## Liệt kê các Network Namespace
+
+> 💡 **Bổ sung:** Mỗi khi tạo container, Docker tạo một network namespace riêng cho nó, sau đó tạo một cặp veth: một đầu gắn vào `docker0` trên host, đầu kia nằm trong namespace của container (thành `eth0`), rồi gán IP cho container. Lưu ý: Docker không đặt namespace vào `/var/run/netns` nên `ip netns` có thể không hiển thị chúng nếu chưa tạo symlink thủ công; ví dụ dưới là output minh họa trong bài giảng.
 
 ```
 $ ip netns
@@ -111,16 +121,18 @@ $ ip -n 04acb487a641 addr
        valid_lft forever preferred_lft forever
 ```
 
-## Port Mapping
+> 💡 **Bổ sung:** Để ý tên `vetha3e33331@if3` trên host và `eth0@if5` trong namespace: `@ifN` cho biết chỉ số (index) của interface ở đầu kia của cặp veth. Đây là mẹo hữu ích khi cần tìm veth nào trên host thuộc về container/Pod nào.
 
-- Creating a docker container.
+## Port Mapping (ánh xạ port)
+
+- Tạo một container Docker.
 
 ```
 $ docker run -itd --name nginx nginx
 d74ca9d57c1d8983db2c590df2fdd109e07e1972d6b361a6ecad8a942af5bf7e
 ```
 
-- Inspect the docker container to view the IPAddress.
+- Inspect container để xem địa chỉ IP.
 
 ```
 $ docker inspect nginx | grep -w IPAddress
@@ -128,7 +140,7 @@ $ docker inspect nginx | grep -w IPAddress
                     "IPAddress": "172.18.0.6",
 ```
 
-- Accessing web page with the `curl` command.
+- Truy cập trang web bằng lệnh `curl` (chỉ thực hiện được từ chính host, vì IP này thuộc mạng nội bộ).
 
 ```
 $ curl --head  http://172.18.0.6:80
@@ -136,14 +148,14 @@ HTTP/1.1 200 OK
 Server: nginx/1.19.2
 ```
 
-- Port Mapping to docker container
+- Ánh xạ port tới container Docker (port 8080 trên host → port 80 trong container)
 
 ```
 $ docker run -itd --name nginx -p 8080:80 nginx
 e7387bbb2e2b6cc1d2096a080445a6b83f2faeb30be74c41741fe7891402f6b6
 ```
 
-- Inspecting docker container to view the assgined ports.
+- Inspect container để xem các port đã được gán.
 
 ```
 $ docker inspect nginx | grep -w -A5 Ports
@@ -156,7 +168,7 @@ $ docker inspect nginx | grep -w -A5 Ports
                     }
 
 ```
-- To view the IP Addr of the host system
+- Xem địa chỉ IP của host
 
 ```
 $ ip a
@@ -168,7 +180,7 @@ HTTP/1.1 200 OK
 Server: nginx/1.19.2
 ```
 
-- Configuring **iptables nat** rules
+- Cấu hình rule **iptables nat** (đây là cách Docker thực hiện port mapping ở bên dưới)
 
 ```
 $ iptables \
@@ -188,16 +200,15 @@ $ iptables \
       --to-destination 172.18.0.6:80
 ```
 
-## List the Iptables rules
+## Liệt kê các rule iptables
 
 ```
 $ iptables -nvL -t nat
 ```
 
+> 💡 **Bổ sung:** Docker tự tạo chain `DOCKER` trong bảng `nat` và thêm rule DNAT vào đó. Các lệnh iptables ở trên chỉ mang tính minh họa (trên thực tế cần thêm `-p tcp` khi dùng `--dport`). Trên các distro mới, `iptables` thường là lớp tương thích chạy trên nftables (`iptables-nft`).
 
-
-
-#### References docs
+#### Tài liệu tham khảo
 
 - https://docs.docker.com/network/
 - https://linux.die.net/man/8/iptables

@@ -1,8 +1,11 @@
-# Practice Test - View Certificates
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-view-certificate-details/)
+# Practice Test - Xem Certificate (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-view-certificate-details/)
   
-Solutions to practice test - view certificates
-- Identify the certificate file used for the kube-api server
+Lời giải cho bài practice test - xem certificate
+
+> 💡 **Mẹo:** Hầu hết câu hỏi trong bài này đều trả lời được bằng cách đọc các file manifest static Pod trong `/etc/kubernetes/manifests/` (lưu ý thư mục là `manifests`, có chữ **s**). Dùng `grep` để tìm nhanh, ví dụ `grep -- --tls-cert-file /etc/kubernetes/manifests/kube-apiserver.yaml` hoặc `grep etcd /etc/kubernetes/manifests/kube-apiserver.yaml`.
+
+- Xác định file certificate được dùng cho kube-apiserver
   
   <details>
   
@@ -12,8 +15,10 @@ Solutions to practice test - view certificates
   Answer: /etc/kubernetes/pki/apiserver.crt
   ```
   </details>
+
+  (Tìm tùy chọn `--tls-cert-file`.)
   
-- Identify the Certificate file used to authenticate kube-apiserver as a client to ETCD Server
+- Xác định file certificate mà kube-apiserver dùng để xác thực với tư cách client tới etcd server
   
   <details>
   ```
@@ -21,8 +26,10 @@ Solutions to practice test - view certificates
   Answer: /etc/kubernetes/pki/apiserver-etcd-client.crt
   ```
   </details>
+
+  (Tìm tùy chọn `--etcd-certfile`.)
   
-- Look for kubelet-client-key option in the file /etc/kubernetes/manifests/kube-apiserver.yaml
+- Tìm tùy chọn `--kubelet-client-key` trong file /etc/kubernetes/manifests/kube-apiserver.yaml
   
   <details>
   ```
@@ -30,7 +37,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Look for cert file option in the file /etc/kubernetes/manifests/etcd.yaml
+- Tìm tùy chọn `--cert-file` trong file /etc/kubernetes/manifests/etcd.yaml
   
   <details>
   ```
@@ -38,7 +45,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Look for CA Certificate in file /etc/kubernetes/manifests/etcd.yaml
+- Tìm CA certificate (tùy chọn `--trusted-ca-file`) trong file /etc/kubernetes/manifests/etcd.yaml
   
   <details>
   ```
@@ -46,7 +53,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Run the command openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text
+- Chạy lệnh openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text (xem CN trong mục Subject)
   
   <details>
   ```
@@ -54,7 +61,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Run the command openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text and look for issuer
+- Chạy lệnh openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text và tìm mục Issuer
   
   <details>
   ```
@@ -62,7 +69,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Run the command openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text and look at Alternative Names
+- Chạy lệnh openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text và xem mục Alternative Names (Subject Alternative Name)
   
   <details>
   ```
@@ -70,7 +77,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Run the command openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text and look for Subject CN.
+- Chạy lệnh openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text và tìm CN trong mục Subject.
   
   <details>
   ```
@@ -78,7 +85,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Run the command openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text and check on the Expiry date.
+- Chạy lệnh openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text và kiểm tra ngày hết hạn (Not After).
   
   <details>
   ```
@@ -86,15 +93,17 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- Run the command 'openssl x509 -in /etc/kubernetes/pki/ca.crt -text' and look for validity
+- Chạy lệnh 'openssl x509 -in /etc/kubernetes/pki/ca.crt -text' và xem mục Validity
   
   <details>
   ```
   $ openssl x509 -in /etc/kubernetes/pki/ca.crt -text
   ```
   </details>
+
+  (Theo mặc định kubeadm cấp CA có hạn 10 năm, còn các certificate thành phần có hạn 1 năm.)
   
-- Inspect the --cert-file option in the manifests file.
+- Kiểm tra tùy chọn `--cert-file` trong file manifest (đường dẫn certificate của etcd bị cấu hình sai, cần sửa lại cho đúng `/etc/kubernetes/pki/etcd/server.crt`).
   
   <details>
   ```
@@ -102,7 +111,7 @@ Solutions to practice test - view certificates
   ```
   </details>
   
-- ETCD has its own CA. The right CA must be used for the ETCD-CA file in /etc/kubernetes/manifests/kube-apiserver.yaml. 
+- etcd có CA riêng. Phải dùng đúng CA của etcd cho tùy chọn `--etcd-cafile` trong /etc/kubernetes/manifests/kube-apiserver.yaml (giá trị đúng là `/etc/kubernetes/pki/etcd/ca.crt`).
   
   <details>
   ```
@@ -110,9 +119,4 @@ Solutions to practice test - view certificates
   ```
   </details>
 
-
-
-
-
-
-  
+> 💡 **Mẹo troubleshooting:** Khi kube-apiserver hoặc etcd chết do cấu hình certificate sai, `kubectl` sẽ không dùng được. Hãy dùng `crictl ps -a | grep kube-apiserver` (hoặc `etcd`) rồi `crictl logs <container-id>` để đọc lỗi, hoặc xem log trong `/var/log/pods/`. Sau khi sửa file manifest, kubelet sẽ tự tạo lại static Pod — đợi một lúc rồi chạy lại `kubectl get pods -n kube-system`.

@@ -1,10 +1,10 @@
-# Storage Section Introduction
+# Giới thiệu phần Storage
 
-  - Take me to [Introduction](https://kodekloud.com/topic/storage-section-introduction/)
+  - Đi tới [Phần giới thiệu](https://kodekloud.com/topic/storage-section-introduction/)
 
- In this section, we will take a look at **Storage**
+ Trong phần này, chúng ta sẽ tìm hiểu về **Storage** (lưu trữ)
  
- - Introduction of Docker Storage
+ - Giới thiệu về Docker Storage
  - Persistent Volume Claim
  - Persistent Volume
  - Storage Class

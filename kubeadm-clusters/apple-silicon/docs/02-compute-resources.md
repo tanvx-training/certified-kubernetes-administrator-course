@@ -1,58 +1,60 @@
-# Compute Resources
+# Tài nguyên tính toán (Compute Resources)
 
-Because we cannot use VirtualBox and are instead using Multipass, [a script is provided](../deploy-virtual-machines.sh) to create the three VMs.
+Vì không dùng được VirtualBox mà thay bằng Multipass, chúng tôi cung cấp sẵn [một script](../deploy-virtual-machines.sh) để tạo ba VM.
 
-1. Run the VM deploy script from your Mac terminal application
+1. Chạy script tạo VM từ ứng dụng terminal trên Mac
 
     ```bash
     ./deploy-virtual-machines.sh
     ```
 
-2. Verify you can connect to all three (two if your Mac only has 8GB RAM) VMs:
+2. Kiểm tra bạn có thể kết nối tới cả ba VM (hai VM nếu Mac chỉ có 8GB RAM):
 
     ```bash
     multipass shell controlplane
     ```
 
-    You should see a command prompt like `ubuntu@controlplane:~$`
+    Bạn sẽ thấy dấu nhắc lệnh dạng `ubuntu@controlplane:~$`
 
-    Type the following to return to the Mac terminal
+    Gõ lệnh sau để quay về terminal của Mac
 
     ```bash
     exit
     ```
 
-    Do this for `node01` and `node02` as well
+    Làm tương tự với `node01` và `node02`
 
-If you encountered issues starting the VMs, you can try NAT mode. Note that in NAT mode you will not be able to connect to your NodePort services using your browser.
+> 💡 **Bổ sung:** `multipass list` hiển thị danh sách VM cùng trạng thái và địa chỉ IP (VM có thể có hai IP — tương ứng hai network adapter đã nói ở phần trước).
 
-1. Run
+Nếu gặp sự cố khi khởi động các VM, bạn có thể thử chế độ NAT. Lưu ý ở chế độ NAT, bạn sẽ không thể kết nối tới Service NodePort bằng trình duyệt.
+
+1. Chạy
     ```
     ./delete-virtual-machines.sh
     ```
-1. Edit `deploy-virtual-machines.sh` and change `BUILD_MODE="BRIDGE"` to `BUILD_MODE="NAT"` at line 15.
+1. Sửa `deploy-virtual-machines.sh`, đổi `BUILD_MODE="BRIDGE"` thành `BUILD_MODE="NAT"` ở dòng 15.
 
 
-# Deleting the Virtual Machines
+# Xóa các máy ảo
 
-When you have finished with your cluster and want to reclaim the resources, perform the following steps
+Khi đã dùng xong cluster và muốn thu hồi tài nguyên, thực hiện các bước sau
 
-1. Exit from all your VM sessions
-1. Run the [delete script](../delete-virtual-machines.sh) from your Mac terminal application
+1. Thoát khỏi tất cả các phiên làm việc trên VM
+1. Chạy [script xóa](../delete-virtual-machines.sh) từ ứng dụng terminal trên Mac
 
     ```bash
     ./delete-virtual-machines.sh
     ````
 
-1. Clean stale DHCP leases. Multipass does not do this automatically and if you do not do it yourself you will eventually run out of IP addresses on the multipass VM network.
+1. Dọn các DHCP lease cũ. Multipass không tự làm việc này, và nếu bạn không tự dọn thì sớm muộn sẽ hết địa chỉ IP trên mạng VM của multipass.
 
-    1. Edit the following
+    1. Sửa file sau
 
         ```bash
         sudo vi /var/db/dhcpd_leases
         ```
 
-    1. Remove all blocks that look like this, specifically those with `name` set to `controlplane`, `node01`or `node02`
+    1. Xóa tất cả các khối có dạng như dưới đây, cụ thể là những khối có `name` là `controlplane`, `node01` hoặc `node02`
         ```text
         {
             name=controlplane
@@ -63,7 +65,7 @@ When you have finished with your cluster and want to reclaim the resources, perf
         }
         ```
 
-    1. Save the file and exit
+    1. Lưu file và thoát
 
-Next: [Connectivity](./03-connectivity.md)<br>
-Prev: [Prerequisites](./01-prerequisites.md)
+Tiếp theo: [Connectivity](./03-connectivity.md)<br>
+Trước: [Prerequisites](./01-prerequisites.md)

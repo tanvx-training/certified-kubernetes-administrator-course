@@ -1,8 +1,8 @@
-# Practice Test - Resource Limits
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-resource-limits/)
+# Practice Test - Resource Limits (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-resource-limits/)
   
-Solutions to practice test - resource limtis
-- Run the command 'kubectl describe pod rabbit' and inspect requests.
+Lời giải cho bài practice test - Resource Limits
+- Chạy lệnh 'kubectl describe pod rabbit' và xem phần requests.
   
   <details>
 
@@ -11,7 +11,7 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-- Run the command 'kubectl delete pod rabbit'.
+- Chạy lệnh 'kubectl delete pod rabbit'.
 
   <details>
 
@@ -20,7 +20,7 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-- Run the command 'kubectl get pods' and inspect the status of the pod elephant
+- Chạy lệnh 'kubectl get pods' và kiểm tra trạng thái của Pod elephant
 
   <details>
 
@@ -29,9 +29,9 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-- The status 'OOMKilled' indicates that the pod ran out of memory. Identify the memory limit set on the POD.
+- Trạng thái 'OOMKilled' cho biết Pod đã dùng hết memory cho phép (vượt memory limit). Xác định memory limit đang đặt trên Pod (xem phần `Limits` và `Last State: Terminated, Reason: OOMKilled` trong `kubectl describe pod elephant`).
 
-- Generate a template of the existing pod.
+- Tạo file template từ Pod đang tồn tại.
 
   <details>
 
@@ -40,7 +40,7 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-  Update the elephant.yaml pod definition with the resource memory limits to 20Mi
+  Sửa file định nghĩa Pod elephant.yaml, đặt memory limit thành 20Mi
   
   <details>
 
@@ -52,7 +52,7 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-  Delete the pod and recreate it.
+  Xóa Pod và tạo lại.
   
   <details>
 
@@ -62,7 +62,9 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-- Inspect the status of POD. Make sure it's running
+  > 💡 **Mẹo:** Hầu hết các trường trong spec của Pod đang chạy không sửa được (kể cả `resources`, trừ khi dùng in-place resize từ v1.33). Khi `kubectl edit pod` báo lỗi, kubectl sẽ lưu bản sửa vào một file tạm trong `/tmp/`; có thể dùng `kubectl replace --force -f /tmp/kubectl-edit-xxxx.yaml` để xóa và tạo lại Pod chỉ bằng một lệnh.
+
+- Kiểm tra trạng thái của Pod. Đảm bảo Pod đang ở trạng thái Running
   
   <details>
 
@@ -71,7 +73,7 @@ Solutions to practice test - resource limtis
   ```
   </details>
 
-- Run the command 'kubectl delete pod elephant'.
+- Chạy lệnh 'kubectl delete pod elephant'.
 
   <details>
 

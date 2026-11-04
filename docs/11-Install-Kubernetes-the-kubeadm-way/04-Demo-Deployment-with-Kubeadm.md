@@ -1,32 +1,45 @@
-# Demo - Deployment with Kubeadm tool
+# Demo - Triển khai cluster bằng công cụ Kubeadm
 
-- Take me to [Lecture](https://kodekloud.com/topic/demo-deployment-with-kubeadm/)
+- Xem [Bài giảng](https://kodekloud.com/topic/demo-deployment-with-kubeadm/)
 
 # Apple Silicon
 
-If you have an Apple M1 or M2 (Apple Silicon) machine, then please follow the separate instructions [here](../../apple-silicon/README.md).
+Nếu bạn dùng máy Apple M1 hoặc M2 (Apple Silicon), hãy làm theo hướng dẫn riêng tại [đây](../../apple-silicon/README.md).
 
-For all other operating systems/hardware including Intel Apple, please remain on this page...
+Với tất cả các hệ điều hành/phần cứng khác, bao gồm cả máy Apple chip Intel, hãy tiếp tục theo trang này...
 
 # VirtualBox/Vagrant
 
-In this lab, you will build your own 3-node Kubernetes cluster using `kubeadm` with `VirtualBox` and `Vagrant`
+Trong lab này, bạn sẽ tự dựng một Kubernetes cluster gồm 3 node bằng `kubeadm`, sử dụng `VirtualBox` và `Vagrant`.
 
-## Important Note
+## Lưu ý quan trọng
 
-This lab cannot currently be performed on Apple M1/M2. We are waiting for VirtualBox to release a version that is fully compatible with Apple Silicon.
+Hiện tại không thể thực hiện lab này trên Apple M1/M2. Chúng tôi đang chờ VirtualBox phát hành phiên bản tương thích hoàn toàn với Apple Silicon.
 
-## Changes to Lecture
+## Thay đổi so với bài giảng
 
-Since the video was recorded, Kubernetes and Ubuntu have progressed somewhat.
+Kể từ khi video được ghi hình, Kubernetes và Ubuntu đã có nhiều thay đổi.
 
-We are now using the latest stable release of Ubuntu - 22.04
+Hiện chúng ta dùng bản phát hành ổn định mới nhất của Ubuntu là 22.04.
 
-Docker is no longer supported as a container driver. Instead we will install the `containerd` driver and associated tooling.
+Docker không còn được hỗ trợ làm container driver. Thay vào đó, chúng ta sẽ cài driver `containerd` và các công cụ đi kèm.
 
-# Lab Instructions
+> 💡 **Bổ sung:** Cụ thể, dockershim (thành phần cho phép kubelet dùng Docker Engine) đã bị gỡ khỏi Kubernetes từ v1.24. Image build bằng Docker vẫn chạy bình thường trên containerd vì đều theo chuẩn OCI. Nếu muốn tiếp tục dùng Docker Engine thì phải cài thêm adapter `cri-dockerd`.
+>
+> Ngoài ra, repository cũ `apt.kubernetes.io` / `packages.cloud.google.com` dùng trong các lệnh bên dưới đã bị **ngừng hoạt động** (bị đóng băng từ tháng 9/2023 và gỡ bỏ từ tháng 3/2024). Hãy dùng repository cộng đồng `pkgs.k8s.io`. Mỗi minor version có một repository riêng, vd với v1.31:
+>
+> - `sudo mkdir -p -m 755 /etc/apt/keyrings`
+> - `curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg`
+> - `echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list`
+> - `sudo apt-get update`
+> - `sudo apt-get install -y kubelet kubeadm kubectl`
+> - `sudo apt-mark hold kubelet kubeadm kubectl`
+>
+> Xem hướng dẫn cập nhật nhất tại [Kubeadm Clusters](../../kubeadm-clusters/).
 
-1. Install required software
+# Hướng dẫn thực hành lab
+
+1. Cài đặt phần mềm cần thiết
 
     <details>
 
@@ -35,7 +48,7 @@ Docker is no longer supported as a container driver. Instead we will install the
 
     </details>
 
-1. Clone this repository
+1. Clone repository này
 
     <details>
 
@@ -46,7 +59,7 @@ Docker is no longer supported as a container driver. Instead we will install the
 
     </details>
 
-1. Bring up the virtual machines
+1. Khởi động các máy ảo (VM)
 
     <details>
 
@@ -54,19 +67,19 @@ Docker is no longer supported as a container driver. Instead we will install the
     vagrant up
     ```
 
-    This will start 3 virtual machines named
+    Lệnh này sẽ khởi động 3 VM có tên:
 
-    * `kubemaster` - where we will install the control plane
+    * `kubemaster` - nơi chúng ta sẽ cài control plane
     * `kubenode01`
     * `kubenode02`
 
     </details>
 
-1. Check you can SSH to each VM
+1. Kiểm tra xem bạn có SSH được vào từng VM không
 
     <details>
 
-    Note: To exit from VM's ssh session, enter `exit`
+    Lưu ý: Để thoát khỏi phiên ssh của VM, gõ `exit`
 
     ```
     vagrant ssh kubemaster
@@ -82,11 +95,11 @@ Docker is no longer supported as a container driver. Instead we will install the
 
     </details>
 
-1. Initialize the nodes.
+1. Khởi tạo các node.
 
-    The following steps must be performed on each of the three nodes, so `ssh` to `kubemaster` and run the steps, then to `kubenode01`, then to `kubenode02`
+    Các bước sau phải được thực hiện trên cả ba node: `ssh` vào `kubemaster` và chạy các bước, sau đó làm tương tự với `kubenode01`, rồi `kubenode02`.
 
-      1. Configure kernel parameters
+      1. Cấu hình các tham số kernel
 
             ```
             {
@@ -106,7 +119,9 @@ Docker is no longer supported as a container driver. Instead we will install the
             }
             ```
 
-    1. Install `containerd` container driver and associated tooling
+            > 💡 **Bổ sung:** Module `br_netfilter` cho phép traffic đi qua Linux bridge được iptables xử lý, nhờ đó kube-proxy và CNI hoạt động đúng. `net.ipv4.ip_forward = 1` cho phép node chuyển tiếp (forward) gói tin giữa các interface, điều bắt buộc để Pod trên các node khác nhau giao tiếp được với nhau. Ngoài ra, containerd cần module `overlay` cho overlayfs (có thể thêm `overlay` vào file module và chạy `sudo modprobe overlay`). Lệnh `sysctl --system` nạp lại tất cả cấu hình sysctl mà không cần khởi động lại máy.
+
+    1. Cài container driver `containerd` và các công cụ đi kèm
 
         <details>
 
@@ -126,10 +141,19 @@ Docker is no longer supported as a container driver. Instead we will install the
         }
         ```
 
-    1. Install Kubernetes software
+        > 💡 **Bổ sung:** Khi dùng kubelet với cgroup driver `systemd` (như trong `KubeletConfiguration` bên dưới), containerd cũng phải dùng `systemd` cgroup. Nếu không đồng nhất, các thành phần control plane có thể bị khởi động lại liên tục. Cách cấu hình phổ biến:
+        >
+        > - `sudo mkdir -p /etc/containerd`
+        > - `containerd config default | sudo tee /etc/containerd/config.toml`
+        > - `sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml`
+        > - `sudo systemctl restart containerd`
+
+        </details>
+
+    1. Cài phần mềm Kubernetes
 
         <details>
-        This will install the latest version
+        Bước này sẽ cài phiên bản mới nhất
 
         ```bash
         {
@@ -142,35 +166,39 @@ Docker is no longer supported as a container driver. Instead we will install the
         sudo apt-get install -y kubelet kubeadm kubectl
         sudo apt-mark hold kubelet kubeadm kubectl
 
-        # Configure crictl so it doesn't print ugly warning messages
+        # Cấu hình crictl để không in ra các cảnh báo khó chịu
         sudo crictl config \
             --set runtime-endpoint=unix:///run/containerd/containerd.sock \
             --set image-endpoint=unix:///run/containerd/containerd.sock
         }
         ```
 
+        > 💡 **Bổ sung:** Lệnh `echo ... | sudo tee /etc/apt/sources.` ở trên bị cắt cụt trong bản gốc (đúng ra là `/etc/apt/sources.list.d/kubernetes.list`). Hơn nữa, repository `apt.kubernetes.io` đã ngừng hoạt động, nên hãy dùng các lệnh với `pkgs.k8s.io` ở phần "Thay đổi so với bài giảng" phía trên. `apt-mark hold` giữ nguyên phiên bản để `apt upgrade` không vô tình nâng cấp các gói này. Việc upgrade cluster phải làm có kiểm soát bằng `kubeadm upgrade`.
+
         </details>
 
-  1. Initialize controlplane node
+  1. Khởi tạo controlplane node
 
      <details>
 
-      1. Get the IP address of the `eth0` adapter of the controlplane
+      1. Lấy địa chỉ IP của adapter `eth0` trên controlplane
 
          ```
          ip addr show dev enp0s8
          ```
 
-         Take the value printed for `inet` in the output. This should be:
+         Lấy giá trị in ra ở mục `inet` trong output. Giá trị đó phải là:
 
          > 192.168.56.11
 
-      1. Create a config file for `kubeadm` to get settings from 
+         > 💡 **Lưu ý:** Trong VM VirtualBox, interface có tên `enp0s8` (adapter thứ hai, mạng host-only/bridge) chứ không phải `eth0`. Đó là lý do lệnh dùng `enp0s8`.
+
+      1. Tạo file cấu hình để `kubeadm` đọc các thiết lập
 
           ```yaml
           kind: ClusterConfiguration
           apiVersion: kubeadm.k8s.io/v1beta3
-          kubernetesVersion: v1.25.4          # <- At time of writing. Change as appropriate
+          kubernetesVersion: v1.25.4          # <- Phiên bản tại thời điểm viết. Hãy đổi cho phù hợp
           controlPlaneEndpoint: 192.168.56.11:6443
           networking:
             serviceSubnet: "10.96.0.0/16"
@@ -194,7 +222,13 @@ Docker is no longer supported as a container driver. Instead we will install the
           serverTLSBootstrap: true
           ```
 
-      1. Run `kubeadm init` using the IP address determined above for `--apiserver-advertise-address`
+          > 💡 **Bổ sung:** Để dùng file này, lưu nó lại (vd `kubeadm-config.yaml`) rồi chạy `sudo kubeadm init --config kubeadm-config.yaml` thay cho lệnh dùng flag ở bước tiếp theo. Bạn chỉ cần chọn một trong hai cách. Một số lưu ý:
+          >
+          > - Từ kubeadm v1.31 có thêm API `kubeadm.k8s.io/v1beta4`, trong đó `extraArgs` chuyển sang dạng danh sách `name`/`value`. Có thể chuyển đổi file cấu hình cũ bằng `kubeadm config migrate`.
+          > - `kubeadm config print init-defaults` in ra cấu hình mặc định để tham khảo.
+          > - Với `serverTLSBootstrap: true`, kubelet sẽ gửi CertificateSigningRequest (CSR) cho serving certificate. Bạn cần duyệt các CSR này (`kubectl get csr`, `kubectl certificate approve <tên-csr>`), nếu không thì `kubectl logs`/`kubectl exec` sẽ báo lỗi TLS.
+
+      1. Chạy `kubeadm init`, dùng địa chỉ IP đã lấy ở trên cho `--apiserver-advertise-address`
 
          ```
          sudo kubeadm init \
@@ -203,9 +237,17 @@ Docker is no longer supported as a container driver. Instead we will install the
             --pod-network-cidr=10.244.0.0/16
          ```
 
-         Note the `kubeadm join` command output at the end of this run. You will require it for the step `Initialize the worker nodes` below
+         Ghi lại lệnh `kubeadm join` được in ra ở cuối quá trình này. Bạn sẽ cần nó ở bước `Khởi tạo các worker node` bên dưới.
 
-      1. Set up the default kubeconfig file
+         > 💡 **Bổ sung:** Ý nghĩa các flag:
+         >
+         > - `--apiserver-advertise-address`: IP mà kube-apiserver quảng bá (advertise) và lắng nghe.
+         > - `--apiserver-cert-extra-sans`: thêm tên/IP vào trường SAN của certificate kube-apiserver.
+         > - `--pod-network-cidr`: dải IP cho Pod. Dải này phải khớp với cấu hình của CNI plugin, vd Flannel mặc định dùng `10.244.0.0/16`.
+         >
+         > Nếu `kubeadm init` lỗi giữa chừng, chạy `sudo kubeadm reset` để dọn dẹp trước khi thử lại.
+
+      1. Thiết lập file kubeconfig mặc định
 
          ```
          {
@@ -215,14 +257,18 @@ Docker is no longer supported as a container driver. Instead we will install the
          }
          ```
 
+         > 💡 **Bổ sung:** Sau bước này, các node sẽ ở trạng thái `NotReady` cho đến khi bạn cài một CNI plugin, vd Flannel: `kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml`.
+
      </details>
 
-1. Initialize the worker nodes
+1. Khởi tạo các worker node
 
     <details>
 
-    The following steps must be performed on both worker nodes, so `ssh` to `kubenode01` and run the steps, then to `kubenode02`
+    Các bước sau phải được thực hiện trên cả hai worker node: `ssh` vào `kubenode01` và chạy các bước, sau đó làm tương tự với `kubenode02`.
 
-    * Paste the `kubeadm join` command from above step to the command prompt and enter it.
+    * Dán lệnh `kubeadm join` từ bước trên vào command prompt rồi nhấn Enter (nhớ chạy với `sudo`).
+
+    > 💡 **Bổ sung:** Nếu làm mất lệnh join hoặc token đã hết hạn (TTL mặc định là 24 giờ), hãy chạy `kubeadm token create --print-join-command` trên controlplane để tạo lại lệnh. Sau khi join xong, kiểm tra bằng `kubectl get nodes` trên controlplane.
 
     </details>

@@ -1,46 +1,46 @@
-# Practice Test - Labels and Selectors
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-labels-and-selectors/)
+# Practice Test - Labels và Selectors (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-labels-and-selectors/)
 
-Solutions to Practice Test - Labels and Selectors
+Lời giải cho bài Practice Test - Labels và Selectors
 1.  <details>
-    <summary>We have deployed a number of PODs. They are labelled with tier, env and bu. How many PODs exist in the dev environment (env)?</summary>
+    <summary>Chúng tôi đã triển khai một số Pod, được gắn các label tier, env và bu. Có bao nhiêu Pod thuộc môi trường dev (env)?</summary>
 
-    Here we are filtering pods by the value olf a label
+    Ở đây ta lọc Pod theo giá trị của một label
 
     ```
     kubectl get pods --selector env=dev
     ```
 
-    Count the pods (if any)
+    Đếm số Pod (nếu có). Mẹo: thêm `--no-headers | wc -l` để đếm nhanh.
 
     </details>
 
 1.  <details>
-    <summary>How many PODs are in the finance business unit (bu)?</summary>
+    <summary>Có bao nhiêu Pod thuộc business unit (bu) finance?</summary>
 
-    Similarly ...
+    Tương tự ...
 
     ```
     kubectl get pods --selector bu=finance
     ```
 
-    Count the pods (if any)
+    Đếm số Pod (nếu có)
     </details>
 
 1.  <details>
-    <summary>How many objects are in the prod environment including PODs, ReplicaSets and any other objects?</summary>
+    <summary>Có bao nhiêu đối tượng trong môi trường prod, bao gồm Pod, ReplicaSet và mọi đối tượng khác?</summary>
 
     ```
     kubectl get all --selector env=prod
     ```
 
-    Count everything (if anything)
+    Đếm tất cả (nếu có). Lưu ý `kubectl get all` liệt kê Pod, Service, Deployment, ReplicaSet, DaemonSet, StatefulSet, Job, CronJob... nhưng không bao gồm ConfigMap, Secret, v.v.
     </details>
 
 1.  <details>
-    <summary>Identify the POD which is part of the prod environment, the finance BU and of frontend tier?</summary>
+    <summary>Xác định Pod thuộc môi trường prod, BU finance và tier frontend?</summary>
 
-    We can combine label expressions with comma. Only items with _all_ the given label/value pairs will be returned, i.e. it is an `and` condition.
+    Ta có thể kết hợp nhiều biểu thức label bằng dấu phẩy. Chỉ những đối tượng có _tất cả_ các cặp label/value đã cho mới được trả về, tức là điều kiện `and`.
 
     ```
     kubectl get all --selector env=prod,bu=finance,tier=frontend
@@ -48,17 +48,17 @@ Solutions to Practice Test - Labels and Selectors
     </details>
 
 1. <details>
-   <summary>A ReplicaSet definition file is given replicaset-definition-1.yaml. Try to create the replicaset. There is an issue with the file. Try to fix it.</summary>
+   <summary>Cho sẵn file định nghĩa ReplicaSet replicaset-definition-1.yaml. Hãy thử tạo ReplicaSet. File này có lỗi, hãy sửa nó.</summary>
 
    ```
    kubectl create -f replicaset-definition-1.yaml
    ```
 
-   Note the error message.
+   Để ý thông báo lỗi (dạng `selector does not match template labels`).
 
-   Selector matchLabels should match with POD labels - Update `replicaset-definition-2.yaml`
+   `selector.matchLabels` phải khớp với label của Pod (trong `template.metadata.labels`) - Sửa file `replicaset-definition-2.yaml`
 
-   The values for labels on lines 9 and 13 should match.
+   Giá trị label ở dòng 9 và dòng 13 phải giống nhau.
 
    ```
    $ kubectl create -f replicaset-definition-2.yaml

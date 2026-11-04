@@ -1,3 +1,3 @@
-# Download Presentation Deck
+# Tải xuống slide bài giảng
 
-  - [Presentation Deck](https://kodekloud.com/topic/download-presentation-deck-7/)
+  - [Slide bài giảng](https://kodekloud.com/topic/download-presentation-deck-7/)

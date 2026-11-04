@@ -1,8 +1,8 @@
-# Practice Test - Cluster Roles
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-cluster-roles/)
+# Practice Test - Cluster Roles (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-cluster-roles/)
  
-Solutions to practice test - cluster roles
-- Run the command kubectl get clusterroles --no-headers | wc -l or kubectl get clusterroles --no-headers -o json | jq '.items | length'
+Lời giải cho bài practice test - Cluster Roles
+- Chạy lệnh kubectl get clusterroles --no-headers | wc -l hoặc kubectl get clusterroles --no-headers -o json | jq '.items | length'
   
   <details>
   
@@ -13,7 +13,7 @@ Solutions to practice test - cluster roles
   
   </details>
   
-- Run the command kubectl get clusterrolebindings --no-headers | wc -l or kubectl get clusterrolebindings --no-headers -o json | jq '.items | length'
+- Chạy lệnh kubectl get clusterrolebindings --no-headers | wc -l hoặc kubectl get clusterrolebindings --no-headers -o json | jq '.items | length'
 
   <details>
   
@@ -24,7 +24,7 @@ Solutions to practice test - cluster roles
   
   </details>
   
-- What namespace is the cluster-admin clusterrole part of?
+- ClusterRole cluster-admin thuộc namespace nào?
 
   <details>
   
@@ -33,8 +33,10 @@ Solutions to practice test - cluster roles
   ```
   
   </details>
+
+  > 💡 Đáp án: ClusterRole có phạm vi toàn cluster và không thuộc namespace nào.
   
-- Run the command kubectl describe clusterrolebinding cluster-admin
+- Chạy lệnh kubectl describe clusterrolebinding cluster-admin
   
   <details>
   
@@ -43,8 +45,10 @@ Solutions to practice test - cluster roles
   ```
   
   </details>
+
+  > 💡 ClusterRoleBinding cluster-admin gắn ClusterRole `cluster-admin` cho group `system:masters`.
   
-- Run the command kubectl describe clusterrole cluster-admin
+- Chạy lệnh kubectl describe clusterrole cluster-admin
 
   <details>
   
@@ -53,8 +57,10 @@ Solutions to practice test - cluster roles
   ```
   
   </details>
+
+  > 💡 Kết quả có resource `*.*` và verb `[*]`, nghĩa là ClusterRole này được thực hiện mọi thao tác trên mọi resource trong cluster.
   
-- Check answer at /var/answers
+- Xem đáp án tại /var/answers
 
   <details>
   
@@ -63,8 +69,13 @@ Solutions to practice test - cluster roles
   ```
   
   </details>
+
+  > 💡 Cách làm imperative tương đương (cấp cho user michelle quyền quản lý node):
+  > - `kubectl create clusterrole michelle-role --verb=get,list,watch --resource=nodes`
+  > - `kubectl create clusterrolebinding michelle-role-binding --clusterrole=michelle-role --user=michelle`
+  > - Kiểm tra: `kubectl auth can-i list nodes --as michelle`
   
-- Check answer at /var/answers
+- Xem đáp án tại /var/answers
 
   <details>
   
@@ -73,9 +84,7 @@ Solutions to practice test - cluster roles
   ```
   
   </details>
-  
-  
 
-
-
-
+  > 💡 Cách làm imperative tương đương (quyền trên PersistentVolume và StorageClass — đều là resource cluster-scoped):
+  > - `kubectl create clusterrole storage-admin --verb=get,list,watch,create,delete --resource=persistentvolumes,storageclasses`
+  > - `kubectl create clusterrolebinding michelle-storage-admin --clusterrole=storage-admin --user=michelle`

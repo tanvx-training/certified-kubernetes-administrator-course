@@ -1,50 +1,51 @@
-# Review and Create
+# Review and Create (Xem lại và tạo)
 
-## Final Checklist
+## Checklist cuối cùng
 
-Here is a summary of settings you should have configured in each of the UI sections. Where a form field is not mentioned, then you should not change it, leaving it with its default setting.
+Dưới đây là tóm tắt các thiết lập mà bạn cần cấu hình ở từng phần của giao diện. Trường nào trong form không được nhắc đến thì bạn không nên thay đổi, hãy để giá trị mặc định.
 
 1. **Basics**
-    * **Resource Group**: Choose the only available option in the list
+    * **Resource Group**: Chọn lựa chọn duy nhất có trong danh sách
     * **Cluster Preset Configuration**: `Dev/Test`
     * **Kubernetes Cluster Name**: `kodekloud-demo`
     * **Region**: `(US) East US`
 1. **Node Pools**
 
-    There should only be `agentpool` here. If there is also `userpool`, select and delete it.
+    Ở đây chỉ nên có `agentpool`. Nếu còn có cả `userpool`, hãy chọn và xóa nó.
 
-    * **Node size**: [Change](./05-node-pools.md) it to `Standard D2s_v3`
+    * **Node size**: [Đổi](./05-node-pools.md) thành `Standard D2s_v3`
     * **Scale method**: `manual`
     * **Node count**: `2`
 1. **Networking**
-    * **DNS name prefix**: Must be globally unique. Set to `kodekloud-demo-` followed by a few random digits of your choice, e.g. `kodekloud-demo-321435423`
+    * **DNS name prefix**: Phải là duy nhất trên toàn cầu. Đặt thành `kodekloud-demo-` theo sau là vài chữ số ngẫu nhiên tùy bạn chọn, ví dụ `kodekloud-demo-321435423`
 1. **Integrations**
-    * All options here should be un-checked.
+    * Tất cả các tùy chọn ở đây phải được bỏ chọn.
 1. **Monitoring**
-    * All options here should be un-checked.
+    * Tất cả các tùy chọn ở đây phải được bỏ chọn.
 1. **Security**
-    * All options here should be un-checked.
+    * Tất cả các tùy chọn ở đây phải được bỏ chọn.
 1. **Advanced**
-    * Change nothing here.
+    * Không thay đổi gì ở đây.
 1. **Tags**
-    * You should be able to add tags if you want, but they are not required.
+    * Bạn có thể thêm tag nếu muốn, nhưng không bắt buộc.
 
-## Deploy
+## Triển khai
 
-Press the `Review and Create` button at the bottom of the browser window. It should think about it for a few seconds then produce a summary screen with a `Create` button at the bottom.
+Bấm nút `Review and Create` ở cuối cửa sổ trình duyệt. Hệ thống sẽ kiểm tra (validate) trong vài giây rồi hiển thị màn hình tóm tắt với nút `Create` ở cuối.
 
-Press the `Create` button. It will take several minutes to provision, so go and make tea/coffee :smile:!
+Bấm nút `Create`. Quá trình khởi tạo sẽ mất vài phút, vậy hãy đi pha một tách trà/cà phê :smile:!
 
-When it completes, you should see this
+Khi hoàn tất, bạn sẽ thấy màn hình này
 
 ![image](../images/08-create-deployment-complete.png)
 
-Click on `Go to resource`
+Bấm vào `Go to resource`
 
-You may see an error similar to the following, but it is an expected issue in the Azure Playground and doesn’t impact any AKS features, so just ignore it.
+Bạn có thể thấy một lỗi tương tự như dưới đây, nhưng đây là vấn đề đã biết trước trên Azure Playground và không ảnh hưởng tới bất kỳ tính năng nào của AKS, nên cứ bỏ qua nó.
 
 > The client 'odl_user_1278229@cloudlabs4kodeKloud.onmicrosoft.com' with object id 'da188846-792f-40be-8c62-ed65018e3a6e' does not have authorization to perform action 'Microsoft.Resources/subscriptions/resourceGroups/read' over scope '/subscriptions/1ca63aff-186a-4e2b-b3bc-f7dddf1d8969/resourceGroups/MC_ODL-azure-1278229_kodekloud-demo_eastus' or the scope is invalid. If access was recently granted, please refresh your credentials.
 
+> 💡 **Bổ sung:** Resource group có tiền tố `MC_` trong thông báo lỗi là "node resource group" do AKS tự động tạo để chứa các tài nguyên hạ tầng của cluster (VMSS, ổ đĩa, load balancer, virtual network...). Tài khoản playground không có quyền đọc resource group này nên mới xuất hiện lỗi trên.
 
-Next: [Connect to Cluster](./09-connect.md)
+Tiếp theo: [Kết nối tới Cluster](./09-connect.md)
 

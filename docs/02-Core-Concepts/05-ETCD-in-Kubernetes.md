@@ -1,43 +1,51 @@
-# ETCD in Kubernetes
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/etcd-in-kubernetes/)
+# ETCD trong Kubernetes
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/etcd-in-kubernetes/)
 
-In this section, we will take a look at ETCD role in kubernetes
+Trong phần này, chúng ta sẽ tìm hiểu vai trò của ETCD trong Kubernetes
 
-## ETCD Datastore
-- The ETCD Datastore stores information regarding the cluster such as **`Nodes`**, **`PODS`**, **`Configs`**, **`Secrets`**, **`Accounts`**, **`Roles`**, **`Bindings`** and **`Others`**.
-- Every information you see when you run the **`kubectl get`** command is from the **`ETCD Server`**.
+## Kho dữ liệu ETCD
+- Kho dữ liệu ETCD lưu thông tin về cluster như **`Nodes`**, **`PODS`**, **`Configs`**, **`Secrets`**, **`Accounts`**, **`Roles`**, **`Bindings`** và **`Others`** (các đối tượng khác).
+- Mọi thông tin bạn thấy khi chạy lệnh **`kubectl get`** đều đến từ **`ETCD Server`**.
 
-## Setup - Manual
-- If you setup your cluster from scratch then you deploy **`ETCD`** by downloading ETCD Binaries yourself
-- Installing Binaries and Configuring ETCD as a service in your master node yourself.
+> 💡 **Bổ sung:** Mọi thay đổi bạn thực hiện trên cluster (thêm node, tạo Pod, Deployment, ReplicaSet...) đều được ghi vào ETCD server; chỉ khi đã được ghi vào ETCD thì thay đổi mới được coi là hoàn tất.
+
+## Cài đặt - Thủ công
+- Nếu bạn tự dựng cluster từ đầu (from scratch), bạn sẽ tự triển khai **`ETCD`** bằng cách tải binary ETCD về
+- Tự cài binary và cấu hình ETCD chạy như một service trên master node.
   ```
   $ wget -q --https-only "https://github.com/etcd-io/etcd/releases/download/v3.3.11/etcd-v3.3.11-linux-amd64.tar.gz"
   ```
 
   ![etcd](../../images/etcd.PNG)
+
+> 💡 **Bổ sung:** Trong cấu hình service, tham số quan trọng cần chú ý là `--advertise-client-urls`: địa chỉ mà ETCD công bố cho client kết nối tới — gồm IP của server và port `2379` (còn `--listen-client-urls` là địa chỉ etcd thực sự lắng nghe). Đây chính là URL cần cấu hình cho kube-apiserver khi nó cần kết nối tới ETCD server.
   
-## Setup - Kubeadm
-- If you setup your cluster using **`kubeadm`** then kubeadm will deploy etcd server for you as a pod in **`kube-system`** namespace.
+## Cài đặt - Kubeadm
+- Nếu bạn dựng cluster bằng **`kubeadm`** thì kubeadm sẽ triển khai ETCD server cho bạn dưới dạng một Pod trong namespace **`kube-system`**.
   ```
   $ kubectl get pods -n kube-system
   ```
   ![etcd1](../../images/etcd1.PNG)
 
-## Explore ETCD
-- To list all keys stored by kubernetes, run the below command
+> 💡 **Bổ sung:** Với kubeadm, etcd chạy dưới dạng **static Pod** có tên `etcd-<tên-node>` (ví dụ `etcd-controlplane`). Manifest nằm ở `/etc/kubernetes/manifests/etcd.yaml`, chứa các thông tin hay được hỏi khi thi: đường dẫn dữ liệu `--data-dir` (mặc định `/var/lib/etcd`), các file certificate (`--cert-file`, `--key-file`, `--trusted-ca-file` dưới `/etc/kubernetes/pki/etcd/`) và `--listen-client-urls`. Mô hình etcd chạy ngay trên các control plane node như vậy gọi là **stacked etcd**; ngược lại, etcd chạy trên các máy riêng gọi là **external etcd**.
+
+## Khám phá ETCD
+- Để liệt kê toàn bộ key do Kubernetes lưu, chạy lệnh dưới đây
   ```
   $ kubectl exec etcd-master -n kube-system -- sh -c "ETCDCTL_API=3 etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt get / --prefix --keys-only"
   ```
-- Kubernetes Stores data in a specific directory structure, the root directory is the **`registry`** and under that you have various kubernetes constructs such as **`minions`**, **`nodes`**, **`pods`**, **`replicasets`**, **`deployments`**, **`roles`**, **`secrets`** and **`Others`**.
+- Kubernetes lưu dữ liệu theo một cấu trúc thư mục cụ thể: thư mục gốc là **`registry`**, bên dưới là các đối tượng Kubernetes như **`minions`**, **`nodes`**, **`pods`**, **`replicasets`**, **`deployments`**, **`roles`**, **`secrets`** và **`Others`**.
   
   ![etcdctl1](../../images/etcdctl1.PNG)
 
-## ETCD in HA Environment
-   - In a high availability environment, you will have multiple master nodes in your cluster that will have multiple ETCD Instances spread across the master nodes.
-   - Make sure etcd instances know each other by setting the right parameter in the **`etcd.service`** configuration. The **`--initial-cluster`** option where you need to specify the different instances of the etcd service.
+> 💡 **Bổ sung:** Thay `etcd-master` bằng tên Pod etcd thực tế trong cluster của bạn (xem bằng `kubectl get pods -n kube-system`). Vì etcd giao tiếp qua TLS, mọi lệnh `etcdctl` đều phải kèm `--cacert`, `--cert`, `--key` (và `--endpoints` nếu chạy từ ngoài Pod). Lưu ý dữ liệu trong etcd (kể cả Secret) mặc định **không được mã hóa** — đó là lý do có tính năng encryption at rest (`EncryptionConfiguration`).
+
+## ETCD trong môi trường HA
+   - Trong môi trường high availability (sẵn sàng cao), cluster sẽ có nhiều master node, với nhiều instance ETCD trải đều trên các master node đó.
+   - Đảm bảo các instance etcd biết nhau bằng cách thiết lập đúng tham số trong cấu hình **`etcd.service`**. Đó là tùy chọn **`--initial-cluster`**, nơi bạn khai báo các instance khác nhau của service etcd.
      ![etcd-ha](../../images/etcd-ha.PNG)
 
-K8s Reference Docs:
+Tài liệu tham khảo K8s:
 - https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/
 - https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/
 - https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#stacked-control-plane-and-etcd-nodes

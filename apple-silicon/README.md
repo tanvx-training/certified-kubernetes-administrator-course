@@ -1,3 +1,3 @@
-# Installing Kubernetes the kubeadm way on Apple Silicon
+# Cài đặt Kubernetes bằng kubeadm trên Apple Silicon
 
-Moved to [here](../kubeadm-clusters/apple-silicon/).
+Nội dung đã được chuyển sang [đây](../kubeadm-clusters/apple-silicon/).

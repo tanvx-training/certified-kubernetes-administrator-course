@@ -1,30 +1,32 @@
-# Practice Test - Namespaces
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-namespaces/)
+# Practice Test - Namespaces (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-namespaces/)
 
-Solutions to practice test for namespaces
+Lời giải cho bài practice test Namespaces
 
 1. <details>
-   <summary>How many Namespaces exist on the system?</summary>
+   <summary>Có bao nhiêu Namespace trên hệ thống?</summary>
 
    ```
    kubectl get namespace
    ```
 
-   Count the number of namespaces (if any)
+   Đếm số namespace hiển thị (nếu có).
+
+   > 💡 **Bổ sung:** Có thể để hệ thống tự đếm: `kubectl get ns --no-headers | wc -l`.
    </details>
 
 1. <details>
-   <summary>How many pods exist in the research namespace?</summary>
+   <summary>Có bao nhiêu Pod trong namespace research?</summary>
 
    ```
    kubectl get pods --namespace=research
    ```
 
-   Count the number of pods (if any)
+   Đếm số Pod hiển thị (nếu có).
    </details>
 
 1. <details>
-   <summary>Create a POD in the finance namespace.</summary>
+   <summary>Tạo một Pod trong namespace finance.</summary>
 
    ```
    kubectl run redis --image=redis --namespace=finance
@@ -32,15 +34,15 @@ Solutions to practice test for namespaces
    </details>
 
 1. <details>
-   <summary>Which namespace has the blue pod in it?</summary>
+   <summary>Pod blue nằm trong namespace nào?</summary>
 
    ```
    kubectl get pods --all-namespaces
    ```
 
-   Examine the output.
+   Xem kết quả output.
 
-   Or use `grep` to filter the results, knowing that `NAMESPACE` is the first result column
+   Hoặc dùng `grep` để lọc kết quả - lưu ý `NAMESPACE` là cột đầu tiên của output
 
    ```
    kubectl get pods --all-namespaces | grep blue
@@ -49,9 +51,9 @@ Solutions to practice test for namespaces
    </details>
 
 1. <details>
-   <summary>Access the Blue web application using the link above your terminal!!</summary>
+   <summary>Truy cập ứng dụng web Blue bằng đường link phía trên terminal!!</summary>
 
-   Press the `blue-application-ui` button at the top of the terminal. Try the following:
+   Nhấn nút `blue-application-ui` ở phía trên terminal. Thử nhập như sau:
 
    ```
    Host Name: db-service
@@ -60,24 +62,26 @@ Solutions to practice test for namespaces
    </details>
 
 1. <details>
-   <summary>What DNS name should the Blue application use to access the database db-service in its own namespace - marketing?</summary>
+   <summary>Ứng dụng Blue nên dùng tên DNS nào để truy cập database db-service trong chính namespace của nó - marketing?</summary>
 
    > db-service
 
-   To access services in the same namespace, only the host name part of the fully qualified domain name (FQDN) is required.
+   Để truy cập Service trong cùng namespace, chỉ cần phần host name của tên miền đầy đủ (FQDN - fully qualified domain name).
 
    </details>
 
 1. <details>
-   <summary>What DNS name should the Blue application use to access the database db-service in the dev namespace?</summary>
+   <summary>Ứng dụng Blue nên dùng tên DNS nào để truy cập database db-service trong namespace dev?</summary>
 
-   Either FQDN
+   Hoặc dùng FQDN
 
    > db-service.dev.svc.cluster.local
 
-   Or, it is sufficient just to append the namespace name
+   Hoặc chỉ cần thêm tên namespace vào sau
 
    > db-service.dev
+
+   > 💡 **Bổ sung:** FQDN của một Service có dạng `<tên-service>.<namespace>.svc.<cluster-domain>`, với cluster domain mặc định là `cluster.local`. Tên ngắn hoạt động được là nhờ file `/etc/resolv.conf` trong Pod có dòng `search <namespace>.svc.cluster.local svc.cluster.local cluster.local`, nên CoreDNS sẽ tự ghép thêm phần đuôi. Vì vậy `db-service` chỉ phân giải được Service **cùng namespace** với Pod, còn sang namespace khác phải có ít nhất `db-service.dev`.
 
    </details>
 

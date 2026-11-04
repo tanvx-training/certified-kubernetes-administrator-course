@@ -1,25 +1,36 @@
 # ReplicaSets
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/replicasets/)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/replicasets/)
 
-In this section, we will take a look at the below
+Trong phần này, chúng ta sẽ tìm hiểu:
 - Replication Controller
 - ReplicaSet
 
-#### Controllers are brain behind kubernetes
+#### Controller là "bộ não" của Kubernetes
 
-## What is a Replica and Why do we need a replication controller?
+> 💡 **Bổ sung:** Controller là các tiến trình chạy vòng lặp điều hòa (reconciliation loop): liên tục theo dõi trạng thái thực tế của các object trong cluster và thực hiện hành động để đưa nó về trạng thái mong muốn (desired state) mà bạn khai báo. Các controller tích hợp sẵn (ReplicaSet, Deployment, Node, Endpoint...) đều chạy bên trong `kube-controller-manager`.
+
+## Replica là gì và vì sao cần Replication Controller?
 
   ![rc](../../images/rc.PNG)
   
   ![rc1](../../images/rc1.PNG)
+
+> 💡 **Bổ sung:** Replica là các bản sao giống hệt nhau của một Pod. Replication Controller giúp:
+> - **Tính sẵn sàng cao (high availability):** nếu một Pod chết, controller tự tạo Pod mới thay thế, kể cả khi bạn chỉ chạy 1 replica.
+> - **Cân bằng tải và mở rộng (load balancing & scaling):** chạy nhiều Pod để chia tải, và các Pod có thể nằm trên nhiều node khác nhau của cluster.
   
-## Difference between ReplicaSet and Replication Controller
-- **`Replication Controller`** is the older technology that is being replaced by a **`ReplicaSet`**.
-- **`ReplicaSet`** is the new way to setup replication.
+## Sự khác nhau giữa ReplicaSet và Replication Controller
+- **`Replication Controller`** là công nghệ cũ, đang được thay thế bởi **`ReplicaSet`**.
+- **`ReplicaSet`** là cách mới để thiết lập replication.
 
-## Creating a Replication Controller
+> 💡 **Bổ sung:** Điểm khác biệt chính:
+> - `ReplicationController` thuộc API `v1`; `ReplicaSet` thuộc API `apps/v1`.
+> - `ReplicaSet` bắt buộc có trường `selector` và hỗ trợ selector dạng tập hợp (`matchExpressions` với `In`, `NotIn`, `Exists`...), còn `ReplicationController` chỉ hỗ trợ so khớp bằng đẳng thức.
+> - Trong thực tế bạn hầu như không tạo ReplicaSet trực tiếp mà dùng **Deployment** (Deployment sẽ tự quản lý ReplicaSet và hỗ trợ rolling update/rollback).
 
-## Replication Controller Definition File
+## Tạo Replication Controller
+
+## File định nghĩa Replication Controller
   
    ![rc2](../../images/rc2.PNG)
   
@@ -44,23 +55,23 @@ In this section, we will take a look at the below
            image: nginx
      replicas: 3
 ```
-  - To Create the replication controller
+  - Tạo Replication Controller
     ```
     $ kubectl create -f rc-definition.yaml
     ```
-  - To list all the replication controllers
+  - Liệt kê tất cả Replication Controller
     ```
     $ kubectl get replicationcontroller
     ```
-  - To list pods that are launch by the replication controller
+  - Liệt kê các Pod được tạo bởi Replication Controller
     ```
     $ kubectl get pods
     ```
     ![rc3](../../images/rc3.PNG)
     
-## Creating a ReplicaSet
+## Tạo ReplicaSet
   
-## ReplicaSet Definition File
+## File định nghĩa ReplicaSet
 
    ![rs](../../images/rs.PNG)
 
@@ -88,31 +99,35 @@ In this section, we will take a look at the below
        matchLabels:
         type: front-end
  ```
-#### ReplicaSet requires a selector definition when compare to Replication Controller.
+#### So với Replication Controller, ReplicaSet bắt buộc phải có phần định nghĩa selector.
+
+> 💡 **Bổ sung:** Label trong `spec.selector.matchLabels` **phải khớp** với label trong `spec.template.metadata.labels`, nếu không API server sẽ từ chối với lỗi `selector does not match template labels`. Selector cũng giúp ReplicaSet "nhận nuôi" cả những Pod đã tồn tại sẵn (không do nó tạo) nếu các Pod đó có label khớp - vì vậy cần cẩn thận để không trùng label giữa các ứng dụng.
    
-  - To Create the replicaset
+  - Tạo ReplicaSet
     ```
     $ kubectl create -f replicaset-definition.yaml
     ```
-  - To list all the replicaset
+  - Liệt kê tất cả ReplicaSet
     ```
     $ kubectl get replicaset
     ```
-  - To list pods that are launch by the replicaset
+  - Liệt kê các Pod được tạo bởi ReplicaSet
     ```
     $ kubectl get pods
     ```
    
     ![rs1](../../images/rs1.PNG)
     
-## Labels and Selectors
-#### What is the deal with Labels and Selectors? Why do we label pods and objects in kubernetes?
+## Labels và Selectors
+#### Labels và Selectors dùng để làm gì? Vì sao chúng ta gắn label cho Pod và các object trong Kubernetes?
 
   ![labels](../../images/labels.PNG)
+
+> 💡 **Bổ sung:** Label là các cặp key/value gắn vào object để phân loại. Selector là bộ lọc dựa trên label. ReplicaSet dùng selector để biết nó cần giám sát những Pod nào - khi có hàng trăm Pod trong cluster, đây là cách để ReplicaSet xác định "Pod của mình". Bạn có thể thử lọc bằng tay: `kubectl get pods -l type=front-end` hoặc `kubectl get pods --selector app=myapp`.
   
-## How to scale replicaset
-- There are multiple ways to scale replicaset
-  - First way is to update the number of replicas in the replicaset-definition.yaml definition file. E.g replicas: 6 and then run 
+## Cách scale ReplicaSet
+- Có nhiều cách để scale một ReplicaSet
+  - Cách thứ nhất là cập nhật số replicas trong file định nghĩa replicaset-definition.yaml, ví dụ replicas: 6, rồi chạy lệnh
  ```
     apiVersion: apps/v1
     kind: ReplicaSet
@@ -141,16 +156,18 @@ In this section, we will take a look at the below
   ```
   $ kubectl apply -f replicaset-definition.yaml
   ```
-  - Second way is to use **`kubectl scale`** command.
+  - Cách thứ hai là dùng lệnh **`kubectl scale`**.
   ```
   $ kubectl scale --replicas=6 -f replicaset-definition.yaml
   ```
-  - Third way is to use **`kubectl scale`** command with type and name
+  - Cách thứ ba là dùng lệnh **`kubectl scale`** kèm loại resource và tên
   ```
   $ kubectl scale --replicas=6 replicaset myapp-replicaset
   ```
   ![rs2](../../images/rs2.PNG)
 
-#### K8s Reference Docs:
+> 💡 **Bổ sung:** Lưu ý: dùng `kubectl scale` (cách 2 và 3) **không** cập nhật số `replicas` trong file YAML của bạn - file vẫn giữ giá trị cũ (ví dụ `replicas: 3`). Nếu sau đó bạn `kubectl apply -f` lại file đó, số replica sẽ quay về giá trị trong file. Ngoài ra, còn có thể scale tự động theo tải bằng HorizontalPodAutoscaler (HPA) - xem lệnh `kubectl autoscale` (thường áp dụng cho Deployment).
+
+#### Tài liệu tham khảo K8s:
 - https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 - https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/

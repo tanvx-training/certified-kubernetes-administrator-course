@@ -1,26 +1,25 @@
-# Lightning Labs Introduction
+# Giới thiệu Lightning Labs
 
-  #### Welcome to the KodeKloud CKA Lightning Labs!
+  #### Chào mừng bạn đến với KodeKloud CKA Lightning Labs!
    
-  - This section has been created to give you hands-on practice in solving questions of mixed difficulty in a short period of time.
+  - Phần này được tạo ra để giúp bạn thực hành giải các câu hỏi với độ khó đa dạng trong một khoảng thời gian ngắn.
    
-  - This environment is only valid for 35 minutes. You have 5-8 questions to complete within this time.
+  - Môi trường này chỉ có hiệu lực trong 35 phút. Bạn có 5-8 câu hỏi cần hoàn thành trong thời gian này.
    
-  - You can toggle between the questions but make sure that that you click on `END EXAM` before the 35 minute mark. To pass, you need to secure 80%.
+  - Bạn có thể chuyển qua lại giữa các câu hỏi nhưng hãy đảm bảo click vào `END EXAM` trước khi hết 35 phút. Để đạt, bạn cần được 80%.
    
-   Good Luck!!!
+   Chúc may mắn!!!
    
-   Note: Answers for most questions should be available under the `/var/answers` directory on the master node.
-   
-   
-  #### Disclaimer:
-   
-  - Please note that this exam is not a replica of the actual exam
-  - Please note that the questions in these exams are not the same as in the actual exam
-  - Please note that the interface is not the same as in the actual exam
-  - Please note that the scoring system may not be the same as in the actual exam
-  - Please note that the difficulty level may not be the same as in the actual exam
+   Lưu ý: Đáp án của hầu hết các câu hỏi có sẵn trong thư mục `/var/answers` trên master node.
    
    
-  - I want to understand what Lightning Lab is, [Let's Explore](https://kodekloud.com/topic/lightning-lab-introduction/)
-
+  #### Lưu ý (Disclaimer):
+   
+  - Xin lưu ý rằng bài thi này không phải là bản sao của đề thi thật
+  - Xin lưu ý rằng các câu hỏi trong bài thi này không giống với các câu hỏi trong đề thi thật
+  - Xin lưu ý rằng giao diện không giống với giao diện của đề thi thật
+  - Xin lưu ý rằng cách tính điểm có thể không giống với đề thi thật
+  - Xin lưu ý rằng độ khó có thể không giống với đề thi thật
+   
+   
+  - Tôi muốn hiểu Lightning Lab là gì, [Cùng khám phá](https://kodekloud.com/topic/lightning-lab-introduction/)

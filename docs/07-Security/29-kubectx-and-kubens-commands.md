@@ -1,2 +1,2 @@
-# kubectx and kubens commands (Optional)
-  - Take me to [Tutorial](https://kodekloud.com/topic/kubectx-and-kubens-command-line-utilities/)
+# Lệnh kubectx và kubens (Tùy chọn)
+  - Xem [Hướng dẫn](https://kodekloud.com/topic/kubectx-and-kubens-command-line-utilities/)

@@ -1,21 +1,23 @@
-# Configure ConfigMaps in Applications
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/configure-configmaps-in-applications/)
+# Cấu hình ConfigMap cho ứng dụng (Configure ConfigMaps in Applications)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/configure-configmaps-in-applications/)
   
-In this section, we will take a look at configuring configmaps in applications
+Trong phần này, chúng ta sẽ tìm hiểu cách cấu hình ConfigMap cho ứng dụng.
+
+Khi có nhiều file định nghĩa Pod, việc quản lý biến môi trường trực tiếp trong từng file trở nên khó khăn. ConfigMap cho phép tách dữ liệu cấu hình ra khỏi file định nghĩa Pod và quản lý tập trung dưới dạng các cặp key-value.
 
 ## ConfigMaps
-- There are 2 phases involved in configuring ConfigMaps. 
-  - First, create the configMaps
-  - Second, Inject then into the pod.
-- There are 2 ways of creating a configmap.
-  - The Imperative way
+- Có 2 bước khi cấu hình ConfigMap:
+  - Bước 1: tạo ConfigMap
+  - Bước 2: inject (đưa) ConfigMap vào Pod.
+- Có 2 cách để tạo ConfigMap:
+  - Cách imperative (dùng lệnh)
     ```
     $ kubectl create configmap app-config --from-literal=APP_COLOR=blue --from-literal=APP_MODE=prod
     $ kubectl create configmap app-config --from-file=app_config.properties (Another way)
     ```
     ![cmi](../../images/cmi.PNG)
     
-  - The Declarative way
+  - Cách declarative (dùng file định nghĩa)
     
     ```
     apiVersion: v1
@@ -27,26 +29,28 @@ In this section, we will take a look at configuring configmaps in applications
      APP_MODE: prod
     ```
     ```
-    Create a config map definition file and run the 'kubectl create` command to deploy it.
+    Tạo file định nghĩa ConfigMap rồi chạy lệnh `kubectl create` để triển khai.
     $ kubectl create -f config-map.yaml
     ```
     ![cmd1](../../images/cmd1.PNG)
+
+> 💡 **Bổ sung:** Với `--from-file`, mặc định **tên file** trở thành key và **nội dung file** trở thành value (vd key `app_config.properties`). Có thể đặt key khác bằng `--from-file=<key>=<đường-dẫn>`. Nếu muốn mỗi dòng `KEY=VALUE` trong file thành một key riêng, dùng `--from-env-file=app_config.properties`. Tạo nhanh YAML mẫu: `kubectl create configmap app-config --from-literal=APP_COLOR=blue --dry-run=client -o yaml`.
     
- ## View ConfigMaps
- - To view configMaps
+ ## Xem ConfigMap
+ - Liệt kê các ConfigMap
    ```
    $ kubectl get configmaps (or)
    $ kubectl get cm
    ```
- - To describe configmaps
+ - Xem chi tiết ConfigMap
    ```
    $ kubectl describe configmaps
    ```
    
    ![cmv](../../images/cmv.PNG)
    
- ## ConfigMap in Pods
- - Inject configmap in pod
+ ## Sử dụng ConfigMap trong Pod
+ - Inject ConfigMap vào Pod (dùng `envFrom` để nạp toàn bộ key của ConfigMap thành biến môi trường)
    ```
    apiVersion: v1
    kind: Pod
@@ -77,13 +81,20 @@ In this section, we will take a look at configuring configmaps in applications
   
    ![cmp](../../images/cmp.PNG)
    
- #### There are other ways to inject configuration variables into pod   
- - You can inject it as a **`Single Environment Variable`** 
- - You can inject it as a file in a **`Volume`**
+ #### Các cách khác để inject biến cấu hình vào Pod
+ - Inject dưới dạng **`một biến môi trường riêng lẻ`** (Single Environment Variable, dùng `valueFrom.configMapKeyRef`)
+ - Inject dưới dạng file trong một **`Volume`**
  
    ![cmp1](../../images/cmp1.PNG)
+
+> 💡 **Bổ sung:**
+> - Khi mount ConfigMap dưới dạng volume, **mỗi key trở thành một file** trong thư mục mount, nội dung file là value. Có thể chọn một số key bằng `items`, hoặc mount một file đơn lẻ bằng `subPath`.
+> - Biến môi trường lấy từ ConfigMap chỉ được đọc **khi container khởi động**; sửa ConfigMap sau đó không làm thay đổi biến trong container đang chạy — cần tạo lại Pod (vd `kubectl rollout restart deployment/<tên>`). Ngược lại, file mount từ volume sẽ được kubelet cập nhật sau một khoảng trễ (trừ khi dùng `subPath`).
+> - ConfigMap phải tồn tại (và cùng namespace với Pod) trước khi Pod khởi động, nếu không Pod sẽ báo lỗi `CreateContainerConfigError` (trừ khi đánh dấu `optional: true`).
+> - Có thể đặt `immutable: true` cho ConfigMap để ngăn chỉnh sửa và giảm tải cho kube-apiserver.
+> - ConfigMap không mã hóa dữ liệu; với dữ liệu nhạy cảm hãy dùng Secret. Dung lượng tối đa của một ConfigMap là 1 MiB.
    
- #### K8s Reference Docs
+ #### Tài liệu tham khảo K8s
  - https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
  - https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data
  - https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#create-configmaps-from-files

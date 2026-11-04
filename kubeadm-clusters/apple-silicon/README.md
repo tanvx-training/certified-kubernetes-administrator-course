@@ -1,9 +1,11 @@
-# Installing Kubernetes the kubeadm way on Apple Silicon
+# Cài đặt Kubernetes bằng kubeadm trên Apple Silicon
 
-Updated March 2024
+Cập nhật tháng 3/2024
 
-In here is the setup specific to newer Apple Silicon (M-series processor) Macs. VirtualBox currently does not have good support for these Macs, therefore we will create the Ubuntu virtual machines using Multipass.
+Thư mục này chứa phần thiết lập dành riêng cho các máy Mac đời mới dùng chip Apple Silicon (bộ xử lý dòng M). Hiện VirtualBox chưa hỗ trợ tốt các máy Mac này, vì vậy chúng ta sẽ tạo các máy ảo Ubuntu bằng Multipass.
 
-Multipass should also work on older Macs (Intel Core processor), as should [VirtualBox](../virtualbox/).
+Multipass cũng chạy được trên các máy Mac đời cũ (bộ xử lý Intel Core); với các máy này bạn cũng có thể dùng [VirtualBox](../virtualbox/).
 
-Click [here](./docs/01-prerequisites.md) to get started.
+> 💡 **Bổ sung:** [Multipass](https://multipass.run/) là công cụ của Canonical giúp tạo nhanh VM Ubuntu bằng một lệnh. Trên macOS, mặc định nó dùng QEMU kết hợp Hypervisor.framework của Apple nên chạy được image Ubuntu ARM64 trên chip M-series. Lưu ý các VM khi đó là kiến trúc `arm64`, vì vậy mọi binary/image bạn tải về trong VM phải có bản `arm64` (các thành phần Kubernetes chính thức và Calico đều có).
+
+[Bấm vào đây](./docs/01-prerequisites.md) để bắt đầu.

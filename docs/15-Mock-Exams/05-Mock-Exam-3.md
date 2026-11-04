@@ -1,5 +1,5 @@
 # Mock Exam 3
 
-  Wohooo! Level Up! 
+  Tuyệt vời! Lên level tiếp nào!
   
-  Take me to [Mock Exam 3](https://kodekloud.com/topic/mock-exam-3-2/)
+  Đi tới [Mock Exam 3](https://kodekloud.com/topic/mock-exam-3-2/)

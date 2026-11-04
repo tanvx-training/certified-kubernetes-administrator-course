@@ -1,12 +1,14 @@
-# Security Section Introduction
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/security-section-introduction/)
+# Giới thiệu phần Security (Bảo mật)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/security-section-introduction/)
 
-In this section, we will take a look at security section introduction
-- Kubernetes Security Primitives
-- Authentication
-- TLS certificates for cluster components
-- Secure Persistent key-value store
-- Authorization
-- Images Security
-- Security Contexts
-- Network Policies   
+Trong phần này, chúng ta sẽ có cái nhìn tổng quan về các chủ đề bảo mật sẽ học:
+- Các cơ chế bảo mật cơ bản của Kubernetes (Security Primitives)
+- Authentication (xác thực)
+- TLS certificate cho các thành phần của cluster
+- Bảo mật kho lưu trữ key-value (etcd)
+- Authorization (phân quyền)
+- Bảo mật image
+- Security Context
+- Network Policy
+
+> 💡 **Bổ sung:** Theo curriculum CKA hiện tại, mảng bảo mật nằm chủ yếu trong domain *Cluster Architecture, Installation & Configuration* (quản lý RBAC, quản lý certificate/kubeconfig) và *Services & Networking* (Network Policy). Các kỹ năng hay gặp khi thi: tạo Role/ClusterRole/RoleBinding, tạo user bằng CertificateSigningRequest, chuyển context trong kubeconfig, và viết NetworkPolicy.

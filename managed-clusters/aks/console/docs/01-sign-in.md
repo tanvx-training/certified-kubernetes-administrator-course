@@ -1,25 +1,27 @@
-# Provision lab
+# Khởi tạo lab
 
-Last updated: September 2026
+Cập nhật lần cuối: tháng 9 năm 2026
 
-### Provision your Azure playground lab
+### Khởi tạo Azure playground lab
 
-Prerequisite: Pro (or higher) KodeKloud subscription
+Điều kiện tiên quyết: có gói đăng ký KodeKloud Pro (hoặc cao hơn)
 
-Access this link: https://kodekloud.com/playgrounds/playground-azure and click `START LAB` to request a new Azure Playground instance. After a few seconds, you will receive your temporary Azure portal account like this:
+Truy cập link sau: https://kodekloud.com/playgrounds/playground-azure và bấm `START LAB` để yêu cầu một Azure Playground instance mới. Sau vài giây, bạn sẽ nhận được một tài khoản Azure portal tạm thời như sau:
 
 ![image](../../images/01-sign-in.png)
 
-Copy the **Console Link** by pressing the copy button to the right of it, paste to your browser and sign in with the given credentials. If you are given a choice of accounts like in the following dialog, select **Use another account**
+Sao chép **Console Link** bằng cách bấm nút copy ở bên phải của nó, dán vào trình duyệt và đăng nhập bằng thông tin đăng nhập được cung cấp. Nếu bạn được yêu cầu chọn tài khoản như trong hộp thoại dưới đây, hãy chọn **Use another account**
 
-1. At the sign-in box, copy the `Username` and paste it there, then press Next.
-1. Now copy the `Password` and paste it as Temporary Access Pass.
+1. Tại ô đăng nhập, sao chép `Username` và dán vào đó, sau đó bấm Next.
+1. Bây giờ sao chép `Password` và dán vào ô Temporary Access Pass.
 
 ![image](../images/01a-sign-in.png)
 
-Skip all the usage and Start a Tour stuff, unless you're interested in that.
+Bỏ qua các phần giới thiệu cách sử dụng và Start a Tour, trừ khi bạn quan tâm tới chúng.
 
-Next: [Creating the Service](./02-create-service.md)
+> 💡 **Bổ sung:** Tài khoản playground là tạm thời và sẽ hết hạn sau một khoảng thời gian nhất định (hiển thị trên trang lab). Khi hết hạn, toàn bộ tài nguyên bạn đã tạo (bao gồm cả cluster) sẽ bị xóa, nên hãy chủ động hoàn thành bài thực hành trong thời gian cho phép.
+
+Tiếp theo: [Tạo Service](./02-create-service.md)
 
 
 

@@ -1,20 +1,22 @@
-# Prerequisites
+# Điều kiện tiên quyết
 
-* Apple Silicon System (M1/M2/M3 etc)
-* 8GB RAM (16GB preferred).
-    * All configurations - One control plane node will be provisioned - `controlplane`
-    * If you have less than 16GB then only one worker node will be provisioned - `node01`
-    * If you have 16GB or more then two workers will be provisioned - `node01` and `node02`
+* Máy dùng chip Apple Silicon (M1/M2/M3 v.v.)
+* 8GB RAM (khuyến nghị 16GB).
+    * Mọi cấu hình - Sẽ tạo một node control plane - `controlplane`
+    * Nếu máy có ít hơn 16GB, chỉ tạo một worker node - `node01`
+    * Nếu máy có từ 16GB trở lên, sẽ tạo hai worker - `node01` và `node02`
 
-You'll need to install the following first.
+Bạn cần cài các công cụ sau trước.
 
-* Multipass - https://multipass.run/install. Follow the instructions to install it and check it is working properly. You should be able to successfully create a test Ubuntu VM following their instructions. Delete the test VM when you're done.
+* Multipass - https://multipass.run/install. Làm theo hướng dẫn để cài đặt và kiểm tra nó hoạt động bình thường. Bạn phải tạo được một VM Ubuntu thử nghiệm theo hướng dẫn của họ. Xóa VM thử nghiệm khi xong.
 * JQ - https://github.com/stedolan/jq/wiki/Installation#macos
 
-Additionally
+> 💡 **Bổ sung:** `jq` là công cụ xử lý JSON trên dòng lệnh; script tạo VM dùng nó để đọc output JSON của `multipass` (vd lấy IP của từng VM). Nếu đã có Homebrew, có thể cài bằng `brew install jq`.
 
-* Your account on your Mac must have admin privilege and be able to use `sudo`
-* Clone this repo down to your Mac. Open your Mac's terminal application. All commands in this guide are executed from the terminal.
+Ngoài ra
+
+* Tài khoản của bạn trên Mac phải có quyền admin và dùng được `sudo`
+* Clone repo này về Mac. Mở ứng dụng terminal của Mac. Mọi lệnh trong hướng dẫn này đều được chạy từ terminal.
 
     ```bash
     mkdir ~/kodekloud
@@ -23,47 +25,49 @@ Additionally
     cd certified-kubernetes-administrator-course/kubeadm-clusters/apple-silicon
     ```
 
-## Virtual Machine Network
+## Mạng của máy ảo
 
-Due to how the virtualization works, the networking for each VM requires two network adapters; one used by Multipass and one used by everything else. Kubernetes components may by default bind to the Multipass adapter, which is *not* what we want, therefore we have pre-set an environment variable `PRIMARY_IP` on all VMs which is the IP address that Kubernetes components should be using. In the coming labs you will see this environment variable being used to ensure Kubernetes components bind to the correct network interface.
+Do cách ảo hóa hoạt động, mỗi VM cần hai network adapter: một adapter do Multipass sử dụng và một adapter cho mọi thứ khác. Mặc định các thành phần Kubernetes có thể bind vào adapter của Multipass, và đó *không* phải điều chúng ta muốn. Vì vậy, chúng tôi đã đặt sẵn biến môi trường `PRIMARY_IP` trên tất cả các VM, chứa địa chỉ IP mà các thành phần Kubernetes nên sử dụng. Trong các lab tiếp theo, bạn sẽ thấy biến này được dùng để đảm bảo các thành phần Kubernetes bind vào đúng network interface.
 
-`PRIMARY_IP` is defined as the IP address of the network interface on the node that is connected to the network having the default gateway, and is the interface that a node will use to talk to the other nodes and also to the internet. In bridge mode, this is also an address on your internal broadband network and is allocated by your broadband router.
+`PRIMARY_IP` được định nghĩa là địa chỉ IP của network interface trên node nối với mạng có default gateway, và đó là interface mà node dùng để nói chuyện với các node khác cũng như ra Internet. Ở chế độ bridge, đây cũng là một địa chỉ trong mạng nội bộ nhà bạn, do router cấp phát.
 
 ### Bridge Networking
 
-The default configuration in this lab is to bring the VMs up on bridged interfaces. What this means is that your Kubernetes nodes will appear as additional machines on your local network, their IP addresses being provided dynamically by your broadband router. This facilitates the use of your browser to connect to any NodePort services you deploy.
+Cấu hình mặc định của lab là khởi động VM trên các bridged interface. Nghĩa là các node Kubernetes sẽ xuất hiện như những máy bổ sung trong mạng nội bộ (LAN) của bạn, với địa chỉ IP do router mạng nhà bạn cấp phát động (DHCP). Điều này giúp bạn dùng trình duyệt để truy cập bất kỳ Service NodePort nào bạn triển khai.
 
-Should you have issues deploying bridge networking, please raise a [bug report](https://github.com/kodekloudhub/certified-kubernetes-administrator-course/issues) and include all details including the output of `deploy-virtual-machines`.
+Nếu gặp vấn đề khi triển khai bridge networking, hãy tạo [bug report](https://github.com/kodekloudhub/certified-kubernetes-administrator-course/issues) kèm đầy đủ thông tin, bao gồm output của `deploy-virtual-machines`.
 
-Then retry the lab in NAT mode. How to do this is covered in the [next section](./02-compute-resources.md).
+Sau đó thử lại lab ở chế độ NAT. Cách làm được trình bày ở [phần tiếp theo](./02-compute-resources.md).
 
 ### NAT Networking
 
-In NAT configuration, the network on which the VMs run is isolated from your broadband router's network by a NAT gateway managed by the hypervisor. This means that VMs can see out (and connect to Internet), but you can't see in (i.e. use browser to connect to NodePorts). It is currently not possible to set up port forwarding rules in Multipass to facilitate this.
+Trong cấu hình NAT, mạng mà các VM chạy trên đó bị tách biệt khỏi mạng của router nhà bạn bởi một NAT gateway do hypervisor quản lý. Nghĩa là các VM có thể nhìn ra ngoài (và kết nối Internet), nhưng bạn không thể nhìn vào trong (tức là dùng trình duyệt để kết nối tới NodePort). Hiện tại Multipass chưa hỗ trợ thiết lập quy tắc port forwarding để làm việc này.
 
-The network used by the VMs is chosen by Multipass.
+Mạng mà các VM sử dụng do Multipass lựa chọn.
 
-It is *recommended* that you leave the pod and service networks as the defaults. If you change them then you will also need to edit the Weave networking manifests to accommodate your change.
+*Khuyến nghị* giữ nguyên mạng Pod và mạng Service ở giá trị mặc định. Nếu thay đổi, bạn sẽ phải sửa cả manifest của CNI cho phù hợp.
 
-If you do decide to change any of these, please treat as personal preference and do not raise a pull request.
+> 💡 **Bổ sung:** Bản gốc nhắc tới manifest mạng Weave, nhưng hướng dẫn hiện tại (xem [05-controlplane](../../generic/05-controlplane.md)) dùng **Calico**. Weave Net đã ngừng được phát triển sau khi Weaveworks đóng cửa (2024). Dù đổi hay không, hãy nhớ nguyên tắc: mạng node, mạng Pod (`POD_CIDR`) và mạng Service (`SERVICE_CIDR`) không được chồng lấn nhau.
+
+Nếu bạn quyết định thay đổi bất kỳ giá trị nào, hãy coi đó là tùy chọn cá nhân và đừng tạo pull request.
 
 
-## Running Commands in Parallel with iterm2
+## Chạy lệnh song song với iterm2
 
-[iterm2](https://iterm2.com/) which is a popular replacement for the standard Mac terminal application can be used to run the same commands on multiple compute instances at the same time. Some labs in this tutorial require running the same commands on multiple compute instances for instance installing the Kubernetes software. In those cases you may consider using iterm2 and splitting a window into multiple panes with *Broadcast input to all panes* enabled to speed up the provisioning process.
+[iterm2](https://iterm2.com/) là ứng dụng thay thế phổ biến cho terminal mặc định của Mac, có thể dùng để chạy cùng một lệnh trên nhiều compute instance cùng lúc. Một số lab trong tutorial này yêu cầu chạy cùng một lệnh trên nhiều compute instance, ví dụ khi cài phần mềm Kubernetes. Khi đó bạn có thể cân nhắc dùng iterm2, chia cửa sổ thành nhiều pane và bật *Broadcast input to all panes* để tăng tốc quá trình provisioning.
 
-*The use of iterm2 is optional and not required to complete this tutorial*.
+*Việc dùng iterm2 là tùy chọn, không bắt buộc để hoàn thành tutorial này*.
 
 ![titerm2 screenshot](../../../images/iterm2-broadcast.png)
 
-To set up as per the image above, do the following in iterm2
-1. Right click and select split pane horizontally
-1. Do this again to create the third pane (if building 2 workers)
-1. In each pane, connect to a different node with `Multipass shell`
-1. From the `Session` menu at the top, select `Broadcast` -> `Broadcast imput to all panes`. The small icon at the top right of each pane indicates broadcast mode is enabled.
+Để thiết lập như hình trên, làm như sau trong iterm2
+1. Chuột phải và chọn split pane horizontally (chia pane theo chiều ngang)
+1. Làm lại lần nữa để tạo pane thứ ba (nếu dựng 2 worker)
+1. Trong mỗi pane, kết nối tới một node khác nhau bằng `Multipass shell`
+1. Từ menu `Session` ở trên cùng, chọn `Broadcast` -> `Broadcast imput to all panes`. Biểu tượng nhỏ ở góc trên bên phải mỗi pane cho biết chế độ broadcast đã bật.
 
-Input typed or pased to one command prompt will be echoed to the others. Remember to turn off broadcast when you have finished a section that applies to all nodes.
+Nội dung gõ hoặc dán vào một dấu nhắc lệnh sẽ được lặp lại ở các dấu nhắc khác. Nhớ tắt broadcast khi đã xong một phần áp dụng cho tất cả các node.
 
-Next: [Compute Resources](02-compute-resources.md)
+Tiếp theo: [Compute Resources](02-compute-resources.md)
 
 [](#running-commands-in-parallel-with-iterm2)

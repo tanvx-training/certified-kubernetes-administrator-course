@@ -1,8 +1,8 @@
-# Connectivity
+# Kết nối
 
-In this lab, you will access the kubernetes nodes by SSH from `student-node` which you should now be logged into.
+Trong bài lab này, bạn sẽ truy cập các node kubernetes bằng SSH từ `student-node`, nơi bạn đang đăng nhập.
 
-Check each one. You must `exit` back to `student-node` before trying the next host.
+Kiểm tra từng node. Bạn phải `exit` về `student-node` trước khi thử host tiếp theo.
 
 ```bash
 ssh controlplane01
@@ -28,8 +28,8 @@ ssh node01
 ssh node02
 ```
 
-Remember to `exit` back to `student-node` each time. ssh access is not configured *between* nodes. This is standard practice when setting up networks, to have one node from which you can get to all the others.
+Hãy nhớ `exit` về `student-node` mỗi lần. Truy cập ssh *giữa* các node với nhau không được cấu hình. Đây là cách làm chuẩn khi thiết lập mạng: có một node mà từ đó bạn có thể đi tới tất cả các node khác.
 
 
-Next: [Load Balancer Setup](./04-loadbalancer.md)<br>
-Prev: [Compute Resources](02-compute-resources.md)
+Tiếp theo: [Thiết lập Load Balancer](./04-loadbalancer.md)<br>
+Trước đó: [Tài nguyên tính toán](02-compute-resources.md)

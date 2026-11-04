@@ -1,3 +1,3 @@
-# Troubelshooting Section Introduction
+# Giới thiệu phần Troubleshooting
 
-  - Lets understand how we can troubleshoot an [Application Failure](https://kodekloud.com/topic/troubleshooting-section-introduction/).
+  - Hãy cùng tìm hiểu cách troubleshoot một [Application Failure (lỗi ứng dụng)](https://kodekloud.com/topic/troubleshooting-section-introduction/).

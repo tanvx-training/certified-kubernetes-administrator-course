@@ -1,140 +1,154 @@
-# Practice Test - PODs
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-pods/)
+# Practice Test - Pods (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-pods/)
 
-## Here are the solutions to the practice test
+## Lời giải cho bài practice test
 1. <details>
-   <summary>How many pods exist on the system?</summary>
+   <summary>Có bao nhiêu Pod đang tồn tại trên hệ thống?</summary>
 
    ```bash
    kubectl get pods
    ```
 
-   Count the number of pods (if any)
+   Đếm số Pod hiển thị (nếu có).
+
+   > 💡 **Bổ sung:** `kubectl get pods` chỉ liệt kê Pod trong namespace hiện tại (mặc định là `default`). Muốn xem Pod ở mọi namespace, dùng `kubectl get pods -A` (viết tắt của `--all-namespaces`).
 
    </details>
 
 1. <details>
-   <summary>Create a new pod with the nginx image.</summary>
+   <summary>Tạo một Pod mới với image nginx.</summary>
 
    ```bash
    kubectl run nginx --image=nginx
    ```
+
+   > 💡 **Bổ sung:** Từ Kubernetes v1.18, `kubectl run` chỉ tạo Pod (flag `--generator` đã bị loại bỏ). Muốn tạo Deployment, dùng `kubectl create deployment`.
+
    </details>
 
 1. <details>
-   <summary>How many pods are created now?</summary>
+   <summary>Bây giờ có bao nhiêu Pod đã được tạo?</summary>
 
    ```bash
    kubectl get pods
    ```
 
-   Count the number of pods (if any)
+   Đếm số Pod hiển thị (nếu có).
 
-   To get the system to tell you you can also do this
+   Để hệ thống tự đếm giúp bạn, có thể dùng lệnh sau:
 
    ```bash
    kubectl get pods --no-headers | wc -l
    ```
 
-   * `--no-headers` should be obvious - output only the details.
-   * `wc` is the word count program. `-l` tells it to count lines instead, and it will count the lines emitted by `kubectl`
+   * `--no-headers` thì khá rõ nghĩa - chỉ in ra phần dữ liệu, bỏ dòng tiêu đề.
+   * `wc` là chương trình đếm từ (word count). `-l` yêu cầu nó đếm số dòng thay vì số từ, tức là đếm số dòng mà `kubectl` in ra.
    </details>
 
 1. <details>
-   <summary>What is the image used to create the new pods?</summary>
+   <summary>Image nào được dùng để tạo các Pod mới?</summary>
 
-    `kubectl describe` outputs lots of information. The following will describe all pods whose name starts with `newpods`, and then we filter with `grep` to get what we are looking for.
+    `kubectl describe` in ra rất nhiều thông tin. Lệnh dưới đây sẽ describe tất cả các Pod có tên bắt đầu bằng `newpods`, sau đó lọc bằng `grep` để lấy đúng thông tin cần tìm.
 
     ```bash
     kubectl describe pod newpods | grep image
     ```
 
-    We see that all three are pulling the same image.
+    Ta thấy cả ba Pod đều pull cùng một image.
+
+    > 💡 **Bổ sung:** `grep` phân biệt hoa thường, và dòng `Image:` trong output viết hoa chữ I. Lệnh trên vẫn cho kết quả nhờ khớp dòng event `Pulling image "..."`. Để chắc chắn hơn, dùng `grep -i image`. Một cách khác gọn hơn: `kubectl get pods -o wide` không hiện image, nhưng `kubectl get pods -o jsonpath='{.items[*].spec.containers[*].image}'` sẽ in ra image của mọi Pod.
+
    </details>
 
 1. <details>
-   <summary>Which nodes are these pods placed on?</summary>
+   <summary>Các Pod này được đặt trên những node nào?</summary>
 
     ```bash
     kubectl get pods -o wide
     ```
 
-    Note the node column for each of the 3 `newpods` pods
+    Xem cột `NODE` của từng Pod trong 3 Pod `newpods`.
 
    </details>
 
 1. <details>
-   <summary>How many containers are part of the pod webapp?</summary>
+   <summary>Pod webapp có bao nhiêu container?</summary>
 
    ```bash
    kubectl describe pod webapp
    ```
 
-   Look under the `Containers` section. Note there is `nginx` and `agentx`
+   Xem trong mục `Containers`. Để ý thấy có `nginx` và `agentx`.
 
    </details>
 
 1. <details>
-   <summary>What images are used in the new webapp pod?</summary>
+   <summary>Những image nào được dùng trong Pod webapp mới?</summary>
 
-   Examine the output from Q6. For each of the identified containers, look at `Image:`
+   Xem lại output của câu 6. Với mỗi container đã tìm thấy, xem dòng `Image:`.
 
    </details>
 
 1. <details>
-   <summary>What is the state of the container agentx in the pod webapp?</summary>
+   <summary>Trạng thái của container agentx trong Pod webapp là gì?</summary>
 
    ```bash
    kubectl describe pod webapp
    ```
 
-   Examine the `State:` field for the `agentx` container.
+   Xem trường `State:` của container `agentx`.
 
    </details>
 
 1. <details>
-   <summary>Why do you think the container agentx in pod webapp is in error?</summary>
+   <summary>Theo bạn, vì sao container agentx trong Pod webapp bị lỗi?</summary>
 
-   Examine the output from Q8 and look in the `Events:` section at the end. Look at the event that says `failed to pull and unpack image ...`
+   Xem lại output của câu 8 và nhìn vào mục `Events:` ở cuối. Tìm event có nội dung `failed to pull and unpack image ...`
+
+   > 💡 **Bổ sung:** Đây là lỗi pull image điển hình (thường do sai tên image/tag, hoặc registry yêu cầu xác thực). Trạng thái Pod khi đó sẽ là `ErrImagePull` rồi chuyển sang `ImagePullBackOff` - kubelet sẽ thử pull lại với thời gian chờ tăng dần.
 
    </details>
 
 1. <details>
-   <summary>What does the READY column in the output of the kubectl get pods command indicate?</summary>
+   <summary>Cột READY trong output của lệnh kubectl get pods biểu thị điều gì?</summary>
 
    ```bash
    kubectl get pods
    ```
 
-   Look at the `webapp` pod which we know has two containers and one is in error. You can deduce which of the answers is correct from this.
+   Nhìn vào Pod `webapp` - ta biết nó có hai container và một container đang lỗi. Từ đó bạn có thể suy ra đáp án đúng.
+
+   > 💡 **Bổ sung:** `READY` có dạng `<số container đang ready>/<tổng số container trong Pod>`. Với `webapp`, giá trị sẽ là `1/2`.
 
    </details>
 
 1. <details>
-   <summary>Delete the webapp Pod.</summary>
+   <summary>Xóa Pod webapp.</summary>
 
    ```bash
    kubectl delete pod webapp
    ```
 
-   To delete the pod without any delay and confirmation, we can add `--force` flag. Note that in a real production system, forcing is a last resort as it can leave behind containers that haven't been cleaned up properly. Some may have important cleanup jobs to run when they are requested to terminate, which wouldn't get run.
+   Để xóa Pod ngay lập tức mà không phải chờ, có thể thêm flag `--force`. Lưu ý rằng trên hệ thống production thực tế, ép xóa là biện pháp cuối cùng vì nó có thể để lại các container chưa được dọn dẹp đúng cách. Một số ứng dụng có tác vụ dọn dẹp quan trọng cần chạy khi được yêu cầu dừng, và các tác vụ đó sẽ không được thực hiện.
 
-   You can however use `--force` in the exam as it will gain you time. No exam pods rely on any of the above.
+   Tuy nhiên, trong kỳ thi bạn có thể dùng `--force` để tiết kiệm thời gian. Không có Pod nào trong đề thi phụ thuộc vào những điều trên.
+
+   > 💡 **Bổ sung:** Cách hay dùng trong kỳ thi là `kubectl delete pod webapp --force --grace-period=0`. Có thể đặt sẵn biến môi trường `export now="--force --grace-period=0"` rồi gõ `kubectl delete pod webapp $now`.
 
    </details>
 
 1. <details>
-   <summary>Create a new pod with the name redis and with the image redis123.</br>Use a pod-definition YAML file.</summary>
+   <summary>Tạo một Pod mới tên redis với image redis123.</br>Sử dụng file YAML định nghĩa Pod.</summary>
 
-   To create the pod definition YAML file:
+   Để tạo file YAML định nghĩa Pod:
 
-   `--dry-run=client` tells `kubectl` to test without actually doing anything. `-o yaml` says "Output what you would send to API server to the console", which we then redirect into the named file.
+   `--dry-run=client` yêu cầu `kubectl` chạy thử mà không thực sự tạo gì cả. `-o yaml` nghĩa là "In ra console nội dung sẽ được gửi tới API server", sau đó ta chuyển hướng (redirect) output vào file chỉ định.
 
    ```bash
    kubectl run redis --image=redis123 --dry-run=client -o yaml > redis.yaml
    ```
 
-   And now use the YAML you created to deploy the pod.
+   Giờ dùng file YAML vừa tạo để deploy Pod.
 
    ```bash
    kubectl create -f redis.yaml
@@ -143,39 +157,41 @@
    </details>
 
 1. <details>
-   <summary>Now change the image on this pod to redis.</br>Once done, the pod should be in a running state.</summary>
+   <summary>Giờ hãy đổi image của Pod này thành redis.</br>Sau khi hoàn tất, Pod phải ở trạng thái running.</summary>
 
-   There are three ways this can be done!
+   Có ba cách để làm việc này!
 
-   1. Method 1</br>
-      Edit your manifest file created in last question
+   1. Cách 1</br>
+      Sửa file manifest đã tạo ở câu trước
 
       ```bash
       vi redis.yaml
       ```
 
-      Fix the image name in the redis.yaml to `redis`, save and exit.
+      Sửa tên image trong redis.yaml thành `redis`, lưu và thoát.
 
-      Apply the edited yaml
+      Apply file yaml đã sửa
 
       ```bash
       kubectl apply -f redis.yaml
       ```
 
-   1. Method 2</br>
-      Edit the running pod directly (note not all fields can be edited this way)
+   1. Cách 2</br>
+      Sửa trực tiếp Pod đang chạy (lưu ý không phải trường nào cũng sửa được theo cách này)
 
       ```
       kubectl edit pod redis
       ```
 
-      This will bring the pod YAML up in `vi`. Edit it as per method 1. When you eixt `vi` the change will be immediately applied. If you make a mistake, you will be dropped back into `vi`
+      Lệnh này sẽ mở YAML của Pod trong `vi`. Sửa giống như cách 1. Khi bạn thoát `vi`, thay đổi sẽ được áp dụng ngay. Nếu bạn sửa sai, bạn sẽ được đưa trở lại `vi`.
 
-   1. Method 3</br>
-      Patch the image directly. For this you need to know the `name` of the container in the pod, as we assign the new image to that name, as in `container_image_name=new_image`
+   1. Cách 3</br>
+      Patch image trực tiếp. Với cách này bạn cần biết `name` của container trong Pod, vì ta gán image mới cho tên đó theo dạng `container_name=new_image`
 
       ```bash
       kubectl set image pod/redis redis=redis
       ```
+
+   > 💡 **Bổ sung:** Với một Pod đang chạy, chỉ một số ít trường được phép sửa trực tiếp, chủ yếu là `spec.containers[*].image`, `spec.initContainers[*].image`, `spec.activeDeadlineSeconds` và thêm `spec.tolerations`. Muốn sửa các trường khác (ví dụ env, ports, command...), `kubectl edit` sẽ từ chối và lưu bản sửa vào một file tạm trong `/tmp/`; khi đó dùng `kubectl replace --force -f /tmp/kubectl-edit-xxxx.yaml` để xóa và tạo lại Pod.
 
    </details>

@@ -1,18 +1,20 @@
 # Networking
 
-1. Select VPC - there should only be one choice, the Default VPC.
+1. Chọn VPC - chỉ nên có một lựa chọn duy nhất, là Default VPC.
 
-1. Select values for the Subnets fields. There needs to be at least two subnets selected, and we don't need more than 3. Ensure that `us-east-1e` is *not* one of the selected subnets. If there are less than 2 subnets available, you will either need to go to VPC console and add some (beyond scope of this guide), or restart the playground until you get 2 or more subnets.
+1. Chọn giá trị cho các trường Subnets. Cần chọn ít nhất hai subnet, và không cần nhiều hơn 3. Đảm bảo `us-east-1e` *không* nằm trong số các subnet được chọn. Nếu có ít hơn 2 subnet, bạn sẽ phải vào VPC console để thêm subnet (nằm ngoài phạm vi của hướng dẫn này), hoặc khởi động lại playground cho đến khi có từ 2 subnet trở lên.
 
     ![](../images/04-subnets.png)
 
-1. Scroll to end and press `Next`.
-1. At the following page (Observability), press `Next` again as there is nothing to do here.
-1. At the following page (Select add-ons), press `Next` again as there is nothing to do here either.
-1. At the following page (Configure selected add-ons settings), press `Next` again as there is nothing to do here either.
+    > 💡 **Bổ sung:** EKS yêu cầu các subnet thuộc ít nhất hai Availability Zone (AZ) khác nhau để đảm bảo tính sẵn sàng cao cho control plane. AZ `us-east-1e` cần tránh vì đây là AZ cũ có nhiều hạn chế: EKS không hỗ trợ đặt control plane ở một số AZ nhất định của `us-east-1`, và nhiều loại instance mới cũng không có ở AZ này, nên việc tạo cluster/node có thể bị lỗi.
 
-Prev: [Configure Cluster](./03-configure-cluster.md)<br/>
-Next: [Create Cluster](./05-create-cluster.md)
+1. Cuộn xuống cuối và bấm `Next`.
+1. Ở trang tiếp theo (Observability), bấm `Next` lần nữa vì không có gì cần làm ở đây.
+1. Ở trang tiếp theo (Select add-ons), bấm `Next` lần nữa vì ở đây cũng không có gì cần làm.
+1. Ở trang tiếp theo (Configure selected add-ons settings), bấm `Next` lần nữa vì ở đây cũng không có gì cần làm.
+
+Trước: [Cấu hình Cluster](./03-configure-cluster.md)<br/>
+Tiếp theo: [Tạo Cluster](./05-create-cluster.md)
 
 
 

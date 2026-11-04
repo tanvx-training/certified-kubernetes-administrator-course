@@ -1,15 +1,14 @@
-# Installing Kubernetes the kubeadm way on AWS EC2
+# Cài đặt Kubernetes bằng kubeadm trên AWS EC2
 
-Updated March 2024
+Cập nhật tháng 3/2024
 
-This guide shows how to install a 3 node kubeadm cluster on AWS EC2 instances. If using the KodeKloud AWS Playground environment, please ensure you have selected region `us-east-1` (N. Virginia) from the region selection at the top right of the AWS console. To maintain compatibility with the playground permissions, we will use the following EC2 instance configuration.
+Hướng dẫn này trình bày cách cài đặt một cluster kubeadm 3 node trên các EC2 instance của AWS. Nếu dùng môi trường KodeKloud AWS Playground, hãy đảm bảo bạn đã chọn region `us-east-1` (N. Virginia) ở mục chọn region góc trên bên phải AWS console. Để tương thích với quyền hạn của playground, chúng ta sẽ dùng cấu hình EC2 instance như sau.
 
 * Instance type: `t3.medium`
-* Operating System: Ubuntu 22.04 (at time of writing)
+* Hệ điều hành: Ubuntu 22.04 (tại thời điểm viết)
 * Storage: `gp2`, 8GB
 
-Note that this is an exercise in simply getting a cluster running and is a learning exercise only! It will not be suitable for serving workloads to the internet, nor will it be properly secured, otherwise this guide would be three times longer! It should not be used as a basis for building a production cluster.
+Lưu ý rằng đây chỉ là bài tập để dựng được một cluster chạy được, mang tính học tập! Cluster này không phù hợp để phục vụ workload ra Internet, cũng không được bảo mật đúng mức — nếu không thì hướng dẫn này sẽ dài gấp ba! Không nên dùng nó làm nền tảng để xây dựng cluster production.
 
 
-[Get Started](./docs/01-prerequisites.md)
-
+[Bắt đầu](./docs/01-prerequisites.md)

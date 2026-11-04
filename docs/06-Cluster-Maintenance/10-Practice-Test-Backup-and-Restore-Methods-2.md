@@ -1,13 +1,17 @@
-# Practice Test - Backup and Restore Methods 2
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-backup-and-restore-methods-2-2/)
+# Practice Test - Backup and Restore Methods 2 (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-backup-and-restore-methods-2-2/)
 
-Solutions to practice test - Backup and Restore Methods 2
+Lời giải cho bài practice test - Backup and Restore Methods 2
 
-In this test, we practice both with _stacked_ and _external_ etcd clusters.
+Trong bài này, chúng ta thực hành với cả hai kiểu etcd cluster: _stacked_ và _external_.
 
-1. Information only
+> 💡 **Bổ sung:**
+> - **Stacked etcd**: etcd chạy ngay trên các node control plane, dưới dạng static Pod (do kubeadm tạo), mỗi control plane node có một member etcd. Dễ thiết lập nhưng nếu mất node thì mất cả member etcd lẫn control plane.
+> - **External etcd**: etcd chạy trên các máy riêng, thường là systemd service, tách biệt khỏi control plane. kube-apiserver kết nối tới qua flag `--etcd-servers`. An toàn hơn nhưng cần nhiều máy hơn và cấu hình phức tạp hơn.
+
+1. Chỉ là thông tin
 1.  <details>
-    <summary>Explore the student-node and the clusters it has access to.</summary>
+    <summary>Khám phá student-node và các cluster mà nó có quyền truy cập.</summary>
 
     ```bash
     kubectl config get-contexts
@@ -15,7 +19,7 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
 
     </details>
 1.  <details>
-    <summary>How many clusters are defined in the kubeconfig on the student-node?</summary>
+    <summary>Có bao nhiêu cluster được định nghĩa trong kubeconfig trên student-node?</summary>
 
     ```bash
     kubectl config get-contexts
@@ -25,7 +29,7 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
 
     </details>
 1.  <details>
-    <summary>How many nodes (both controlplane and worker) are part of cluster1?</summary>
+    <summary>Có bao nhiêu node (cả controlplane và worker) thuộc cluster1?</summary>
 
     ```bash
     kubectl config use-context cluster1
@@ -36,7 +40,7 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
 
     </details>
 1.  <details>
-    <summary>What is the name of the controlplane node in cluster2?</summary>
+    <summary>Tên của node controlplane trong cluster2 là gì?</summary>
 
     ```bash
     kubectl config use-context cluster2
@@ -46,82 +50,82 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
     > cluster2-controlplane
 
     </details>
-1. Information only
+1. Chỉ là thông tin
 1.  <details>
-    <summary>How is ETCD configured for cluster1?</summary>
+    <summary>ETCD được cấu hình như thế nào cho cluster1?</summary>
 
     ```bash
     kubectl config use-context cluster1
     kubectl get pods -n kube-system
     ```
 
-    > From the output we can see a pod for etcd, therefore the answer is `Stacked ETCD`
+    > Từ output, ta thấy có một Pod etcd, do đó đáp án là `Stacked ETCD`
 
     </details>
 1.  <details>
-    <summary>How is ETCD configured for cluster2?</summary>
+    <summary>ETCD được cấu hình như thế nào cho cluster2?</summary>
 
     ```bash
     kubectl config use-context cluster2
     kubectl get pods -n kube-system
     ```
 
-    > From the output we can see no pod for etcd. Since no etcd is not an option for a _functioning_ cluster the answer must therefore be `External ETCD`
+    > Từ output, ta không thấy Pod etcd nào. Vì một cluster _đang hoạt động_ thì không thể không có etcd, nên đáp án phải là `External ETCD`
 
     </details>
 1.  <details>
-    <summary>What is the IP address of the External ETCD datastore used in cluster2?</summary>
+    <summary>Địa chỉ IP của datastore External ETCD mà cluster2 sử dụng là gì?</summary>
 
-    For this, we need to exampine the API server configuration
+    Để trả lời, ta cần xem xét cấu hình của API server
 
     ```bash
     kubectl config use-context cluster2
     kubectl get pods -n kube-system kube-apiserver-cluster2-controlplane -o yaml | grep etcd
     ```
 
-    > From the output, locate `--etcd-servers`. The IP address in this line is the answer.
+    > Trong output, tìm `--etcd-servers`. Địa chỉ IP trong dòng này chính là đáp án.
 
     </details>
 1.  <details>
-    <summary>What is the default data directory used the for ETCD datastore used in cluster1?</summary>
+    <summary>Thư mục dữ liệu mặc định (data directory) của datastore ETCD trong cluster1 là gì?</summary>
 
-    For this, we need to examine the etcd manifest on the control plane node, and we need to find out the hostpath of its `etcd-data` volume.
+    Để trả lời, ta cần xem manifest của etcd trên node control plane, và tìm hostPath của volume `etcd-data`.
 
     ```bash
     kubectl config use-context cluster1
     kubectl get pods -n kube-system etcd-cluster1-controlplane -o yaml
     ```
 
-    In the output, find the `volumes` section. The host path of the volume named `etcd-data` is the answer.
+    Trong output, tìm mục `volumes`. Host path của volume có tên `etcd-data` chính là đáp án.
 
     > /var/lib/etcd
 
     </details>
-1. Information only
+1. Chỉ là thông tin
 1.  <details>
-    <summary>What is the default data directory used the for ETCD datastore used in cluster2?</summary>
+    <summary>Thư mục dữ liệu mặc định của datastore ETCD trong cluster2 là gì?</summary>
 
-    For this, we need to examine the system unit file for the etcd service. Remember that for external etcd, it is running as an operating system service.
+    Để trả lời, ta cần xem system unit file của dịch vụ etcd. Hãy nhớ rằng với external etcd, nó chạy dưới dạng một service của hệ điều hành.
 
     ```bash
     ssh etcd-server
     ```
 
     ```bash
-    # Verify the name of the service
+    # Kiểm tra tên của service
     systemctl list-unit-files | grep etcd
 
-    # Using the output from above command
+    # Dùng kết quả từ lệnh trên
     systemctl cat etcd.service
     ```
 
-    Note the comment line in the output. This tells you where the service unit file is. We are going to need to edit this file in a later question!
+    Chú ý dòng comment trong output. Dòng này cho biết service unit file nằm ở đâu. Chúng ta sẽ cần sửa file này ở một câu hỏi sau!
 
-    From the output, locate `--data-dir`
+    Trong output, tìm `--data-dir`
 
     > /var/lib/etcd-data
 
-    Return to the student node:
+    Quay lại student node:
 
     ```bash
     exit
@@ -129,17 +133,24 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
 
     </details>
 1.  <details>
-    <summary>How many other nodes are part of the ETCD cluster that etcd-server is a part of?</summary>
+    <summary>Có bao nhiêu node khác thuộc cùng cluster ETCD với etcd-server?</summary>
 
-    This question is somewhat contentious. It ought not to contain the word `other`. The required answer is
+    Câu hỏi này có phần gây tranh cãi. Lẽ ra nó không nên chứa từ `other` (khác). Đáp án yêu cầu là
 
     > 1
 
+    > 💡 **Bổ sung:** Có thể kiểm tra số member bằng lệnh sau trên etcd-server (đường dẫn cert lấy từ `systemctl cat etcd.service`):
+    > ```bash
+    > ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 \
+    >   --cacert=<ca-file> --cert=<cert-file> --key=<key-file> \
+    >   member list
+    > ```
+
     </details>
 1.  <details>
-    <summary>Take a backup of etcd on cluster1 and save it on the student-node at the path /opt/cluster1.db</summary>
+    <summary>Backup etcd của cluster1 và lưu trên student-node tại đường dẫn /opt/cluster1.db</summary>
 
-    For this, we need to do the backup on the control node, then pull it back to the student node.
+    Để làm việc này, ta cần thực hiện backup trên node control plane, sau đó copy file về student node.
 
     ```bash
     ssh cluster1-controlplane
@@ -152,7 +163,7 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
       --key /etc/kubernetes/pki/etcd/server.key \
       cluster1.db
 
-    # Return to student node
+    # Quay lại student node
     exit
     ```
 
@@ -162,23 +173,23 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
 
     </details>
 1.  <details>
-    <summary>An ETCD backup for cluster2 is stored at /opt/cluster2.db. Use this snapshot file to carry out a restore on cluster2 to a new path <b>/var/lib/etcd-data-new</b>.</summary>
+    <summary>Một bản backup ETCD của cluster2 được lưu tại /opt/cluster2.db. Dùng file snapshot này để restore cluster2 vào đường dẫn mới <b>/var/lib/etcd-data-new</b>.</summary>
 
-    As you recall, `cluster2` is using _external_ etcd. This means
-    * `etcd` does not have to be on the control plane node of the cluster. In this case, it is not.
-    * `etcd` runs as an operating system service not a pod, therefore there is no manifest file to edit. Changes are instead made to a service unit file.</br></br>
+    Như đã biết, `cluster2` đang dùng etcd _external_. Điều này có nghĩa là
+    * `etcd` không nhất thiết phải nằm trên node control plane của cluster. Trong trường hợp này, nó không nằm ở đó.
+    * `etcd` chạy như một service của hệ điều hành chứ không phải Pod, do đó không có file manifest nào để sửa. Thay vào đó, thay đổi được thực hiện trên service unit file.</br></br>
 
-    There are several parts to this question. Let's go through them one at a time.
+    Câu hỏi này gồm nhiều phần. Hãy đi qua lần lượt từng phần.
 
     1.  <details>
-        <summary>Move the backup to the etcd-server node</summary>
+        <summary>Chuyển file backup sang node etcd-server</summary>
 
         ```bash
         scp /opt/cluster2.db etcd-server:~/
         ```
         </details>
     1.  <details>
-        <summary>Log into etcd-server node</summary>
+        <summary>Đăng nhập vào node etcd-server</summary>
 
         ```bash
         ssh etcd-server
@@ -186,18 +197,18 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
 
         </details>
     1.  <details>
-        <summary>Check the ownership of the current etcd-data directory</summary>
+        <summary>Kiểm tra quyền sở hữu (ownership) của thư mục etcd-data hiện tại</summary>
 
-        We will need to ensure correct ownership of our restored data. We determined the location of the data directory in Q12
+        Ta cần đảm bảo dữ liệu được restore có quyền sở hữu đúng. Vị trí của thư mục dữ liệu đã được xác định ở Q12
 
         ```bash
         ls -ld /var/lib/etcd-data/
         ```
 
-        > Note that owner and group are both `etcd`
+        > Chú ý rằng owner và group đều là `etcd`
         </details>
     1.  <details>
-        <summary>Do the restore</summary>
+        <summary>Thực hiện restore</summary>
 
         ```bash
         ETCDCTL_API=3 etcdctl snapshot restore \
@@ -205,42 +216,48 @@ In this test, we practice both with _stacked_ and _external_ etcd clusters.
             cluster2.db
         ```
 
+        > 💡 Tương đương với etcd v3.5+: `etcdutl snapshot restore cluster2.db --data-dir /var/lib/etcd-data-new`.
+
         </details>
     1.  <details>
-        <summary>Set ownership on the restored directory</summary>
+        <summary>Đặt quyền sở hữu cho thư mục đã restore</summary>
 
         ```bash
         chown -R etcd:etcd /var/lib/etcd-data-new
         ```
 
-        </detials>
-    1.  <details>
-        <summary>Reconfigure and restart etcd</summary>
+        > 💡 **Giải thích:** Service etcd chạy dưới user `etcd`. Lệnh restore chạy bằng root nên thư mục mới thuộc root; nếu không `chown`, etcd sẽ không đọc/ghi được dữ liệu và service sẽ không khởi động được.
 
-        We will need the location of the service unit file which we also determined in Q12
+        </details>
+    1.  <details>
+        <summary>Cấu hình lại và restart etcd</summary>
+
+        Ta cần biết vị trí của service unit file, vị trí này cũng đã được xác định ở Q12
 
         ```bash
         vi /etc/systemd/system/etcd.service
         ```
 
-        Edit the `--data-dir` argument to the newly restored directory, and save.
+        Sửa tham số `--data-dir` thành thư mục vừa restore, rồi lưu lại.
 
-        Finally, reload and restart the `etcd` service. Whenever you have edited a service unit file, a `daemon-reload` is required to reload the in-memory configuration of the `systemd` service.
+        Cuối cùng, reload và restart service `etcd`. Mỗi khi sửa service unit file, cần chạy `daemon-reload` để `systemd` nạp lại cấu hình vào bộ nhớ.
 
         ```bash
         systemctl daemon-reload
         systemctl restart etcd.service
         ```
 
-        Return to the student node:
+        Quay lại student node:
 
         ```bash
         exit
         ```
 
+        > 💡 **Bổ sung:** Kiểm tra trạng thái bằng `systemctl status etcd` hoặc `journalctl -u etcd`. Nên cân nhắc restart các thành phần control plane (vd xóa Pod `kube-controller-manager` và `kube-scheduler` trong namespace `kube-system` để chúng được tạo lại, và restart kubelet trên cluster2-controlplane) để đảm bảo chúng không dùng dữ liệu đã cache.
+
         </details>
     1.  <details>
-        <summary>Verify the restore</summary>
+        <summary>Kiểm tra kết quả restore</summary>
 
         ```bash
         kubectl config use-context cluster2

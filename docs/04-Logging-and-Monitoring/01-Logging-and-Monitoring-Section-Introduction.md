@@ -1,8 +1,8 @@
-# Logging and Monitoring Section Introduction
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/logging-and-monitoring-section-introduction/)
+# Giới thiệu phần Logging và Monitoring
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/logging-and-monitoring-section-introduction/)
   
-In this section, we will take a look at the below
-- Monitor Cluster Components
-- Monitor Applications
-- Monitor Cluster Components Logs
-- Application Logs
+Trong phần này, chúng ta sẽ tìm hiểu các nội dung sau:
+- Giám sát (monitor) các thành phần của cluster
+- Giám sát ứng dụng
+- Log của các thành phần cluster
+- Log của ứng dụng

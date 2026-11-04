@@ -1,3 +1,3 @@
-# Download Presentation Deck
+# Tải Presentation Deck (slide bài giảng)
 
-  - [Download - Presentation Deck](https://kodekloud.com/topic/download-presentation-deck-8/)
+  - [Tải xuống - Presentation Deck](https://kodekloud.com/topic/download-presentation-deck-8/)

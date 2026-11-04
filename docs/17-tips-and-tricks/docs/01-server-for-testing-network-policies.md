@@ -1,16 +1,16 @@
-# Servers for testing network policies
+# Server để kiểm thử Network Policy
 
-Sometimes you may have a question that asks you to block ingress to a pod on all but some specific port. If a pod that meets the port requirement is not already present in the given namespace, then the issue here is "How do I create a pod onto which to attach the netpol that listens on the given port so I can test the policy?". You can't just run an nginx pod as that always listens on port 80. You could configure it otherwise, but that would require you to mount a configmap into the nginx pod containing an alternate config for nginx with the new port number. That's far too much hassle under exam conditions!
+Đôi khi đề thi yêu cầu bạn chặn ingress vào một Pod trên mọi port trừ một vài port cụ thể. Nếu trong namespace đó chưa có Pod nào lắng nghe trên port được yêu cầu, thì vấn đề đặt ra là "Làm sao tạo một Pod lắng nghe trên port đó để gắn netpol vào và kiểm thử policy?". Bạn không thể chỉ chạy một Pod nginx vì nó luôn lắng nghe ở port 80. Có thể cấu hình khác đi, nhưng như vậy phải mount một ConfigMap chứa file cấu hình nginx với port mới vào Pod – quá rắc rối trong điều kiện phòng thi!
 
-## Simple server
+## Server đơn giản
 
-Fortunately, the default Python distribution contains a simple server that can have its port number configured from the command line, meaning you can run it imperatively. Let's say the network policy requires blocking all but port 9000. We can start a server test pod to listen on 9000 like so. If it's a different port, just put that port number instead of 9000.
+May mắn là bản phân phối Python mặc định có sẵn một server đơn giản, có thể cấu hình port ngay trên dòng lệnh, nghĩa là bạn có thể chạy nó theo kiểu imperative. Giả sử network policy yêu cầu chặn mọi port trừ port 9000. Ta có thể khởi chạy một Pod server thử nghiệm lắng nghe trên port 9000 như sau. Nếu là port khác, chỉ cần thay 9000 bằng port đó.
 
 ```
 kubectl run server --image python --command -- python -m http.server 9000
 ```
 
-Get the pod's IP address. Using the IP for curl test is quicker than typing out the DNS name.
+Lấy địa chỉ IP của Pod. Dùng IP để test bằng curl sẽ nhanh hơn gõ tên DNS.
 
 ```
 controlplane $ k get pod server -o wide
@@ -18,78 +18,82 @@ NAME     READY   STATUS    RESTARTS   AGE   IP             NODE     NOMINATED NO
 server   1/1     Running   0          16s   192.168.1.12   node01   <none>           <none>
 ```
 
-Now run a pod with `curl` in and test connection to the server
+Giờ chạy một Pod có `curl` và kiểm tra kết nối tới server
 
 ```
 curl 192.168.1.12:9000
 ```
 
-You should get a response.
+Bạn sẽ nhận được phản hồi.
 
-Now apply your network policy and test again.
+Bây giờ apply network policy của bạn và kiểm tra lại.
 
-## Slightly more advanced server
+> 💡 **Bổ sung:** Network Policy chọn Pod theo **label**, nên hãy gắn label phù hợp cho Pod server (`kubectl run` tự gắn `run=server`; có thể thêm `--labels=app=db` nếu policy chọn theo label khác). Image `python` khá nặng, lần đầu pull có thể mất một lúc – chờ Pod `Running` rồi mới test. Ngoài ra, có thể thêm `--port 9000` vào lệnh `kubectl run` để khai báo containerPort (không bắt buộc để server hoạt động).
 
-Perhaps you want to set up several pods and have each serve a specific message on a configurable port so you can tell them apart by their reponses. We can do that with a pod and a config map for each. The pod is the same each time - except for giving it a unique name and mounting the appropriate config map.
+## Server nâng cao hơn một chút
 
-The following simulates a pod found in one of the Killer.sh network policy questions.
+Có thể bạn muốn dựng nhiều Pod, mỗi Pod trả về một thông điệp riêng trên một port tùy chỉnh để phân biệt chúng qua phản hồi. Ta có thể làm vậy với một Pod và một ConfigMap cho mỗi server. Pod giống hệt nhau mỗi lần – chỉ khác ở tên riêng và ConfigMap được mount.
 
-1. Create a config map which contains a shell script to run the server on a given port with a given message
+Ví dụ sau mô phỏng một Pod xuất hiện trong một câu hỏi network policy của Killer.sh.
+
+1. Tạo một ConfigMap chứa shell script để chạy server trên một port với một thông điệp cho trước
 
     ```yaml
     apiVersion: v1
     kind: ConfigMap
     metadata:
-    name: db1-configmap
+      name: db1-configmap
     data:
-    entrypoint.sh: |
-      #!/bin/sh
-      echo "database one" > index.htm  #<- Message
-      port=1111                        #<- Server Port
-      # Run server...
-      while true
-      do
-          { echo -ne "HTTP/1.0 200 OK\r\nContent-Length: $(wc -c <index.htm)\r\n\r\n"; cat index.htm; } | nc -l -p $port
-      done
+      entrypoint.sh: |
+        #!/bin/sh
+        echo "database one" > index.htm  #<- Thông điệp trả về
+        port=1111                        #<- Port của server
+        # Chạy server...
+        while true
+        do
+            { echo -ne "HTTP/1.0 200 OK\r\nContent-Length: $(wc -c <index.htm)\r\n\r\n"; cat index.htm; } | nc -l -p $port
+        done
     ```
-1. Create a pod that mounts the configmap and runs the script it contains
+1. Tạo một Pod mount ConfigMap và chạy script bên trong nó
 
     ```yaml
     apiVersion: v1
     kind: Pod
     metadata:
-    name: db-1
+      name: db-1
     spec:
-    containers:
-    - name: server
+      containers:
+      - name: server
         image: alpine:3.19
         command:
         - /opt/server/entrypoint.sh
         volumeMounts:
         - name: script
-        mountPath: /opt/server
-    volumes:
-    - name: script
+          mountPath: /opt/server
+      volumes:
+      - name: script
         configMap:
-        name: db1-configmap
-        defaultMode: 0755
+          name: db1-configmap
+          defaultMode: 0755
     ```
-1. Get the pod's IP address. Using the IP for curl test is quicker than typing out the DNS name.
+
+    > 💡 **Ghi chú:** Thụt lề YAML của hai manifest trên trong bản gốc bị lệch (ví dụ `name` không nằm dưới `metadata`) nên không apply được; bản dịch đã sửa lại thụt lề, nội dung giữ nguyên. `defaultMode: 0755` cần thiết để file script có quyền thực thi. Image `alpine` có sẵn `nc` (của busybox) nên không phải cài thêm.
+1. Lấy địa chỉ IP của Pod. Dùng IP để test bằng curl sẽ nhanh hơn gõ tên DNS.
 
     ```
-    controlplane $ k get pod server -o wide
+    controlplane $ k get pod db-1 -o wide
     NAME     READY   STATUS    RESTARTS   AGE   IP             NODE     NOMINATED NODE   READINESS GATES
     db-1     1/1     Running   0          16s   192.168.1.12   node01   <none>           <none>
     ```
 
-1. Now run a pod with `curl` in and test connection to the server
+1. Giờ chạy một Pod có `curl` và kiểm tra kết nối tới server
 
     ```
     curl 192.168.1.12:1111
     ```
 
 
-## See also
+## Xem thêm
 
-See also [client for testing](./02-client--for-testing-network-things.md)
+Xem thêm [client để kiểm thử](./02-client--for-testing-network-things.md)
 

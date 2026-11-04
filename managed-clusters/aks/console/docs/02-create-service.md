@@ -1,7 +1,9 @@
-# Create the Service
+# Tạo Service
 
-From the Azure portal dashboard, select **Kubernetes Services** or search for it in the search bar.
+Từ dashboard của Azure portal, chọn **Kubernetes Services** hoặc tìm kiếm nó trên thanh tìm kiếm.
 
 ![image](../images/02-services.png)
 
-Next: [Create Cluster](./03-create-cluster.md)
+> 💡 **Bổ sung:** Ở đây "Service" là dịch vụ Azure (Azure Kubernetes Service - AKS), không phải đối tượng `Service` của Kubernetes.
+
+Tiếp theo: [Tạo Cluster](./03-create-cluster.md)

@@ -1,23 +1,24 @@
-# Section Introduction
+# Giới thiệu phần Networking
 
-  - Take me to [Introduction](https://kodekloud.com/topic/networking-introduction/)
+  - Đi tới [Introduction](https://kodekloud.com/topic/networking-introduction/)
 
-In this section, we will take a look at **Networking Section**
+Trong phần này, chúng ta sẽ tìm hiểu **phần Networking (mạng)**
 
-- Prerequisite 
-    - Switching, Routing and Gateways
+- Kiến thức nền tảng (Prerequisite)
+    - Switching, Routing và Gateways
       - Switching
       - Routing
       - Default Gateway
     - DNS
-      - DNS Configuration on Linux
+      - Cấu hình DNS trên Linux
     - CoreDNS
     - Network Namespace
     - Docker Networking
     - CNI
 - Cluster Networking
 - Pod Networking
-- CNI in Kubernetes
+- CNI trong Kubernetes
 - CoreDNS
 - Ingress
- 
+
+> 💡 **Bổ sung:** Theo curriculum CKA hiện tại (từ 2025), mảng "Services & Networking" chiếm khoảng 20% số điểm, gồm: hiểu kết nối giữa các Pod, định nghĩa và áp dụng Network Policy, sử dụng Service (ClusterIP, NodePort, LoadBalancer) và endpoint, dùng **Gateway API** để quản lý ingress traffic, biết cách dùng Ingress Controller và Ingress resource, hiểu và dùng CoreDNS. Ngoài ra phần "Cluster Architecture, Installation & Configuration" có yêu cầu hiểu các extension interface (CNI, CSI, CRI). Hãy chú ý thêm Gateway API và Network Policy vì đây là phần mới/được nhấn mạnh trong đề thi.

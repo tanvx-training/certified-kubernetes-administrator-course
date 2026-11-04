@@ -1,31 +1,32 @@
-# Join the worker nodes
+# Join các worker node
 
-1.  SSH to `node01`
-1.  Become root
+1.  SSH tới `node01`
+1.  Chuyển sang root
 
     ```bash
     sudo -i
     ```
 
-1. Paste the join command for *worker* nodes that was output by `kubeadm init` on `controlplane01`
+1. Dán lệnh join dành cho các node *worker* mà `kubeadm init` đã in ra trên `controlplane01`
 
-1. Return to `student-node`
+1. Quay về `student-node`
 
     ```
     exit
     exit
     ```
 
-1. Repeat the steps 2, 3 and 4 on `node02`
+1. Lặp lại các bước 2, 3 và 4 trên `node02`
 
-1. Now you should be back on `student-node`. Check all nodes are up
+1. Giờ bạn đã quay lại `student-node`. Kiểm tra tất cả các node đã lên
 
     ```bash
     kubectl get nodes -o wide
     ```
 
-    There should now be 3 control nodes and 2 workers.
+    Lúc này sẽ có 3 control node và 2 worker.
 
-Next: [Test](./08-test.md)</br>
-Prev: [Control Plane Setup](./06-controlplane.md)
+    > 💡 **Bổ sung:** Các node control plane do kubeadm tạo có taint `node-role.kubernetes.io/control-plane:NoSchedule`, nên Pod ứng dụng thông thường sẽ chỉ được schedule lên `node01` và `node02`.
 
+Tiếp theo: [Kiểm thử](./08-test.md)</br>
+Trước đó: [Thiết lập Control Plane](./06-controlplane.md)

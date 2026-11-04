@@ -1,14 +1,14 @@
-# Using PVC in PODs
+# Sử dụng PVC trong Pod
 
-  - Take me the [Lecture](https://kodekloud.com/topic/using-pvc-in-pods/)
+  - Xem [Bài giảng](https://kodekloud.com/topic/using-pvc-in-pods/)
 
-In this section, we will take a look at **Using PVC in PODs**
+Trong phần này, chúng ta sẽ tìm hiểu cách **sử dụng PVC trong Pod**
 
-- In this case, Pods access storage by using the claim as a volume. Persistent Volume Claim must exist in the same namespace as the Pod using the claim. 
-- The cluster finds the claim in the Pod's namespace and uses it to get the Persistent Volume backing the claim. The volume is then mounted to the host and into the Pod.
-- Persistent Volume is a cluster-scoped and Persistent Volume Claim is a namespace-scoped.
+- Pod truy cập lưu trữ bằng cách dùng claim như một volume. Persistent Volume Claim phải nằm trong **cùng namespace** với Pod sử dụng claim đó.
+- Cluster tìm claim trong namespace của Pod và dùng nó để lấy Persistent Volume đứng sau claim. Sau đó volume được mount lên host và vào bên trong Pod.
+- Persistent Volume là tài nguyên cấp cluster (cluster-scoped), còn Persistent Volume Claim là tài nguyên cấp namespace (namespace-scoped).
 
-#### Create the Persistent Volume
+#### Tạo Persistent Volume
 
 ```
 pv-definition.yaml
@@ -29,7 +29,7 @@ $ kubectl create -f pv-definition.yaml
 
 ```
 
-#### Create the Persistent Volume Claim
+#### Tạo Persistent Volume Claim
 
 ```
 pvc-definition.yaml
@@ -48,7 +48,7 @@ spec:
 $ kubectl create -f pvc-definition.yaml
 ```
 
-#### Create a Pod
+#### Tạo Pod
 
 ```
 pod-definition.yaml
@@ -74,14 +74,16 @@ $ kubectl create -f pod-definition.yaml
 
 ```
 
-#### List the Pod,Persistent Volume and Persistent Volume Claim
+#### Liệt kê Pod, Persistent Volume và Persistent Volume Claim
 
 ```
 $ kubectl get pod,pvc,pv
 
 ```
 
-#### References Docs
+> 💡 **Bổ sung:** Với Deployment hay ReplicaSet, cách dùng PVC cũng tương tự: khai báo `persistentVolumeClaim.claimName` trong phần `volumes` của Pod template. Lưu ý với Deployment nhiều replica và PVC kiểu `ReadWriteOnce`, các Pod nằm trên node khác sẽ không mount được volume; StatefulSet dùng `volumeClaimTemplates` để tạo PVC riêng cho từng Pod. Nếu Pod ở trạng thái `Pending`/`ContainerCreating` vì volume, hãy kiểm tra `kubectl describe pod <tên>` và trạng thái PVC (phải là `Bound`).
+
+#### Tài liệu tham khảo
 
 - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes
 

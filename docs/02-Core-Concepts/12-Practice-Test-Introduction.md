@@ -1,5 +1,4 @@
-# Practice Test Introduction
+# Giới thiệu Practice Test
 
-In this section, we will take a look at practice test demo.
-- Take me to [Video Tutorial](https://kodekloud.com/topic/practice-test-introduction-2/)
-
+Trong phần này, chúng ta sẽ xem demo về cách làm practice test.
+- Xem [Video hướng dẫn](https://kodekloud.com/topic/practice-test-introduction-2/)

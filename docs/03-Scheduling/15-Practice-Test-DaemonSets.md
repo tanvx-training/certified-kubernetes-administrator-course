@@ -1,8 +1,8 @@
-# Practice Test - DaemonSets
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-daemonsets/)
+# Practice Test - DaemonSets (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-daemonsets/)
   
-Solutions to practice test daemonsets
-- Run the command kubectl get daemonsets --all-namespaces
+Lời giải cho bài practice test DaemonSets
+- Chạy lệnh kubectl get daemonsets --all-namespaces (đếm số DaemonSet trong tất cả namespace)
   
   <details>
 
@@ -11,7 +11,7 @@ Solutions to practice test daemonsets
   ```
   </details>
 
-- Run the command kubectl get daemonsets --all-namespaces
+- Chạy lệnh kubectl get daemonsets --all-namespaces (xác định namespace chứa các DaemonSet)
 
   <details>
 
@@ -20,7 +20,7 @@ Solutions to practice test daemonsets
   ```
   </details>
 
-- Run the command kubectl get all --all-namespaces and identify the types
+- Chạy lệnh kubectl get all --all-namespaces và xác định loại của các đối tượng
 
   <details>
 
@@ -29,7 +29,7 @@ Solutions to practice test daemonsets
   ```
   </details>
 
-- Run the command kubectl describe daemonset kube-proxy --namespace=kube-system
+- Chạy lệnh kubectl describe daemonset kube-proxy --namespace=kube-system (xem số Pod đang chạy/được lập lịch trên các node)
 
   <details>
 
@@ -38,7 +38,7 @@ Solutions to practice test daemonsets
   ```
   </details>
 
-- Run the command kubectl describe daemonset kube-flannel-ds-amd64 --namespace=kube-system
+- Chạy lệnh kubectl describe daemonset kube-flannel-ds-amd64 --namespace=kube-system (xem image mà DaemonSet đang dùng). Lưu ý: ở các phiên bản lab mới, DaemonSet của Flannel có thể tên là `kube-flannel-ds` và nằm trong namespace `kube-flannel`.
 
   <details>
 
@@ -47,7 +47,7 @@ Solutions to practice test daemonsets
   ```
   </details>
     
-- Create a daemonset
+- Tạo DaemonSet
 
   <details>
 
@@ -73,17 +73,19 @@ Solutions to practice test daemonsets
           name: elasticsearch
       spec:
         tolerations:
-        # this toleration is to have the daemonset runnable on master nodes
-        # remove it if your masters can't run pods
+        # toleration này cho phép DaemonSet chạy trên master node
+        # xóa đi nếu master node của bạn không được chạy Pod
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
         containers:
         - name: elasticsearch
           image: k8s.gcr.io/fluentd-elasticsearch:1.20
   ```
+
+  > 💡 **Cập nhật:** Từ Kubernetes v1.24, taint của control plane là `node-role.kubernetes.io/control-plane` (key `node-role.kubernetes.io/master` không còn được dùng), nên toleration nên đổi thành `key: node-role.kubernetes.io/control-plane`. Registry `k8s.gcr.io` đã bị đóng băng, image chính thức hiện được phân phối qua `registry.k8s.io`. Luôn dùng đúng image mà đề bài yêu cầu (lab thường dùng `registry.k8s.io/fluentd-elasticsearch:1.20`).
   </details>
 
-- To create the daemonset and list the daemonsets and pods
+- Tạo DaemonSet, sau đó liệt kê các DaemonSet và Pod
 
   <details>
 

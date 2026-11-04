@@ -1,10 +1,10 @@
-# Practice Test CKA Ingress 2
+# Practice Test CKA Ingress 2 (Bài thực hành Ingress 2)
 
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-cka-ingress-networking-2/)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-cka-ingress-networking-2/)
 
-#### Solution 
+#### Lời giải
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
@@ -13,16 +13,18 @@
       ```
      </details>
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
       ```
       kubectl create namespace ingress-nginx
       ```
+
+      > 💡 Thông thường Ingress Controller được triển khai trong namespace riêng (`ingress-nginx`) để tách biệt với ứng dụng.
      </details>
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
@@ -31,7 +33,7 @@
       ```
      </details>
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
@@ -39,9 +41,11 @@
       kubectl create serviceaccount ingress-nginx --namespace ingress-nginx
       kubectl create serviceaccount ingress-nginx-admission --namespace ingress-nginx
       ```
+
+      > 💡 ServiceAccount `ingress-nginx` dùng cho controller; `ingress-nginx-admission` dùng cho Job tạo certificate của admission webhook (webhook này kiểm tra tính hợp lệ của Ingress trước khi lưu).
      </details>
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
@@ -52,23 +56,23 @@
       ```
      </details>
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
-     Fix the issues
+     Sửa các lỗi
 
      ```
      vi /root/ingress-controller.yaml
      ```
 
-     There is a `Deployment` and a `Service` in this file, There are issues with each.
+     File này chứa một `Deployment` và một `Service`, cả hai đều có lỗi.
 
 
-     1. The `namespace` of the deployment is incorrect.
-     1. indentation error at line 74 (use `:set nu` in vi to turn on line numbers)
-     1. `name` of the service is incorrect
-     1. `nodeport` on service is incorrect case. Should be `nodePort`
+     1. `namespace` của Deployment bị sai.
+     1. Lỗi thụt lề ở dòng 74 (dùng `:set nu` trong vi để bật hiển thị số dòng).
+     1. `name` của Service bị sai.
+     1. `nodeport` trong Service viết sai chữ hoa/thường, đúng phải là `nodePort`.
 
       ```yaml
       apiVersion: apps/v1
@@ -217,7 +221,7 @@
         ```
      </details>
   
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
@@ -238,24 +242,27 @@
               pathType: Prefix
               backend:
                 service:
-                name: wear-service
-                port: 
-                  number: 8080
+                  name: wear-service
+                  port:
+                    number: 8080
             - path: /watch
               pathType: Prefix
               backend:
                 service:
-                name: video-service
-                port:
-                  number: 8080
+                  name: video-service
+                  port:
+                    number: 8080
       ```
+
+      > 💡 **Ghi chú:** Bản gốc thụt lề sai ở `name`/`port` (nằm ngang hàng với `service:`), YAML đó sẽ bị API server từ chối; đoạn trên đã được sửa để `name` và `port` nằm bên trong `service`. Ingress phải nằm trong namespace `app-space` (cùng namespace với các Service backend). Có thể tạo nhanh bằng:
+      `kubectl create ingress ingress-wear-watch -n app-space --rule="/wear*=wear-service:8080" --rule="/watch*=video-service:8080" --annotation nginx.ingress.kubernetes.io/rewrite-target=/ --annotation nginx.ingress.kubernetes.io/ssl-redirect=false`
      </details>
 
-  1. Check the Solution
+  1. Xem lời giải
 
      <details>
 
-      Press the `Ingress` button above the terminal pane. 
-      In the browser tab that opens, try appending `/wear` or `/watch` after `labs.kodekloud.com` in the browser address bar.
+      Bấm nút `Ingress` phía trên khung terminal.
+      Trong tab trình duyệt vừa mở, thử thêm `/wear` hoặc `/watch` vào sau `labs.kodekloud.com` trên thanh địa chỉ.
 
      </details>

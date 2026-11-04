@@ -1,8 +1,8 @@
-# Practice Test - Image Security
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-image-security/)
+# Practice Test - Image Security (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-image-security/)
 
-Solutions to the practice test - Image Security
-- We have an application running on our cluster. Let us explore it first. What image is the application using?
+Lời giải cho bài practice test - Image Security
+- Chúng ta có một ứng dụng đang chạy trên cluster. Hãy tìm hiểu nó trước. Ứng dụng đang dùng image nào?
 
   <details>
   
@@ -12,7 +12,7 @@ Solutions to the practice test - Image Security
   
   </details>
   
-- Use the kubectl edit deployment command to edit the image name to myprivateregistry.com:5000/nginx:alpine
+- Dùng lệnh kubectl edit deployment để sửa tên image thành myprivateregistry.com:5000/nginx:alpine
 
   <details>
   
@@ -21,8 +21,10 @@ Solutions to the practice test - Image Security
   ```
   
   </details>
+
+  > 💡 Cách nhanh hơn: `kubectl set image deployment/web nginx=myprivateregistry.com:5000/nginx:alpine` (thay `nginx` bằng đúng tên container trong Deployment, xem bằng `kubectl get deploy web -o wide`).
   
-- Run the command kubectl get pods command and check the status of the pods
+- Chạy lệnh kubectl get pods và kiểm tra trạng thái các Pod
 
   <details>
   
@@ -31,8 +33,10 @@ Solutions to the practice test - Image Security
   ```
   
   </details>
+
+  > 💡 Pod mới sẽ ở trạng thái `ErrImagePull`/`ImagePullBackOff` vì chưa có thông tin đăng nhập vào private registry. Xem chi tiết lỗi bằng `kubectl describe pod <tên-pod>`.
   
-- Run command kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
+- Chạy lệnh kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
   
   <details>
   
@@ -42,7 +46,7 @@ Solutions to the practice test - Image Security
   
   </details>
   
-- Edit deployment using kubectl edit deploy web command and add imagePullSecrets section. Use private-reg-cred
+- Sửa Deployment bằng lệnh kubectl edit deploy web và thêm mục imagePullSecrets. Dùng Secret private-reg-cred
   
   <details>
   
@@ -51,8 +55,10 @@ Solutions to the practice test - Image Security
   ```
   
   </details>
+
+  > 💡 Thêm vào `spec.template.spec` (ngang hàng với `containers`) khối `imagePullSecrets:` với một phần tử `- name: private-reg-cred`. Sau khi lưu, Deployment sẽ tự rollout tạo Pod mới.
   
-- Check the status of PODs. Wait for them to be running. You have now successfully configured a Deployment to pull images from the private registry
+- Kiểm tra trạng thái các Pod. Chờ đến khi chúng ở trạng thái Running. Bạn đã cấu hình thành công Deployment để pull image từ private registry
   
   <details>
   

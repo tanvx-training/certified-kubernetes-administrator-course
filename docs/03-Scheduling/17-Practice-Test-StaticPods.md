@@ -1,8 +1,8 @@
-# Practice Test - Static Pods
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-static-pods/)
+# Practice Test - Static Pods (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-static-pods/)
   
-Solutions to the practice test - static pods
-- Run the command kubectl get pods --all-namespaces and look for those with -controlplane appended in the name
+Lời giải cho bài practice test - Static Pods
+- Chạy lệnh kubectl get pods --all-namespaces và tìm những Pod có hậu tố -controlplane trong tên (đó là các static Pod trên node controlplane)
   
   <details>
 
@@ -11,7 +11,7 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-- Which of the below components is NOT deployed as a static pod?
+- Thành phần nào dưới đây KHÔNG được triển khai dưới dạng static Pod? (Gợi ý: `coredns` là Deployment, `kube-proxy` là DaemonSet; còn `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, `etcd` là static Pod.)
 
   <details>
 
@@ -20,7 +20,7 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-- Which of the below components is NOT deployed as a static POD?
+- Thành phần nào dưới đây KHÔNG được triển khai dưới dạng static Pod?
 
   <details>
 
@@ -29,7 +29,7 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-- Run the kubectl get pods --all-namespaces -o wide
+- Chạy lệnh kubectl get pods --all-namespaces -o wide (xem các static Pod nằm trên node nào)
 
   <details>
 
@@ -38,7 +38,7 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-- Run the command ps -aux | grep kubelet and identify the config file - --config=/var/lib/kubelet/config.yaml. Then checkin the config file for staticPdPath.
+- Chạy lệnh ps -aux | grep kubelet và xác định file config - --config=/var/lib/kubelet/config.yaml. Sau đó tìm trường staticPodPath trong file config này.
 
   <details>
 
@@ -47,11 +47,11 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-- Count the number of files under /etc/kubernetes/manifests
+- Đếm số file trong thư mục /etc/kubernetes/manifests
 
-- Check the image defined in the /etc/kubernetes/manifests/kube-apiserver.yaml manifest file.
+- Kiểm tra image được khai báo trong file manifest /etc/kubernetes/manifests/kube-apiserver.yaml.
 
-- Create a pod definition file in the manifests folder. Use command kubectl run --restart=Never --image=busybox static-busybox --dry-run -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+- Tạo file định nghĩa Pod trong thư mục manifests. Dùng lệnh kubectl run --restart=Never --image=busybox static-busybox --dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml (lưu ý: `--dry-run` không kèm giá trị đã deprecated, phải dùng `--dry-run=client`)
   
   <details>
 
@@ -60,7 +60,7 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-- Simply edit the static pod definition file and save it 
+- Chỉ cần sửa file định nghĩa static Pod và lưu lại (kubelet sẽ tự tạo lại Pod với image mới)
 
   <details>
 
@@ -69,17 +69,19 @@ Solutions to the practice test - static pods
   ```
   </details>
 
-  OR
+  HOẶC
   
   <details>
 
+  Chạy lại lệnh với image tag mới (đã sửa lỗi thiếu dấu cách trước `--dry-run=client` ở bản gốc):
+
   ```
   Run the command with updated image tag:
-  kubectl run --restart=Never --image=busybox:1.28.4 static-busybox--dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+  kubectl run --restart=Never --image=busybox:1.28.4 static-busybox --dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
   ```
   </details>
 
-- Identify which node the static pod is created on, ssh to the node and delete the pod definition file. If you don't know theIP of the node, run the kubectl get nodes -o wide command and identify the IP. Then SSH to the node using that IP. For static pod manifest path look at the file /var/lib/kubelet/config.yaml on node01
+- Xác định static Pod được tạo trên node nào, SSH vào node đó và xóa file định nghĩa Pod. Nếu không biết IP của node, chạy lệnh kubectl get nodes -o wide để lấy IP, rồi SSH vào node bằng IP đó (hoặc `ssh node01`). Để tìm đường dẫn manifest của static Pod, xem file /var/lib/kubelet/config.yaml trên node01.
 
   <details>
 
@@ -90,4 +92,6 @@ Solutions to the practice test - static pods
   $ grep staticPodPath /var/lib/kubelet/config.yaml
   $ node01 $ rm -rf /etc/just-to-mess-with-you/greenbox.yaml
   ```
+
+  Lưu ý: `<ip address of pod>` ở trên thực chất là IP của **node** (không phải Pod). Sau khi xóa file, quay lại controlplane và chạy `kubectl get pods` để xác nhận Pod `static-greenbox` đã biến mất. Nếu chỉ dùng `kubectl delete pod`, Pod sẽ được kubelet tạo lại ngay vì file manifest vẫn còn.
   </details>

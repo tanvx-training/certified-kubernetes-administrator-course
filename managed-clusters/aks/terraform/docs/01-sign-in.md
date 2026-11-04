@@ -1,23 +1,23 @@
-# Provision lab
+# Khởi tạo lab
 
-Last updated: March 2024
+Cập nhật lần cuối: tháng 3 năm 2024
 
-### Provision your Azure playground lab
+### Khởi tạo Azure playground lab
 
-Prerequisite: Pro (or higher) KodeKloud subscription
+Điều kiện tiên quyết: có gói đăng ký KodeKloud Pro (hoặc cao hơn)
 
-Access this link: https://kodekloud.com/playgrounds/playground-azure and click `START LAB` to request a new Azure Playground instance. After a few seconds, you will receive your temporary Azure portal account like this:
+Truy cập link sau: https://kodekloud.com/playgrounds/playground-azure và bấm `START LAB` để yêu cầu một Azure Playground instance mới. Sau vài giây, bạn sẽ nhận được một tài khoản Azure portal tạm thời như sau:
 
 ![image](../../images/01-sign-in.png)
 
-Copy the **Console Link** by pressing the copy button to the right of it, paste to your browser and sign in with the given credentials. If you are given a choice of accounts like in the following dialog, select **Use another account**
+Sao chép **Console Link** bằng cách bấm nút copy ở bên phải của nó, dán vào trình duyệt và đăng nhập bằng thông tin đăng nhập được cung cấp. Nếu bạn được yêu cầu chọn tài khoản như trong hộp thoại dưới đây, hãy chọn **Use another account**
 
-1. At the sign-in box, copy the `Username` and paste it there, then press Next.
-1. Now copy the `Password` and paste it as Temporary Access Pass.
+1. Tại ô đăng nhập, sao chép `Username` và dán vào đó, sau đó bấm Next.
+1. Bây giờ sao chép `Password` và dán vào ô Temporary Access Pass.
 
-Skip all the usage and Start a Tour stuff, unless you're interested in that.
+Bỏ qua các phần giới thiệu cách sử dụng và Start a Tour, trừ khi bạn quan tâm tới chúng.
 
-Next: [Open a Cloud Shell](./02-cloudshell.md)
+Tiếp theo: [Mở Cloud Shell](./02-cloudshell.md)
 
 
 

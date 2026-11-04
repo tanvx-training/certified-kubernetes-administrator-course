@@ -1,8 +1,8 @@
-# Practice Test - Certificates API
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-certificates-api/)
+# Practice Test - Certificates API (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-certificates-api/)
 
-Solutions to the practice test - certificate API
-- A new member akshay joined our team. He requires access to our cluster. The Certificate Signing Request is at the /root location.
+Lời giải cho bài practice test - Certificates API
+- Một thành viên mới tên akshay vừa gia nhập team và cần quyền truy cập vào cluster. File Certificate Signing Request nằm ở thư mục /root.
 
   <details>
   ```
@@ -10,15 +10,17 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- View the answer at /var/answers/akshay-csr.yaml
+- Xem đáp án tại /var/answers/akshay-csr.yaml
   
   <details>
   ```
   $ kubectl create -f /var/answers/akshay-csr.yaml
   ```
   </details>
+
+> 💡 **Bổ sung:** Nếu phải tự viết file YAML, dùng `apiVersion: certificates.k8s.io/v1`, `signerName: kubernetes.io/kube-apiserver-client`, `usages: [client auth]`, và trường `request` lấy từ `cat /root/akshay.csr | base64 -w 0`.
   
-- Run the command kubectl get csr
+- Chạy lệnh kubectl get csr (kiểm tra trạng thái của CSR vừa tạo — lúc này là `Pending`)
   
   <details>
   ```
@@ -26,7 +28,7 @@ Solutions to the practice test - certificate API
   ```
   </details>
     
-- Run the command kubectl certificate approve akshay
+- Chạy lệnh kubectl certificate approve akshay
   
   <details>
   ```
@@ -34,7 +36,7 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- Run the command kubectl get csr
+- Chạy lệnh kubectl get csr (trạng thái chuyển thành `Approved,Issued`)
   
   <details>
   ```
@@ -42,7 +44,7 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- Run the command kubectl get csr and look at the Requestor column
+- Chạy lệnh kubectl get csr và xem cột Requestor
   
   <details>
   ```
@@ -50,9 +52,9 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- The other CSR's are requested during the TLS Bootstrapping process. We will discuss more about it later in the course when we go through the TLS bootstrap section.
+- Các CSR còn lại được tạo ra trong quá trình TLS Bootstrapping (khi kubelet trên node tham gia cluster và xin certificate). Chúng ta sẽ tìm hiểu kỹ hơn ở phần TLS bootstrap sau trong khóa học.
 
-- Run the command kubectl get csr
+- Chạy lệnh kubectl get csr
   
   <details>
   ```
@@ -60,7 +62,7 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- Run the command kubectl get csr agent-smith -o yaml
+- Chạy lệnh kubectl get csr agent-smith -o yaml (xem trường `groups` — request này xin quyền `system:masters`, tức là toàn quyền admin, nên không được duyệt)
   
   <details>
   ```
@@ -68,7 +70,7 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- Run the command kubectl certificate deny agent-smith
+- Chạy lệnh kubectl certificate deny agent-smith
   
   <details>
   ```
@@ -76,7 +78,7 @@ Solutions to the practice test - certificate API
   ```
   </details>
   
-- Run the command kubectl delete csr agent-smith
+- Chạy lệnh kubectl delete csr agent-smith
   
   <details>
   ```

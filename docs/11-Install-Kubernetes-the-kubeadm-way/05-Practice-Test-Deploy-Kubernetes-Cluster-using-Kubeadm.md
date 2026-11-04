@@ -1,24 +1,26 @@
-# Practice Test - Install kubernetes cluster using kubeadm tool
+# Practice Test - Cài đặt Kubernetes cluster bằng công cụ kubeadm (Bài thực hành)
 
-If you want to build your own cluster, check these out:
+Nếu bạn muốn tự dựng cluster của riêng mình, hãy xem các hướng dẫn sau:
 
 * [Kubeadm Clusters](../../kubeadm-clusters/)
 * [Managed Clusters](../../managed-clusters/)
 
-# Solutions for KodeKloud lab practice test - Install Using Kubeadm
+# Lời giải cho bài practice test của KodeKloud - Cài đặt bằng Kubeadm
 
-- Take me to [Practice Test](https://kodekloud.com/topic/practice-test-deploy-a-kubernetes-cluster-using-kubeadm/)
+- Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-deploy-a-kubernetes-cluster-using-kubeadm/)
 
-In this practice lab, the container runtime (containerd) has already been installed. We only need to focus on the remaining node configuration, that is the kernel module and parameter settings, and installing the kubeadm cluster itself.
+Trong lab thực hành này, container runtime (containerd) đã được cài sẵn. Chúng ta chỉ cần tập trung vào phần cấu hình node còn lại, tức là thiết lập kernel module và tham số kernel, rồi cài đặt cluster bằng kubeadm.
 
-Note that the video preceding this lab is out of date and is still using docker container driver and an out of date Kubernetes version. The lab is up to date.
+Lưu ý rằng video trước lab này đã lỗi thời: video vẫn dùng container driver docker và một phiên bản Kubernetes cũ. Còn lab thì đã được cập nhật.
 
   1.  <details>
-      <summary>Install the kubeadm, kubelet and kubectl packages at exact version 1.24.0 on the controlplane and node01.</summary>
+      <summary>Cài các gói kubeadm, kubelet và kubectl với đúng phiên bản 1.24.0 trên controlplane và node01.</summary>
 
-      Run the following two steps on both `controlplane` and `node01` (use `ssh node01` to get to the worker node).
+      > 💡 **Lưu ý:** Phiên bản được yêu cầu có thể thay đổi theo từng lần cập nhật lab (lời giải bên dưới dùng 1.27.0). Hãy đọc kỹ đề và thay `v1.27` cũng như `1.27.0-2.1` cho đúng phiên bản được yêu cầu.
 
-      1. Configure kernel parameters
+      Chạy hai bước sau trên cả `controlplane` và `node01` (dùng `ssh node01` để vào worker node).
+
+      1. Cấu hình các tham số kernel
 
          ```
          cat <<EOF | tee /etc/modules-load.d/k8s.conf
@@ -35,9 +37,9 @@ Note that the video preceding this lab is out of date and is still using docker 
          sysctl --system
          ```
 
-      2. Install kubernetes binaries
+      2. Cài các binary của Kubernetes
 
-         Note that because you are logged into the lab as `root`, the use of `sudo` is not required.
+         Lưu ý: vì bạn đăng nhập vào lab với quyền `root` nên không cần dùng `sudo`.
 
          ```
          apt-get update
@@ -51,61 +53,67 @@ Note that the video preceding this lab is out of date and is still using docker 
 
          apt-get update
 
-         # To see the new version labels
+         # Xem các nhãn phiên bản mới
          apt-cache madison kubeadm
 
          apt-get install -y kubelet=1.27.0-2.1 kubeadm=1.27.0-2.1 kubectl=1.27.0-2.1
 
          apt-mark hold kubelet kubeadm kubectl
          ```
+
+         > 💡 **Bổ sung:** Repository `pkgs.k8s.io` tách riêng theo từng minor version (`v1.27`, `v1.28`...), nên URL phải khớp với phiên bản cần cài. Lệnh `apt-cache madison kubeadm` liệt kê các phiên bản có sẵn kèm hậu tố gói (vd `1.27.0-2.1`), và bạn phải dùng đúng chuỗi đó khi chạy `apt-get install`. Nếu thư mục `/etc/apt/keyrings` đã tồn tại thì lệnh `mkdir` sẽ báo lỗi, có thể bỏ qua lỗi này hoặc dùng `mkdir -p`.
       </details>
 
   1.  <details>
-      <summary>What is the version of kubelet installed?</summary>
+      <summary>Phiên bản kubelet đã được cài là bao nhiêu?</summary>
 
       ```
       kubelet version
       ```
 
-      You will get an error message because the cluster isn't installed yet, but it will tell you its version.
+      Bạn sẽ nhận được thông báo lỗi vì cluster chưa được cài đặt, nhưng thông báo đó vẫn cho biết phiên bản của kubelet.
+
+      > 💡 **Bổ sung:** Cách chuẩn hơn là `kubelet --version`, lệnh này in trực tiếp phiên bản (vd `Kubernetes v1.27.0`) mà không báo lỗi.
 
       </details>
 
   1.  <details>
-      <summary>How many nodes are part of kubernetes cluster currently?</summary>
+      <summary>Hiện có bao nhiêu node thuộc Kubernetes cluster?</summary>
 
-      Are you able to run `kubectl get nodes`? Have you run `kubeadm init` yet?
+      Bạn có chạy được `kubectl get nodes` không? Bạn đã chạy `kubeadm init` chưa?
 
-      No, so there are no nodes.
+      Chưa, nên chưa có node nào.
 
       > 0
 
       </details>
 
-  1.  Information only
+  1.  Chỉ mang tính thông tin
 
   1.  <details>
-      <summary>Initialize Control Plane Node (Master Node).</summary>
+      <summary>Khởi tạo Control Plane Node (Master Node).</summary>
 
-      Use the following options:
+      Sử dụng các tùy chọn sau:
 
-      * `apiserver-advertise-address` - Use the IP address allocated to eth0 on the controlplane node
-      * `apiserver-cert-extra-sans`` - Set it to `controlplane`
-      * `pod-network-cidr` - Set to `10.244.0.0/16`
+      * `apiserver-advertise-address` - Dùng địa chỉ IP được cấp cho eth0 trên controlplane node
+      * `apiserver-cert-extra-sans` - Đặt giá trị là `controlplane`
+      * `pod-network-cidr` - Đặt giá trị là `10.244.0.0/16`
 
-      Once done, set up the default kubeconfig file and wait for node to be part of the cluster.
+      Sau khi xong, thiết lập file kubeconfig mặc định và chờ node trở thành một phần của cluster.
 
-      1. Get the IP address of the `eth0` adapter of the controlplane
+      1. Lấy địa chỉ IP của adapter `eth0` trên controlplane
 
          ```
          ifconfig eth0
          ```
 
-         Take the value printed for `inet` in the output. This will be something like the following, but can be different each time you run the lab.
+         Lấy giá trị in ra ở mục `inet` trong output. Giá trị sẽ có dạng như bên dưới, nhưng có thể khác nhau mỗi lần bạn chạy lab.
+
+         > 💡 **Bổ sung:** Nếu không có `ifconfig`, dùng `ip addr show eth0` hoặc `ip -4 addr show eth0`.
 
          > 10.13.26.9
 
-      1. Run `kubeadm init` using the IP address determined above for `--apiserver-advertise-address`
+      1. Chạy `kubeadm init`, dùng địa chỉ IP đã lấy ở trên cho `--apiserver-advertise-address`
 
          ```
          kubeadm init \
@@ -114,50 +122,56 @@ Note that the video preceding this lab is out of date and is still using docker 
             --pod-network-cidr=10.244.0.0/16
          ```
 
-      1. Set up the default kubeconfig file
+      1. Thiết lập file kubeconfig mặc định
 
          ```
          mkdir ~/.kube
          cp /etc/kubernetes/admin.conf ~/.kube/config
          ```
 
+         > 💡 **Bổ sung:** Với quyền `root`, cũng có thể dùng `export KUBECONFIG=/etc/kubernetes/admin.conf` thay vì copy file. Kiểm tra bằng `kubectl get nodes`, lúc này controlplane sẽ ở trạng thái `NotReady` vì chưa có CNI.
+
       </details>
 
   1.  <details>
-      <summary>Generate a kubeadm join token</summary>
+      <summary>Tạo một kubeadm join token</summary>
 
-      You can copy the join command output by `kubeadm init` which looks like
+      Bạn có thể copy lệnh join do `kubeadm init` in ra, có dạng như sau
 
       ```
       kubeadm join 10.13.26.9:6443 --token cpwmot.ldhadf3cokvyyx60 \
         --discovery-token-ca-cert-hash sha256:ea3a622922315b14b289c6efd7b1a77cbf81d29f6ddaf03472c304b6d3228c06
       ```
 
-      Note it will be different each time you do the lab.
+      Lưu ý rằng lệnh này sẽ khác nhau mỗi lần bạn làm lab.
+
+      > 💡 **Bổ sung:** Nếu không còn output của `kubeadm init`, chạy `kubeadm token create --print-join-command` trên controlplane để tạo token mới kèm đầy đủ lệnh join. `--discovery-token-ca-cert-hash` là hash SHA-256 của public key của CA, giúp worker node xác minh rằng nó đang kết nối đúng tới control plane.
 
       </details>
 
   1.  <details>
-      <summary>Join node01 to the cluster using the join token</summary>
+      <summary>Join node01 vào cluster bằng join token</summary>
 
-      1. `ssh` onto `node01` and paste the join command from above
-      1. Return to the controlplane node
-      1. Run `kubectl get nodes`. Note that both nodes are `NotReady`. This is OK because we have not yet installed networking.
+      1. `ssh` vào `node01` và dán lệnh join ở trên
+      1. Quay lại controlplane node
+      1. Chạy `kubectl get nodes`. Lưu ý rằng cả hai node đều ở trạng thái `NotReady`. Điều này là bình thường vì chúng ta chưa cài networking.
 
       </details>
 
   1.  <details>
-      <summary>Install a Network Plugin</summary>
+      <summary>Cài một Network Plugin</summary>
 
-      1. Install flannel
+      1. Cài flannel
 
-         Click on "Install Netowrk Plugin" tab above the terminal. Find the link to Flannel in the page that comes up
+         Nhấn vào tab "Install Network Plugin" phía trên terminal, rồi tìm link tới Flannel trong trang hiện ra.
 
          ```
          kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
          ```
 
-      2. Wait 30 seconds or so, then run `kubectl get nodes`. Nodes should now be ready.
+      2. Chờ khoảng 30 giây, sau đó chạy `kubectl get nodes`. Lúc này các node sẽ ở trạng thái Ready.
+
+         > 💡 **Bổ sung:** Flannel mặc định dùng dải Pod `10.244.0.0/16`, đó là lý do dùng `--pod-network-cidr=10.244.0.0/16` khi chạy `kubeadm init`. Nếu dùng dải khác, phải sửa `net-conf.json` trong ConfigMap của manifest Flannel cho khớp. Có thể theo dõi Pod của Flannel bằng `kubectl get pods -n kube-flannel` và CoreDNS bằng `kubectl get pods -n kube-system`.
 
       </details>
 

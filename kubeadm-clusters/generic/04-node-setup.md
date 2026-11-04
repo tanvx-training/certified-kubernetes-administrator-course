@@ -1,17 +1,17 @@
-# Node Setup
+# Chuẩn bị node (Node Setup)
 
-**NOTE**<br/>
-In this and the following sections, you will notice some groups of shell commands are enclosed in `{ }`. This is so that you can copy the block from github with the github copy button and paste to your node terminals. Without this, a group of several commands with `sudo` will stop after the first command and you will probably miss this fact, leading to things not working further on.
+**LƯU Ý**<br/>
+Trong phần này và các phần tiếp theo, bạn sẽ thấy một số nhóm lệnh shell được bao trong cặp `{ }`. Mục đích là để bạn có thể copy cả khối lệnh từ github bằng nút copy của github rồi dán vào terminal của node. Nếu không có cặp ngoặc này, khi dán một nhóm nhiều lệnh có `sudo`, shell sẽ dừng lại sau lệnh đầu tiên và nhiều khả năng bạn không để ý, dẫn tới các bước sau không hoạt động.
 
 ---
 
-In this section we will configure the nodes and install prerequisites such as the container runtime (`containerd`).
+Trong phần này, chúng ta sẽ cấu hình các node và cài đặt các thành phần cần thiết như container runtime (`containerd`).
 
-Perform all the following steps on each of `controlplane`, `node01` and `node02`. For this section you can run the commands simultaneously on all nodes if using iterm2 broadcast (Mac) or tmux (others).
+Thực hiện tất cả các bước dưới đây trên từng node `controlplane`, `node01` và `node02`. Ở phần này, bạn có thể chạy lệnh đồng thời trên tất cả các node nếu dùng tính năng broadcast của iterm2 (Mac) hoặc tmux (các hệ điều hành khác).
 
 [//]: # (host:controlplane-node01-node02)
 
-1. Update the apt package index and install packages needed to use the Kubernetes apt repository:
+1. Cập nhật danh mục gói apt và cài các gói cần thiết để sử dụng apt repository của Kubernetes:
     ```bash
     {
         sudo apt-get update
@@ -19,7 +19,7 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
     }
     ```
 
-1. Set up the required kernel modules and make them persistent
+1. Nạp các kernel module cần thiết và cấu hình để chúng được nạp lại sau mỗi lần khởi động
     ```bash
     {
         cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
@@ -32,7 +32,9 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
     }
     ```
 
-1.  Set the required kernel parameters and make them persistent
+    > 💡 **Bổ sung:** `overlay` là module cho filesystem OverlayFS mà containerd dùng để xếp chồng các layer của image thành filesystem của container. `br_netfilter` cho phép traffic đi qua Linux bridge (nơi các Pod được nối vào) được xử lý bởi iptables — thiếu module này thì các rule iptables do kube-proxy tạo cho Service sẽ không áp dụng với traffic giữa các Pod trên cùng node. File trong `/etc/modules-load.d/` giúp module được nạp tự động khi reboot, còn `modprobe` nạp ngay lập tức.
+
+1.  Thiết lập các tham số kernel cần thiết và lưu cố định
     ```bash
     {
         cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
@@ -45,14 +47,18 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
     }
     ```
 
-1. Install the container runtime
+    > 💡 **Bổ sung:** `net.bridge.bridge-nf-call-iptables`/`ip6tables = 1` bật việc chuyển traffic của bridge qua iptables (chỉ có hiệu lực khi đã nạp `br_netfilter`). `net.ipv4.ip_forward = 1` cho phép node chuyển tiếp (route) gói tin giữa các network interface — bắt buộc để Pod trên node này nói chuyện được với Pod trên node khác và với Service. Nếu thiếu `ip_forward`, `kubeadm init`/`kubeadm join` sẽ báo lỗi ở bước preflight check. `sysctl --system` nạp lại toàn bộ cấu hình trong `/etc/sysctl.d/` mà không cần reboot.
+
+1. Cài đặt container runtime
     ```bash
     sudo apt-get install -y containerd
     ```
 
-1.  Configure the container runtime to use systemd Cgroups. This part is the bit many students miss, and if not done results in a controlplane that comes up, then all the pods start crashlooping. `kubectl` will also fail with an error like `The connection to the server x.x.x.x:6443 was refused - did you specify the right host or port?`
+1.  Cấu hình container runtime sử dụng systemd Cgroups. Đây là bước rất nhiều học viên bỏ sót, và nếu không làm thì control plane sẽ khởi động lên được, nhưng sau đó tất cả các Pod bắt đầu bị crashloop. `kubectl` cũng sẽ lỗi với thông báo kiểu `The connection to the server x.x.x.x:6443 was refused - did you specify the right host or port?`
 
-    1. Create default configuration
+    > 💡 **Bổ sung:** cgroup là cơ chế của Linux để giới hạn tài nguyên (CPU, memory) cho tiến trình. Trên hệ điều hành dùng systemd, kubelet (từ v1.22 kubeadm mặc định cấu hình kubelet dùng `cgroupDriver: systemd`) và container runtime **phải dùng cùng một cgroup driver**. Nếu containerd vẫn dùng driver mặc định `cgroupfs` trong khi kubelet dùng `systemd`, sẽ có hai trình quản lý cgroup cùng lúc, gây xung đột tài nguyên — các static Pod của control plane (kube-apiserver, etcd...) liên tục bị khởi động lại. Lệnh `sed` dưới đây đổi `SystemdCgroup = false` thành `true` trong cấu hình runc của containerd.
+
+    1. Tạo file cấu hình mặc định
 
         ```bash
         {
@@ -61,19 +67,19 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
         }
         ```
 
-    1.  Restart containerd
+    1.  Khởi động lại containerd
 
         ```bash
         sudo systemctl restart containerd
         ```
 
-1.  Determine latest version of Kubernetes and store in a shell variable
+1.  Xác định phiên bản Kubernetes mới nhất và lưu vào một biến shell
 
     ```bash
     KUBE_LATEST=$(curl -L -s https://dl.k8s.io/release/stable.txt | awk 'BEGIN { FS="." } { printf "%s.%s", $1, $2 }')
     ```
 
-1. Download the Kubernetes public signing key
+1. Tải signing key công khai của Kubernetes
     ```bash
     {
         sudo mkdir -p /etc/apt/keyrings
@@ -81,12 +87,14 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
     }
     ```
 
-1. Add the Kubernetes apt repository
+1. Thêm apt repository của Kubernetes
     ```bash
     echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${KUBE_LATEST}/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
     ```
 
-1. Update apt package index, install kubelet, kubeadm and kubectl, and pin their version
+    > 💡 **Bổ sung:** Repository `pkgs.k8s.io` được tổ chức theo từng minor version (vd `v1.31`). Repo cũ `apt.kubernetes.io`/`packages.cloud.google.com` đã ngừng hoạt động từ năm 2024. Vì mỗi repo chỉ chứa một minor version, khi upgrade cluster lên minor version mới (vd 1.31 → 1.32), bạn phải sửa file `/etc/apt/sources.list.d/kubernetes.list` sang repo của version mới trước rồi mới `apt-get update` — đây là điểm hay gặp trong bài upgrade của đề CKA.
+
+1. Cập nhật danh mục gói apt, cài kubelet, kubeadm và kubectl, rồi ghim (pin) phiên bản của chúng
     ```bash
     {
         sudo apt-get update
@@ -95,16 +103,20 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
     }
     ```
 
-1.  Configure `crictl` in case we need it to examine running containers
+    > 💡 **Bổ sung:** `apt-mark hold` ngăn các gói này bị nâng cấp ngoài ý muốn khi chạy `apt-get upgrade`. Việc upgrade Kubernetes phải được làm có kiểm soát theo đúng trình tự (control plane trước, worker sau), nên khi cần upgrade ta sẽ `apt-mark unhold`, cài version mới rồi `hold` lại.
+
+    > 💡 **Bổ sung — về swap:** Hướng dẫn này không có bước tắt swap vì các image VM dùng trong lab mặc định không bật swap. Theo truyền thống, kubelet không khởi động nếu node đang bật swap (preflight check của kubeadm sẽ báo lỗi), vì swap làm sai lệch việc tính toán memory requests/limits và hành vi OOM của Pod. Từ v1.28 kubelet đã hỗ trợ swap ở mức beta nhưng vẫn cần cấu hình riêng. Nếu môi trường của bạn có swap, hãy tắt nó trước khi chạy kubeadm: `sudo swapoff -a` và comment dòng swap trong `/etc/fstab` để không bị bật lại sau khi reboot. Kiểm tra bằng `free -h` hoặc `swapon --show`.
+
+1.  Cấu hình `crictl` để dùng khi cần kiểm tra các container đang chạy
     ```bash
     sudo crictl config \
         --set runtime-endpoint=unix:///run/containerd/containerd.sock \
         --set image-endpoint=unix:///run/containerd/containerd.sock
     ```
 
-1.  Prepare extra arguments for kubelet such that when it starts, it listens on the VM's primary network address and not any NAT one that may be present. This uses the predefined `PRIMARY_IP` environment variable discussed earlier
+1.  Chuẩn bị tham số bổ sung cho kubelet để khi khởi động, nó lắng nghe trên địa chỉ mạng chính của VM chứ không phải một địa chỉ NAT có thể tồn tại. Bước này dùng biến môi trường `PRIMARY_IP` đã được định nghĩa sẵn như đã nói ở phần trước.
 
-    Paste the following to the terminal
+    Dán đoạn sau vào terminal
 
     ```bash
     cat <<EOF | sudo tee /etc/default/kubelet
@@ -112,11 +124,11 @@ Perform all the following steps on each of `controlplane`, `node01` and `node02`
     EOF
     ```
 
-If you used tmux or iterm2 synchronized panes for this section, you should disable the synchronization now.
+    > 💡 **Bổ sung:** Với VirtualBox/Multipass, VM thường có nhiều network interface (vd một interface NAT để ra Internet có cùng IP trên mọi VM). Nếu kubelet tự chọn nhầm interface đó, `kubectl get nodes -o wide` sẽ hiện INTERNAL-IP sai và `kubectl logs`/`exec` tới Pod trên node đó sẽ lỗi. Vì vậy ta chỉ định rõ `--node-ip`.
 
-[Kubernetes Documentation Link](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+Nếu bạn đã dùng tính năng đồng bộ pane của tmux hoặc iterm2 cho phần này, hãy tắt đồng bộ ngay bây giờ.
 
-Next: [Control Plane setup](./05-controlplane.md)</br>
-Prev: Connectivity ([VirtualBox](../virtualbox/docs/03-connectivity.md)) ([Apple Silicon](../apple-silicon/docs/03-connectivity.md)) [AWS](../aws/docs/03-connectivity.md)
+[Link tài liệu Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
 
-
+Tiếp theo: [Thiết lập Control Plane](./05-controlplane.md)</br>
+Trước đó: Kết nối ([VirtualBox](../virtualbox/docs/03-connectivity.md)) ([Apple Silicon](../apple-silicon/docs/03-connectivity.md)) [AWS](../aws/docs/03-connectivity.md)

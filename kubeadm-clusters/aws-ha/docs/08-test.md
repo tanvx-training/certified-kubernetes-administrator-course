@@ -1,22 +1,22 @@
-## Create a test service
+## Tạo một Service để kiểm thử
 
-Run the following on `student-node`
+Chạy các lệnh sau trên `student-node`
 
-1.  Ensure all calico pods are running. They can take a while to initialise
+1.  Đảm bảo tất cả các Pod calico đang chạy. Chúng có thể mất một lúc để khởi tạo
 
     ```bash
     watch kubectl get pods -n calico-system
     ```
 
-    Press `CTRL-C` to exit watch when pods are stable
+    Nhấn `CTRL-C` để thoát watch khi các Pod đã ổn định
 
-1. All 5 nodes should now be ready:
+1. Lúc này cả 5 node phải ở trạng thái ready:
 
     ```
     kubectl get nodes
     ```
 
-1. Deploy and expose an nginx pod
+1. Deploy và expose một Pod nginx
 
     ```bash
     kubectl create deployment nginx --image nginx:alpine
@@ -29,24 +29,25 @@ Run the following on `student-node`
 
 [//]: # (command:kubectl wait deployment -n default nginx --for condition=Available=True --timeout=90s)
 
-2.  Hit the new service
+2.  Gọi tới Service mới
 
     ```bash
     curl http://node01:$PORT_NUMBER
     curl http://node02:$PORT_NUMBER
     ```
 
-    Both should return the nginx welcome message as HTML text.
+    Cả hai lệnh đều phải trả về trang chào mừng của nginx dưới dạng HTML.
 
-Congratulations! You now have a working HA kubeadm cluster.
+Chúc mừng! Bạn đã có một cluster kubeadm HA hoạt động.
 
-## Viewing service with a browser
+> 💡 **Bổ sung:** Để thử tính sẵn sàng cao, hãy SSH vào một control plane (vd `controlplane02`) và tắt nó (`sudo shutdown -h now`, hoặc stop instance trong EC2 console). Các lệnh `kubectl` từ `student-node` vẫn chạy bình thường vì HAProxy chuyển request sang hai control plane còn lại, và etcd vẫn đủ quorum (2/3).
 
-1. Refer to the outputs of the terraform run and get the IP address for either `node01` or `node02`. If you did not note these down, you can find the IP addresses from the [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:) by looking in the `Public IPv4 ...` column (scroll right if this column is not in view).
-1. Form a URL using the IP address (it will be different for you) and the NodePort number output from step 1 above, e.g.
+## Xem Service bằng trình duyệt
+
+1. Xem output của lần chạy terraform và lấy địa chỉ IP của `node01` hoặc `node02`. Nếu chưa ghi lại, bạn có thể tìm các địa chỉ IP trong [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:) ở cột `Public IPv4 ...` (cuộn sang phải nếu không thấy cột này).
+1. Ghép URL từ địa chỉ IP (của bạn sẽ khác) và số NodePort in ra ở bước 1 phía trên, ví dụ
 
     ```
     http://54.167.161.210:32182
     ```
-1. Paste URL to your browser
-
+1. Dán URL vào trình duyệt

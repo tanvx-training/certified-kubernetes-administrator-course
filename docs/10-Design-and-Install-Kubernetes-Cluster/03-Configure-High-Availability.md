@@ -1,3 +1,13 @@
-# Choosing a HA
+# Lựa chọn kiến trúc HA (High Availability - tính sẵn sàng cao)
 
-  - Take me to [Lecture](https://kodekloud.com/topic/configure-high-availability/)
+  - Xem [Bài giảng](https://kodekloud.com/topic/configure-high-availability/)
+
+> 💡 **Bổ sung:** Tóm tắt kiến trúc HA cho control plane:
+>
+> - **Vì sao cần HA:** nếu cluster chỉ có một master node và node đó gặp sự cố, các Pod đang chạy trên worker node vẫn tiếp tục chạy. Tuy nhiên, bạn không thể dùng `kubectl` (kube-apiserver không còn), Pod hỏng sẽ không được tạo lại (kube-controller-manager không còn) và Pod mới sẽ không được lên lịch (kube-scheduler không còn). HA loại bỏ điểm lỗi đơn (single point of failure) này bằng cách chạy nhiều master node.
+> - **kube-apiserver (active-active):** mọi instance kube-apiserver đều phục vụ request cùng lúc. Đặt một **load balancer** (HAProxy, nginx, keepalived + VIP, hoặc load balancer của cloud) phía trước, và trỏ `kubectl`, kubelet cùng các thành phần khác tới địa chỉ của load balancer. Với kubeadm, địa chỉ này được khai báo qua `--control-plane-endpoint` (hoặc trường `controlPlaneEndpoint` trong `ClusterConfiguration`).
+> - **kube-scheduler và kube-controller-manager (active-standby):** nếu nhiều instance cùng hoạt động thì chúng sẽ thực hiện trùng lặp công việc, nên chỉ một instance được hoạt động (leader) tại một thời điểm. Việc chọn leader (leader election) được bật mặc định qua `--leader-elect=true`. Leader giữ một **Lease** object trong namespace `kube-system`, và các instance khác sẽ giành quyền lãnh đạo nếu leader không gia hạn Lease đúng hạn (các tham số `--leader-elect-lease-duration`, `--leader-elect-renew-deadline`, `--leader-elect-retry-period`, mặc định lần lượt là 15s, 10s, 2s). Xem leader hiện tại: `kubectl -n kube-system get lease kube-scheduler kube-controller-manager`.
+> - **etcd:** có hai mô hình topology:
+>   - **Stacked etcd:** mỗi master node chạy luôn một member etcd. Mô hình này dễ cài đặt, cần ít máy hơn và là mặc định của kubeadm. Nhược điểm là khi mất một node thì mất cả một member etcd lẫn một instance control plane, nên rủi ro cao hơn.
+>   - **External etcd:** etcd chạy trên một cụm máy riêng, tách khỏi control plane. Mô hình này an toàn hơn vì sự cố control plane không ảnh hưởng tới etcd, nhưng cần nhiều máy hơn và cài đặt phức tạp hơn. kube-apiserver được trỏ tới các etcd server qua `--etcd-servers`, kèm các flag certificate `--etcd-cafile`, `--etcd-certfile`, `--etcd-keyfile`.
+> - Để triển khai HA control plane bằng kubeadm, chạy `kubeadm init --control-plane-endpoint <LB>:6443 --upload-certs` trên master node đầu tiên. Sau đó join các master node còn lại bằng `kubeadm join ... --control-plane --certificate-key <key>`.

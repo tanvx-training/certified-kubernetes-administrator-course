@@ -1,7 +1,7 @@
-# Cluster Maintenance Section Introduction
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/cluster-maintenance-section-introduction-2/)
+# Giới thiệu phần Bảo trì Cluster (Cluster Maintenance)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/cluster-maintenance-section-introduction-2/)
   
-In this section, we will take a look at cluster maintenance
-- Cluster Upgrade Process
-- Operating System Upgrades
-- Backup and Restore Methodologies
+Trong phần này, chúng ta sẽ tìm hiểu về việc bảo trì cluster, bao gồm:
+- Quy trình upgrade cluster
+- Upgrade hệ điều hành (OS) trên các node
+- Các phương pháp backup và restore

@@ -1,25 +1,25 @@
 # RBAC
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/role-based-access-controls/)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/role-based-access-controls/)
 
-In this section, we will take a look at RBAC
+Trong phần này, chúng ta sẽ tìm hiểu về RBAC (Role-Based Access Control — phân quyền dựa trên vai trò).
 
-## How do we create a role?
-- Each role has 3 sections
+## Làm thế nào để tạo một Role?
+- Mỗi rule trong Role gồm 3 phần:
   - apiGroups
   - resources
   - verbs
-- create the role with kubectl command
+- Tạo Role bằng lệnh kubectl:
   ```
   $ kubectl create -f developer-role.yaml
   ```
 
-## The next step is to link the user to that role.
-- For this we create another object called **`RoleBinding`**. This role binding object links a user object to a role.
-- create the role binding using kubectl command
+## Bước tiếp theo là liên kết user với Role đó.
+- Để làm việc này, ta tạo một object khác gọi là **`RoleBinding`**. Object RoleBinding liên kết một user với một Role.
+- Tạo RoleBinding bằng lệnh kubectl:
   ```
   $ kubectl create -f devuser-developer-binding.yaml
   ```
-- Also note that the roles and role bindings fall under the scope of namespace.
+- Lưu ý rằng Role và RoleBinding có phạm vi trong namespace (namespaced). Nếu không chỉ định `namespace` trong `metadata`, chúng sẽ được tạo trong namespace `default`.
   ```
   apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
@@ -48,52 +48,69 @@ In this section, we will take a look at RBAC
     apiGroup: rbac.authorization.k8s.io
   ```
   ![rbac1](../../images/rbac1.PNG)
+
+> ⚠️ **Lưu ý (sửa lỗi bản gốc):** Trong trường `resources`, tên resource phải viết thường, số nhiều — đúng như trong `kubectl api-resources`. Ví dụ trên ghi `"ConfigMap"` sẽ **không có tác dụng**, phải là `"configmaps"`. `apiGroups: [""]` là core API group (pods, configmaps, secrets, services...); với Deployment phải dùng `apiGroups: ["apps"]`.
+
+> 💡 **Bổ sung — tạo nhanh bằng lệnh imperative (rất nên dùng khi thi):**
+> - Tạo Role: `kubectl create role developer --verb=get,list,create,update,delete --resource=pods -n default`
+> - Thêm giới hạn theo tên: `kubectl create role developer --verb=get --resource=pods --resource-name=blue --resource-name=orange`
+> - Tạo RoleBinding: `kubectl create rolebinding devuser-developer-binding --role=developer --user=dev-user -n default`
+> - Gắn cho ServiceAccount: `--serviceaccount=<namespace>:<sa-name>`; cho group: `--group=<group>`.
+> - Có thể thêm `--dry-run=client -o yaml > file.yaml` để sinh YAML rồi chỉnh sửa.
   
 
-## View RBAC
+## Xem thông tin RBAC
   
-- To list roles
+- Liệt kê các Role:
   ```
   $ kubectl get roles
   ```
-- To list rolebindings
+- Liệt kê các RoleBinding:
   ```
   $ kubectl get rolebindings
   ```
-- To describe role 
+- Xem chi tiết Role:
   ```
   $ kubectl describe role developer
   ```
   
   ![rbac2](../../images/rbac2.PNG)
     
-- To describe rolebinding
+- Xem chi tiết RoleBinding:
   ```
   $ kubectl describe rolebinding devuser-developer-binding
   ```
   
   ![rbac3](../../images/rbac3.PNG)
   
-#### What if you being a user would like to see if you have access to a particular resource in the cluster.
-## Check Access
+#### Nếu bạn là một user và muốn kiểm tra xem mình có quyền truy cập một resource cụ thể trong cluster hay không?
+## Kiểm tra quyền truy cập
 
-- You can use the kubectl auth command
+- Bạn có thể dùng lệnh `kubectl auth can-i`:
   ```
   $ kubectl auth can-i create deployments
   $ kubectl auth can-i delete nodes
   ```
+- Là admin, bạn có thể giả lập (impersonate) một user khác để kiểm tra quyền của họ bằng `--as`:
   ```
   $ kubectl auth can-i create deployments --as dev-user
   $ kubectl auth can-i create pods --as dev-user
   ```
+- Kiểm tra trong một namespace cụ thể:
   ```
   $ kubectl auth can-i create pods --as dev-user --namespace test
   ```
   
   ![rbac5](../../images/rbac5.PNG)
+
+> 💡 **Bổ sung:**
+> - Lệnh trả về `yes` hoặc `no`.
+> - Kiểm tra quyền của ServiceAccount: `kubectl auth can-i list pods --as=system:serviceaccount:<namespace>:<sa-name>`.
+> - Liệt kê toàn bộ quyền của một user trong namespace: `kubectl auth can-i --list --as dev-user -n default`.
+> - Lệnh `--as` hoạt động được vì admin có quyền `impersonate`. Bạn cũng có thể chạy thử lệnh thật dưới danh nghĩa user đó, ví dụ `kubectl get pods --as dev-user`.
   
 ## Resource Names
-- Note on resource names we just saw how you can provide access to users for resources like pods within the namespace.
+- Ở trên ta đã thấy cách cấp quyền cho user trên các resource như Pod trong namespace. Bạn còn có thể giới hạn chặt hơn nữa: chỉ cho phép truy cập một số Pod cụ thể theo tên bằng trường `resourceNames`.
   ```
   apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
@@ -106,7 +123,9 @@ In this section, we will take a look at RBAC
     resourceNames: ["blue", "orange"]
   ```  
   ![rbac4](../../images/rbac4.PNG)
+
+> 💡 **Bổ sung:** `resourceNames` không áp dụng được cho verb `create` (lúc tạo object, tên chưa được biết khi phân quyền), và với `list`/`watch` chỉ có tác dụng khi request có chọn đúng một object theo tên (field selector `metadata.name`). Vì vậy trong ví dụ trên, request `create` Pod sẽ **không khớp** rule này (request create không mang tên object nên không khớp `resourceNames`) — muốn cho phép tạo Pod, hãy tách `create` sang một rule riêng không có `resourceNames`.
   
-#### K8s Reference Docs
+#### Tài liệu tham khảo K8s
 - https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 - https://kubernetes.io/docs/reference/access-authn-authz/rbac/#command-line-utilities

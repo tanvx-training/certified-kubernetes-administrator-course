@@ -1,45 +1,49 @@
-# Practice Test - Services
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-services/)
+# Practice Test - Services (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-services/)
 
-#### Solutions to Practice test - Services
+#### Lời giải cho bài Practice Test - Services
 
 1. <details>
-    <summary>How many Services exist on the system?</summary>
+    <summary>Có bao nhiêu Service trên hệ thống?</summary>
 
     ```
     kubectl get services
     ```
 
-    Count the number of services (if any)
+    Đếm số Service hiển thị (nếu có).
     </details>
 
 
-1. Information only
+1. Chỉ là thông tin (không cần trả lời)
 
 1.  <details>
-    <summary>What is the type of the default kubernetes service?</summary>
+    <summary>Service mặc định kubernetes thuộc loại (type) nào?</summary>
 
-    From the output of Q1, examine the `TYPE` column.
+    Từ output của câu 1, xem cột `TYPE`.
+
+    > 💡 **Bổ sung:** Service `kubernetes` trong namespace `default` được tạo tự động, có loại `ClusterIP`. Nó trỏ tới kube-apiserver, giúp các Pod trong cluster gọi được API server qua địa chỉ `kubernetes.default.svc`.
     </details>
 
 1.  <details>
-    <summary>What is the targetPort configured on the kubernetes service?</summary>
+    <summary>targetPort được cấu hình trên Service kubernetes là bao nhiêu?</summary>
 
     ```
     $ kubectl describe service | grep TargetPort
     ```
+
+    > 💡 **Bổ sung:** Ở đây chỉ có một Service nên lệnh trên đủ dùng; khi có nhiều Service, hãy chỉ rõ tên: `kubectl describe service kubernetes`. Giá trị thường là `6443/TCP` - port mà kube-apiserver lắng nghe.
     </details>
 
 1.  <details>
-    <summary>How many labels are configured on the kubernetes service?</summary>
+    <summary>Có bao nhiêu label được cấu hình trên Service kubernetes?</summary>
 
     ```
     kubectl describe service
     ```
 
-    ...and look for labels.
+    ...rồi tìm phần labels.
 
-    --- OR ---
+    --- HOẶC ---
 
     ```
     kubectl get service --show-labels
@@ -48,65 +52,69 @@
     </details>
 
 1.  <details>
-    <summary>How many Endpoints are attached on the kubernetes service?</summary>
+    <summary>Có bao nhiêu Endpoint được gắn vào Service kubernetes?</summary>
 
     ```
     kubectl describe service
     ```
 
-    ...and look for endpoints
+    ...rồi tìm phần endpoints.
+
+    > 💡 **Bổ sung:** Endpoint là địa chỉ `IP:port` của các đích mà Service chuyển traffic tới (với Service thông thường là các Pod khớp selector). Nếu một Service có `Endpoints: <none>`, gần như chắc chắn selector không khớp label của Pod nào - đây là lỗi rất hay gặp khi troubleshooting. Có thể xem nhanh bằng `kubectl get endpoints` hoặc `kubectl get endpointslices`.
 
     </details>
 
 1.  <details>
-    <summary>How many Deployments exist on the system now?</summary>
+    <summary>Bây giờ có bao nhiêu Deployment trên hệ thống?</summary>
 
     ```
     kubectl get deployment
     ```
 
-    Count the deployments (if any)
+    Đếm số Deployment hiển thị (nếu có).
     </details>
 
 1.  <details>
-    <summary>What is the image used to create the pods in the deployment?</summary>
+    <summary>Image nào được dùng để tạo các Pod trong Deployment?</summary>
 
     ```
     kubectl describe deployment
     ```
 
-    Look in the containers section.
+    Xem trong mục containers.
 
-    --- OR ---
+    --- HOẶC ---
 
     ```
     kubectl get deployment -o wide
     ```
 
-    Look in the `IMAGES` column
+    Xem cột `IMAGES`.
 
     </details>
 
 1.  <details>
-    <summary>Are you able to access the Web App UI?</summary>
+    <summary>Bạn có truy cập được giao diện Web App không?</summary>
 
-    Try to access the Web Application UI using the tab simple-webapp-ui above the terminal.
+    Thử truy cập giao diện Web Application bằng tab simple-webapp-ui phía trên terminal.
 
     </details>
 
 1.  <details>
-    <summary>Create a new service to access the web application using the service-definition-1.yaml file.</summary>
+    <summary>Tạo một Service mới để truy cập ứng dụng web, sử dụng file service-definition-1.yaml.</summary>
 
     ```
     vi service-definition-1.yaml
     ```
 
-    Fill in the values as directed, save and exit.
+    Điền các giá trị theo yêu cầu, lưu và thoát.
 
     ```
     kubectl create -f service-definition-1.yaml
     ```
+
+    > 💡 **Bổ sung:** Các giá trị cần điền thường gồm `type: NodePort`, `port`, `targetPort`, `nodePort` và `selector` khớp với label của Pod trong Deployment (xem bằng `kubectl get pods --show-labels` hoặc `kubectl describe deployment`). Sau khi tạo, kiểm tra bằng `kubectl describe service <tên-service>` để chắc chắn mục `Endpoints` không rỗng.
     </details>
 
-1. Test newly deployed service.
+1. Kiểm tra Service vừa được deploy.
 

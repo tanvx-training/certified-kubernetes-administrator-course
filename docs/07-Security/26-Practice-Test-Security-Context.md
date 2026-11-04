@@ -1,8 +1,8 @@
-# Practice Test - Security Context
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-security-contexts/)
+# Practice Test - Security Context (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-security-contexts/)
   
-Solutions to practice test - security context
-- Run the command 'kubectl exec ubuntu-sleeper -- whoami' and count the number of pods.
+Lời giải cho bài practice test - Security Context
+- Chạy lệnh 'kubectl exec ubuntu-sleeper -- whoami' để xem user đang chạy tiến trình trong Pod (bản gốc ghi nhầm là "đếm số Pod").
 
   <details>
   
@@ -11,8 +11,10 @@ Solutions to practice test - security context
   ```
   
   </details>
+
+  > 💡 Cú pháp `kubectl exec <pod> <lệnh>` (không có `--`) đã bị loại bỏ trong các bản kubectl mới; hãy dùng `kubectl exec ubuntu-sleeper -- whoami`. Kết quả là `root`.
   
-- Set a security context to run as user 1010.
+- Đặt security context để chạy với user 1010.
 
   <details>
   
@@ -26,12 +28,14 @@ Solutions to practice test - security context
   ```
   
   </details>
-  
-- The User ID defined in the securityContext of the container overrides the User ID in the POD.
- 
-- The User ID defined in the securityContext of the POD is carried over to all the PODs in the container.
 
-- Run kubectl exec -it ubuntu-sleeper -- date -s '19 APR 2012 11:14:00'
+  > 💡 Có thể gộp bước xóa và tạo lại: sau khi sửa file, chạy `kubectl replace --force -f ubuntu.yaml`.
+  
+- User ID được khai báo trong securityContext của container sẽ ghi đè User ID khai báo ở cấp Pod.
+ 
+- User ID được khai báo trong securityContext của Pod sẽ được áp dụng cho tất cả container trong Pod (bản gốc viết nhầm "all the PODs in the container").
+
+- Chạy lệnh kubectl exec -it ubuntu-sleeper -- date -s '19 APR 2012 11:14:00'
   
   <details>
   
@@ -40,8 +44,10 @@ Solutions to practice test - security context
   ```
   
   </details>
+
+  > 💡 Lệnh sẽ thất bại (`Operation not permitted`) vì container mặc định không có capability `SYS_TIME`, kể cả khi chạy bằng root.
   
-- Add SYS_TIME capability to the container's securityContext
+- Thêm capability SYS_TIME vào securityContext của container
   
   <details>
   
@@ -60,8 +66,10 @@ Solutions to practice test - security context
   ```
   
   </details>
+
+  > 💡 Lưu ý: `capabilities` phải đặt trong securityContext **của container** (`spec.containers[].securityContext`), không phải ở cấp Pod.
   
- - Now try to run the below command in the pod to set the date. If the security capability was added correctly, it should work. If it doesn't make sure you changed the user back to root.
+ - Bây giờ hãy chạy lệnh dưới đây trong Pod để đặt ngày giờ. Nếu capability đã được thêm đúng, lệnh sẽ chạy thành công. Nếu không, hãy chắc chắn rằng bạn đã đổi user về lại root.
   
    <details>
   

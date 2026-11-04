@@ -1,20 +1,25 @@
-# Practice Test - Storage Class
+# Practice Test - Storage Class (Bài thực hành)
   
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-storage-class-2/)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-storage-class-2/)
 
-#### Solution
+#### Lời giải
 
-  1. Check the Solution
+Lời giải cho bài practice test.
+
+  1. Xem lời giải
 
      <details>
 
       ```
       0
       ```
+
+     > 💡 Dùng `kubectl get sc` để đếm số StorageClass trong cluster.
+
     
      </details>
 
-  2. Check the Solution
+  2. Xem lời giải
 
      <details>
 
@@ -23,25 +28,31 @@
       ```
      </details>
  
-  3. Check the Solution
+  3. Xem lời giải
 
      <details>
 
       ```
       local-storage
       ```
+
+     > 💡 StorageClass dùng `kubernetes.io/no-provisioner` không hỗ trợ dynamic provisioning — PV phải được tạo thủ công.
+
      </details>
 
-  4. Check the Solution
+  4. Xem lời giải
     
      <details>
 
       ```
       WaitForFirstConsumer
       ```
+
+     > 💡 Xem cột VOLUMEBINDINGMODE trong `kubectl get sc`.
+
       </details>
 
-  5. Check the Solution
+  5. Xem lời giải
 
      <details>
 
@@ -49,18 +60,24 @@
       portworx-volume
       ```
 
+     > 💡 Xem cột PROVISIONER trong `kubectl get sc` (ở đây là `kubernetes.io/portworx-volume`).
+
+
      </details>
 
-  6. Check the Solution
+  6. Xem lời giải
 
      <details>
 
       ```
       NO
       ```
+
+     > 💡 StorageClass `local-storage` không có provisioner thực sự (`kubernetes.io/no-provisioner`) nên không thể cấp phát động.
+
      </details>
 
-  7. Check the Solution
+  7. Xem lời giải
 
      <details>
 
@@ -77,18 +94,24 @@
             storage: 500Mi
         storageClassName: local-storage
       ```
+
+     > 💡 Trường `storageClassName` phải khớp với StorageClass của PV có sẵn thì PVC mới bind được.
+
      </details>
 
-  8. Check the Solution
+  8. Xem lời giải
 
      <details>
 
       ```
       Pending
       ```
+
+     > 💡 Kiểm tra lý do bằng `kubectl describe pvc local-pvc` — phần Events sẽ ghi `waiting for first consumer to be created before binding`.
+
      </details>
 
-  9. Check the Solution
+  9. Xem lời giải
 
      <details>
 
@@ -97,7 +120,7 @@
       ```
      </details>
 
-  10. Check the Solution
+  10. Xem lời giải
 
       <details>
  
@@ -106,7 +129,7 @@
        ```
       </details>
 
-  11. Check the Solution
+  11. Xem lời giải
 
       <details>
  
@@ -129,9 +152,12 @@
              persistentVolumeClaim:
                claimName: local-pvc
        ```
+
+      > 💡 Sau khi Pod `nginx` được tạo và schedule, PVC `local-pvc` sẽ chuyển sang `Bound`.
+
       </details>
 
-  12. Check the Solution
+  12. Xem lời giải
 
       <details>
  

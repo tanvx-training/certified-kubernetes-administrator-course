@@ -1,22 +1,25 @@
-# Pre-requisite Network Namespaces
+# Kiến thức nền tảng: Network Namespaces
 
-  - Take me to [Lecture](https://kodekloud.com/topic/prerequsite-network-namespaces/)
+  - Đi tới [Lecture](https://kodekloud.com/topic/prerequsite-network-namespaces/)
 
-In this section, we will take a look at **Network Namespaces**
+Trong phần này, chúng ta sẽ tìm hiểu **Network Namespaces**
 
+> 💡 **Bổ sung:** Namespace là cơ chế của Linux kernel để cô lập tài nguyên cho một nhóm process. Có nhiều loại namespace: PID, network, mount, UTS, IPC, user, cgroup. Container (và Pod trong Kubernetes) thực chất là các process chạy trong những namespace riêng. Network namespace cho mỗi container một "ngăn xếp mạng" riêng: interface, bảng định tuyến, bảng ARP, rule iptables riêng — tách biệt hoàn toàn với host.
 
 ## Process Namespace
 
-> On the container
+> Bên trong container
 ```
 $ ps aux      
 ```
 
-> On the host
+> Trên host
 ```
 $ ps aux 
 
 ```
+
+> 💡 **Bổ sung:** Bên trong container, `ps aux` chỉ thấy process của chính container đó (process chính có PID 1). Trên host, `ps aux` thấy được cùng process ấy nhưng với một PID khác — vì host nhìn thấy tất cả namespace.
 
 ## Network Namespace
 
@@ -28,28 +31,30 @@ $ route
 $ arp
 ```
 
-## Create Network Namespace
+> 💡 **Bổ sung:** Host có interface, routing table và ARP table riêng. Khi tạo container, ta tạo một network namespace cho nó để container không thấy được các thông tin mạng này của host.
+
+## Tạo Network Namespace
 
 ```
 $ ip netns add red
 
 $ ip netns add blue
 ```
-- List the network namespace
+- Liệt kê các network namespace
 
 ```
 $ ip netns
 ```
 
-## Exec in Network Namespace
+## Chạy lệnh bên trong Network Namespace
 
-- List the interfaces on the host
+- Liệt kê các interface trên host
 
 ```
 $ ip link
 ```
 
-- Exec inside the network namespace
+- Chạy lệnh bên trong network namespace
 
 ```
 $ ip netns exec red ip link
@@ -60,16 +65,18 @@ $ ip netns exec blue ip link
 1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
 ```
-- You can try with other options as well. Both works the same.
+- Bạn cũng có thể dùng tùy chọn `-n`. Hai cách cho kết quả như nhau.
 ```
 $ ip -n red link
 1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
 ```
 
-## ARP and Routing Table
+> 💡 **Bổ sung:** Trong namespace mới tạo chỉ có interface loopback `lo` (và đang DOWN), không thấy `eth0` hay các interface khác của host.
 
-> On the host
+## ARP và Routing Table
+
+> Trên host
 ```
 $ arp
 Address                  HWtype  HWaddress           Flags Mask            Iface
@@ -77,7 +84,7 @@ Address                  HWtype  HWaddress           Flags Mask            Iface
 172.17.0.55              ether   02:42:ac:11:00:37   C                     ens3
 ```
 
-> On the Network Namespace
+> Trong network namespace
 ```
 $ ip netns exec red arp
 Address                  HWtype  HWaddress           Flags Mask            Iface
@@ -86,12 +93,12 @@ $ ip netns exec blue arp
 Address                  HWtype  HWaddress           Flags Mask            Iface
 ```
 
-> On the host 
+> Trên host 
 ```
 $ route
 ```
 
-> On the Network Namespace
+> Trong network namespace
 ```
 $ ip netns exec red route
 Kernel IP routing table
@@ -102,35 +109,37 @@ Kernel IP routing table
 Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 ```
 
-## Virtual Cable
+## Cáp ảo (Virtual Cable)
 
-- To create a virtual cable
+- Tạo một cáp ảo (cặp veth)
 ```
 $ ip link add veth-red type veth peer name veth-blue
 ```
 
-- To attach with the network namespaces
+> 💡 **Bổ sung:** `veth` (virtual ethernet) luôn được tạo theo cặp, hoạt động như một sợi cáp có hai đầu: gói tin đi vào đầu này sẽ đi ra ở đầu kia. Đây chính là cách CNI plugin nối network namespace của Pod với host.
+
+- Gắn mỗi đầu cáp vào một network namespace
 ```
 $ ip link set veth-red netns red
 
 $ ip link set veth-blue netns blue
 ```
 
-- To add an IP address
+- Gán địa chỉ IP
 ```
 $ ip -n red addr add 192.168.15.1/24 dev veth-red
 
 $ ip -n blue addr add 192.168.15.2/24 dev veth-blue
 ```
 
-- To turn it up `ns` interfaces
+- Bật (up) các interface trong namespace
 ```
 $ ip -n red link set veth-red up
 
 $ ip -n blue link set veth-blue up
 ```
 
-- Check the reachability 
+- Kiểm tra kết nối
 ```
 $ ip netns exec red ping 192.168.15.2
 PING 192.168.15.2 (192.168.15.2) 56(84) bytes of data.
@@ -147,12 +156,12 @@ Address                  HWtype  HWaddress           Flags Mask            Iface
 
 ```
 
-- Delete the link.
+- Xóa link (xóa một đầu thì đầu kia của cặp veth cũng tự động bị xóa).
 ```
 $ ip -n red link del veth-red
 ```
 
-> On the host
+> Trên host
 ```
 # Not available
 $ arp
@@ -163,36 +172,40 @@ Address                  HWtype  HWaddress           Flags Mask            Iface
 172.17.0.75              ether   02:42:ac:11:00:4b   C                     ens3
 ```
 
+> 💡 **Bổ sung:** Host không hề biết về các entry ARP của namespace `red`/`blue` — mỗi namespace có bảng ARP riêng.
+
 ## Linux Bridge
 
-- Create a network namespace
+> 💡 **Bổ sung:** Nối trực tiếp từng cặp namespace bằng veth không mở rộng được khi có nhiều namespace. Giải pháp là tạo một switch ảo (Linux bridge) trên host và nối tất cả namespace vào đó — giống như Docker với `docker0` hay CNI plugin `bridge` với `cni0`.
+
+- Tạo network namespace
 
 ```
 $ ip netns add red
 
 $ ip netns add blue
 ``` 
-- To create a internal virtual bridge network, we add a new interface to the host
+- Để tạo một mạng bridge ảo nội bộ, ta thêm một interface mới kiểu `bridge` trên host
 ```
 $ ip link add v-net-0 type bridge
 ```
-- Display in the host
+- Interface này hiển thị trên host
 ```
 $ ip link
 8: v-net-0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
     link/ether fa:fd:d4:9b:33:66 brd ff:ff:ff:ff:ff:ff
 ```
-- Currently it's down, so turn it up
+- Hiện nó đang DOWN, hãy bật nó lên
 ```
 $ ip link set dev v-net-0 up
 ```
-- To connect network namespace to the bridge. Creating a virtual cabel
+- Để nối network namespace vào bridge, ta tạo các cáp ảo
 ```
 $ ip link add veth-red type veth peer name veth-red-br
 
 $ ip link add veth-blue type veth peer name veth-blue-br
 ```
-- Set with the network namespaces
+- Gắn một đầu vào network namespace, đầu còn lại vào bridge
 ```
 $ ip link set veth-red netns red
 
@@ -202,34 +215,34 @@ $ ip link set veth-red-br master v-net-0
 
 $ ip link set veth-blue-br master v-net-0
 ```
-- To add an IP address
+- Gán địa chỉ IP
 ```
 $ ip -n red addr add 192.168.15.1/24 dev veth-red
 
 $ ip -n blue addr add 192.168.15.2/24 dev veth-blue
 ```
-- To turn it up `ns` interfaces
+- Bật các interface trong namespace
 ```
 $ ip -n red link set veth-red up
 
 $ ip -n blue link set veth-blue up
 ```
-- To add an IP address
+- Gán địa chỉ IP cho bridge (để host có thể giao tiếp với các namespace)
 ```
 $ ip addr add 192.168.15.5/24 dev v-net-0
 ```
-- Turn it up added interfaces on the host
+- Bật các interface vừa thêm trên host
 ```
 $ ip link set dev veth-red-br up
 $ ip link set dev veth-blue-br up
 ```
 
-> On the host
+> Trên host
 ```
 $ ping 192.168.15.1
 ```
 
-> On the ns
+> Trong namespace
 ```
 $ ip netns exec blue ping 192.168.1.1
 Connect: Network is unreachable
@@ -257,7 +270,12 @@ $ ip netns exec blue ip route add default via 192.168.15.5
 $ ip netns exec blue ping 8.8.8.8
 ```
 
-- Adding port forwarding rule to the iptables
+> 💡 **Bổ sung:** Giải thích các bước trên:
+> - Namespace `blue` không có route tới mạng ngoài `192.168.1.0/24`, nên báo "Network is unreachable". Ta thêm route đi qua bridge `v-net-0` (`192.168.15.5`), lúc này host đóng vai trò gateway (host cần bật `ip_forward`).
+> - Gói tin đến được đích nhưng không có phản hồi, vì máy bên ngoài không biết đường quay về mạng riêng `192.168.15.0/24`. Rule `MASQUERADE` (NAT nguồn) thay địa chỉ nguồn bằng IP của host, nhờ vậy phản hồi quay về được.
+> - Để ra Internet (`8.8.8.8`), thêm default route qua host.
+
+- Thêm rule port forwarding vào iptables (để bên ngoài truy cập được ứng dụng trong namespace `blue`)
 
 ```
 $ iptables -t nat -A PREROUTING --dport 80 --to-destination 192.168.15.2:80 -j DNAT
@@ -266,4 +284,4 @@ $ iptables -t nat -A PREROUTING --dport 80 --to-destination 192.168.15.2:80 -j D
 $ iptables -nvL -t nat
 ```
 
-
+> 💡 **Bổ sung:** Lệnh trên là dạng rút gọn trong bài giảng; trên thực tế `--dport` yêu cầu phải chỉ định protocol, tức cần thêm `-p tcp` (ví dụ `iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.15.2:80`). Kube-proxy (ở chế độ iptables) cũng dùng chính các rule DNAT kiểu này để chuyển traffic tới Service về các Pod.

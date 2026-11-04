@@ -1,4 +1,4 @@
-# Practice Test - Worker Node Failure
+# Practice Test - Worker Node Failure (Bài thực hành)
 
-  - Lets Debug the Failure of [Worker Node](https://kodekloud.com/topic/practice-test-worker-node-failure/)
+  - Cùng debug lỗi của [Worker Node](https://kodekloud.com/topic/practice-test-worker-node-failure/)
 

@@ -1,9 +1,9 @@
-# Application Lifecycle Management Section Introduction
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/application-lifecycle-management-section-introduction/)
+# Giới thiệu phần Application Lifecycle Management (Quản lý vòng đời ứng dụng)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/application-lifecycle-management-section-introduction/)
   
-In this section, we will take a look at application lifecycle management
-- Rolling Updates and Rollbacks in Deployments
-- Configure Applications
-- Scale Applications
-- Self-Healing Application
+Trong phần này, chúng ta sẽ tìm hiểu về quản lý vòng đời ứng dụng (application lifecycle management):
+- Rolling update và rollback trong Deployment
+- Cấu hình ứng dụng (command, argument, biến môi trường, ConfigMap, Secret)
+- Scale ứng dụng
+- Ứng dụng tự phục hồi (self-healing)
 

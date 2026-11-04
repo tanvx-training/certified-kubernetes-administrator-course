@@ -1,14 +1,14 @@
-# Storage in Docker
+# Storage trong Docker
 
-  - Take me to [Lecture](https://kodekloud.com/topic/storage-in-docker-2/)
+  - Xem [Bài giảng](https://kodekloud.com/topic/storage-in-docker-2/)
 
-In this section, we will take a look at docker **Storage driver and Filesystem**.
+Trong phần này, chúng ta sẽ tìm hiểu về **Storage driver và Filesystem** (hệ thống file) của Docker.
 
-  - We are going to see where and how Docker stores data and how it manages filesystem of the containers.
+  - Chúng ta sẽ xem Docker lưu dữ liệu ở đâu, như thế nào và cách nó quản lý filesystem của các container.
 
 ## Filesystem
 
-- Let's see how Docker stores data on the local file system. At the first time, When you install Docker on a system, it creates this directory structures at /var/lib/docker.
+- Hãy xem cách Docker lưu dữ liệu trên filesystem cục bộ. Khi bạn cài đặt Docker lần đầu trên một hệ thống, nó sẽ tạo cấu trúc thư mục tại `/var/lib/docker`.
 
   ```
   $ cd /var/lib/docker/
@@ -17,47 +17,49 @@ In this section, we will take a look at docker **Storage driver and Filesystem**
 
 ![class-2](../../images/class2.PNG)
 
-- You have multiple directories under it called aufs, containers, image, volumes etc.
-- This is where Docker stores all its data by default.
-- All files related to containers are stored under the containers directory and the files related to images are stored under the image directory. Any volumes created by the Docker containers are created under the volumes directory.
-- For now, let's just understand where Docker stores its files of an image and a container and in what format.
-- To understand that we need to understand Dockers layered architecture.
+- Bên trong có nhiều thư mục con như `aufs`, `containers`, `image`, `volumes`, v.v.
+- Đây là nơi Docker lưu toàn bộ dữ liệu của nó theo mặc định.
+- Mọi file liên quan đến container được lưu trong thư mục `containers`, các file liên quan đến image được lưu trong thư mục `image`. Mọi volume do Docker container tạo ra đều nằm trong thư mục `volumes`.
+- Hiện tại, chúng ta chỉ cần hiểu Docker lưu các file của image và container ở đâu và theo định dạng nào.
+- Để hiểu điều đó, ta cần hiểu kiến trúc phân lớp (layered architecture) của Docker.
 
-## Layered Architecture
+> 💡 **Bổ sung:** Trên các bản Docker hiện đại, storage driver mặc định là `overlay2` nên bạn sẽ thấy thư mục `overlay2` thay vì `aufs`. Lưu ý thêm: Kubernetes đã gỡ bỏ dockershim từ v1.24, các cluster hiện nay (kể cả môi trường thi CKA) thường dùng **containerd** (hoặc CRI-O) làm container runtime; containerd lưu dữ liệu ở `/var/lib/containerd`. Tuy nhiên các khái niệm về layer, copy-on-write và volume trình bày dưới đây vẫn hoàn toàn đúng.
 
-- When docker builds images, it builds these in a layered architecture. Each line of instruction in the Docker file creates a new layer in the Docker image with just the changes from the previous layer.
-- As you can see in the image, layer-1 is the Ubuntu base layer, layer-2 install the packages, layer-3 install the python packages, layer-4 update the source code, layer-5 updates the entry point of the image. Since each layer only stores the changes from the previous layer. It is reflected in the size as well.
+## Kiến trúc phân lớp (Layered Architecture)
+
+- Khi Docker build image, nó build theo kiến trúc phân lớp. Mỗi dòng lệnh (instruction) trong Dockerfile tạo ra một layer mới trong Docker image, chỉ chứa những thay đổi so với layer trước đó.
+- Như bạn thấy trong hình, layer 1 là layer nền Ubuntu, layer 2 cài đặt các package, layer 3 cài các package Python, layer 4 cập nhật mã nguồn, layer 5 cập nhật entry point của image. Vì mỗi layer chỉ lưu những thay đổi so với layer trước, điều này cũng được phản ánh qua kích thước của từng layer.
 
 ![class-3](../../images/class3.PNG)
 
-- For better understanding the advantages of this layered architecture, Let's take a different Dockerfile, this is very similiar to our first application. only source code and entry point is differnet to create this application. 
-- When image builds, docker is not going to build first three layers instead of it reuses the same three layers it built for the first application from the cache. Only creates the last two layers with the new sources and the new entry point. 
-- This way, Docker builds images faster and efficiently saves disk spaces. This is also applicable, if you were to update your application code. Docker simply reuses all the previous layers from the cache and quickly rebuild the application image by updating the latest source code. 
+- Để hiểu rõ hơn lợi ích của kiến trúc phân lớp, hãy xét một Dockerfile khác, rất giống với ứng dụng đầu tiên của chúng ta, chỉ khác mã nguồn và entry point.
+- Khi build image này, Docker sẽ không build lại ba layer đầu tiên mà tái sử dụng chính ba layer đã build cho ứng dụng đầu tiên từ cache. Docker chỉ tạo hai layer cuối với mã nguồn mới và entry point mới.
+- Nhờ vậy, Docker build image nhanh hơn và tiết kiệm dung lượng đĩa hiệu quả. Điều này cũng áp dụng khi bạn cập nhật mã nguồn ứng dụng: Docker đơn giản là tái sử dụng tất cả các layer trước đó từ cache và nhanh chóng build lại image ứng dụng bằng cách cập nhật mã nguồn mới nhất.
 
 ![class-4](../../images/class4.PNG)
 
-- Let's rearrange the layers bottom up so we can understand it better. All of these layers are created when we run the Docker build command to form the final Docker image. Once the build is complete, you cannot modify the contents of these layers and so they are read-only and you can only modify them by initiating a new build.
+- Hãy sắp xếp lại các layer theo thứ tự từ dưới lên để dễ hiểu hơn. Tất cả các layer này được tạo ra khi chạy lệnh `docker build` để hình thành Docker image cuối cùng. Khi build xong, bạn không thể sửa nội dung của các layer này; chúng là **read-only** (chỉ đọc) và bạn chỉ có thể thay đổi chúng bằng cách thực hiện một lần build mới.
 
 ![class-5](../../images/class5.PNG)
 
-- When you run a container based off of this image, using the **Docker run** command Docker creates a container based off of these layers and creates a new writeable layer on top of the image layer. The writeable layer is used to store data created by the container such as log files written by the applications, any temporary files generated by the container. 
+- Khi bạn chạy một container từ image này bằng lệnh **docker run**, Docker tạo container dựa trên các layer đó và tạo thêm một **writable layer** (layer có thể ghi) mới nằm trên cùng các image layer. Writable layer được dùng để lưu dữ liệu do container tạo ra, chẳng hạn file log do ứng dụng ghi, các file tạm do container sinh ra.
 
 ![class-6](../../images/class6.PNG)
 
-- When the container is destroyed, this layer and all of the changes stored in it are also destroyed. Remember that the same image layer is shared by all containers created using this image.
-- If I will create a new file called temp.txt in the newly created container, which is read and write. 
-- The files in the image layer are read-only meaning you cannot edit anything in those layers.
+- Khi container bị xóa, layer này cùng toàn bộ thay đổi lưu trong nó cũng bị xóa theo. Hãy nhớ rằng cùng một image layer được chia sẻ bởi tất cả các container tạo từ image đó.
+- Ví dụ, nếu tôi tạo một file mới tên `temp.txt` trong container vừa tạo, file này nằm trong layer đọc-ghi (read-write).
+- Các file trong image layer là read-only, nghĩa là bạn không thể chỉnh sửa gì trong các layer đó.
 
 
 ![class-7](../../images/class7.PNG)
 
-- Let's take an example of our application code. Since we bake our code into the image, the code is part of the image and as such, its read-only. After running a container, what if I wish to modify the source code.
-- Yes, I can still modify this file, but before I saved the modified file, Docker automatically creates a copy of the file in the read-write layer and I will then be modifying a different version of the file in the read-write layer. All future modifications will be done on this copy of the file in the read-write layer. This is called copy-on-write mechanism.
-- The Image layer being a read-only just means that the files in these layers will not be modified in the image itself. So, the image will remain the same all the time until you rebuild the image using the Docker build command. If container destroyed then all of the data that was stored in the container layer also gets deleted.
+- Hãy lấy ví dụ với mã nguồn ứng dụng. Vì mã nguồn được "đóng gói" sẵn vào image, nó là một phần của image và do đó là read-only. Vậy sau khi chạy container, nếu tôi muốn sửa mã nguồn thì sao?
+- Tôi vẫn có thể sửa file này, nhưng trước khi lưu file đã sửa, Docker sẽ tự động tạo một bản sao của file đó trong layer read-write, và tôi sẽ sửa trên bản sao này. Mọi chỉnh sửa về sau đều thực hiện trên bản sao trong layer read-write. Cơ chế này gọi là **copy-on-write** (sao chép khi ghi).
+- Việc image layer là read-only chỉ có nghĩa là các file trong các layer này sẽ không bị sửa đổi trong chính image. Vì vậy, image luôn giữ nguyên cho đến khi bạn build lại bằng lệnh `docker build`. Nếu container bị xóa, toàn bộ dữ liệu lưu trong container layer cũng bị xóa theo.
 
 ## Volumes
 
-- To get a persistent data in the containers, we need to create a volume using the `docker volume create` command. So, when I run the `docker volume create data_volume` command, it creates a directory called data_volume under the `/var/lib/docker/` volumes directory.
+- Để có dữ liệu bền vững (persistent) cho container, ta cần tạo một volume bằng lệnh `docker volume create`. Khi chạy lệnh `docker volume create data_volume`, Docker tạo một thư mục tên `data_volume` trong thư mục `/var/lib/docker/volumes`.
 
   ```
   $ docker volume create data_volume
@@ -71,14 +73,14 @@ In this section, we will take a look at docker **Storage driver and Filesystem**
   DRIVER              VOLUME NAME
 	local               data_volume
   ```
-- When I run the Docker container using the `docker run` command, I could mount this volume inside the Docker containers, with `-v` options.
-- So when I do a `docker run -v` then specify my newly created volume name followed by a colon(:) and the location inside my container, which is the default location where MySQL stores data and that is `/var/lib/mysql` and at the last image name of MySQL. This will create a new container and mount the data volume.
+- Khi chạy Docker container bằng lệnh `docker run`, tôi có thể mount volume này vào bên trong container bằng tùy chọn `-v`.
+- Cụ thể, khi chạy `docker run -v`, tôi chỉ định tên volume vừa tạo, theo sau là dấu hai chấm (:) và vị trí bên trong container — ở đây là vị trí mặc định MySQL lưu dữ liệu, tức `/var/lib/mysql` — và cuối cùng là tên image MySQL. Lệnh này tạo một container mới và mount data volume vào đó.
 
 	```
 	$ docker run -v data_volume:/var/lib/mysql mysql
   ```
-- Even if the container is destroyed, the data is still available. 
-- What if you didn't create the Docker volume before the Docker run command. In this image, Docker will automatically create a volume named data_volume2 and mount it to the container.
+- Ngay cả khi container bị xóa, dữ liệu vẫn còn nguyên.
+- Nếu bạn chưa tạo Docker volume trước khi chạy `docker run` thì sao? Trong trường hợp này, Docker sẽ tự động tạo một volume tên `data_volume2` và mount nó vào container.
 
   ```
   $ docker run -v data_volume2:/var/lib/mysql mysql
@@ -89,25 +91,25 @@ In this section, we will take a look at docker **Storage driver and Filesystem**
 	local               data_volume
 	local               data_volume2
   ```
-- You should be able to see all these volumes if you list the contents of the `/var/lib/docker` volumes directory. This is called **Volume mounting**.
-- What if we had our data already at another location?
-- Let's say we have some external storage on the Docker host at `/data` path and we would like to store database data on that volume and not in the default `/var/lib/docker` volumes directory. In that case, we would run a container using the command `docker run -v`. But in this case, we will provide the complete path to the directory we would like to mount. That is `/data/mysql` and so it will create a container and mount the directory to the container. This is called **Bind mounting**.
-- So there are two types of mounts, volume mount and bind mount.
-  * Volume mount, mounts of volume from the volumes directory and bind mount, mounts indirectly from any location on the Docker host.
-- Instead of `-v` option, we can preferred `--mount` option.
+- Bạn sẽ thấy tất cả các volume này nếu liệt kê nội dung thư mục `/var/lib/docker/volumes`. Cách này gọi là **Volume mounting**.
+- Vậy nếu dữ liệu của chúng ta đã nằm sẵn ở một vị trí khác thì sao?
+- Giả sử ta có một ổ lưu trữ ngoài trên Docker host tại đường dẫn `/data` và muốn lưu dữ liệu database trên đó thay vì trong thư mục mặc định `/var/lib/docker/volumes`. Khi đó, ta vẫn chạy container bằng lệnh `docker run -v`, nhưng cung cấp đường dẫn đầy đủ tới thư mục muốn mount, tức `/data/mysql`. Docker sẽ tạo container và mount thư mục đó vào container. Cách này gọi là **Bind mounting**.
+- Như vậy có hai kiểu mount: volume mount và bind mount.
+  * Volume mount: mount một volume từ thư mục volumes của Docker; bind mount: mount một thư mục từ bất kỳ vị trí nào trên Docker host.
+- Thay vì tùy chọn `-v`, nên ưu tiên dùng tùy chọn `--mount` (cú pháp mới, tường minh hơn).
 
   ```
   $ mkdir -p /data/mysql
 
   $ docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
   ```
-- So, who is responsible for doing all of these Operations? 
-- Maintaining of layered architecture, creating a writeable layer, moving files across layers to enable copy and write etc. It's the **Storage Drivers**.
-- Docker uses storage drivers to enable layered architecture.
+- Vậy ai chịu trách nhiệm thực hiện tất cả các thao tác này?
+- Duy trì kiến trúc phân lớp, tạo writable layer, di chuyển file giữa các layer để thực hiện copy-on-write, v.v. Đó chính là **Storage Driver**.
+- Docker sử dụng storage driver để hiện thực kiến trúc phân lớp.
 
 ![class-8](../../images/class8.PNG)
 
-#### Common Storage Drivers
+#### Các Storage Driver phổ biến
 
 - AUFS
 - ZFS
@@ -116,9 +118,11 @@ In this section, we will take a look at docker **Storage driver and Filesystem**
 - Overlay
 - Overlay2
 
-- To Selection of the storage drivers depends on the underlying OS. Docker will choose the best storage driver available automatically based on the operating system.
+- Việc lựa chọn storage driver phụ thuộc vào hệ điều hành bên dưới. Docker sẽ tự động chọn storage driver tốt nhất hiện có dựa trên hệ điều hành.
 
-#### Docker References
+> 💡 **Bổ sung:** Hiện nay `overlay2` là storage driver mặc định và được khuyến nghị trên hầu hết các bản phân phối Linux; `aufs` và `devicemapper` đã bị deprecated/gỡ bỏ trong các phiên bản Docker Engine mới. Có thể kiểm tra driver đang dùng bằng `docker info` (dòng `Storage Driver`).
+
+#### Tài liệu tham khảo Docker
 
 - https://docs.docker.com/storage/
 - https://docs.docker.com/engine/reference/commandline/volume_create/

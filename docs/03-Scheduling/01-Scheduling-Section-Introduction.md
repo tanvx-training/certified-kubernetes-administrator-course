@@ -1,2 +1,2 @@
-# Scheduling Section Introduction
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/scheduling-section-introduction/)
+# Giới thiệu chương Scheduling
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/scheduling-section-introduction/)

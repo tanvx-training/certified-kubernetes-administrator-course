@@ -1,47 +1,47 @@
-# Practice Test - Explore Env
+# Practice Test - Explore Env (Bài thực hành khám phá môi trường)
 
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-explore-environment/)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-explore-environment/)
 
-#### Solution
+#### Lời giải
 
 1. <details>
-   <summary>How many nodes are part of this cluster?</summary>
+   <summary>Cluster này có bao nhiêu node?</summary>
 
       ```
       kubectl get nodes
       ```
 
-      Count the results
+      Đếm số dòng kết quả
 
    </details>
 
 1. <details>
-   <summary>What is the Internal IP address of the controlplane node in this cluster?</summary>
+   <summary>Địa chỉ Internal IP của node controlplane trong cluster này là gì?</summary>
 
       ```
       kubectl get nodes -o wide
       ```
 
-      Note the value in `INTERNAL-IP` column for `controlplane`
+      Xem giá trị ở cột `INTERNAL-IP` của `controlplane`
 
    </details>
 
 1. <details>
-   <summary>What is the network interface configured for cluster connectivity on the controlplane node?</summary>
+   <summary>Network interface nào được cấu hình cho kết nối cluster trên node controlplane?</summary>
 
-   This will be the network interface that has the same IP address you determined in the previous question.
+   Đó là network interface có cùng địa chỉ IP mà bạn tìm được ở câu trước.
 
    ```
    ip a
    ```
 
-   There is quite a lot of output for the above command. We can filter it better:
+   Lệnh trên in ra khá nhiều. Ta có thể lọc cho gọn hơn:
 
    ```
    ip a | grep -B2 X.X.X.X
    ```
 
-   where `X.X.X.X` is the IP address you got from the previous question. `grep -B2` will find the line containing the value we are looking for and print that and the previous 2 line of output. It will look like this, though the values will be different each time you run the lab.
+   trong đó `X.X.X.X` là địa chỉ IP bạn tìm được ở câu trước. `grep -B2` sẽ tìm dòng chứa giá trị cần tìm và in ra dòng đó cùng 2 dòng phía trước. Kết quả sẽ trông như dưới đây, dù các giá trị sẽ khác nhau mỗi lần bạn chạy lab.
 
    ```
    3058: eth0@if3059: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default
@@ -49,18 +49,20 @@
      inet 192.8.234.3/24 brd 192.8.234.255 scope global eth0
    ```
 
-   From this, we can determine the answer to be
+   Từ đây, ta xác định được đáp án là
 
    > `eth0`
+
+   > 💡 **Bổ sung:** Cách nhanh hơn: `ip -br a` (brief) in mỗi interface trên một dòng kèm trạng thái và IP; hoặc `ip route get <IP-của-node-khác>` sẽ cho biết interface được dùng để đi tới IP đó.
 
    </details>
 
 1. <details>
-   <summary>What is the MAC address of the interface on the controlplane node?</summary>
+   <summary>MAC address của interface đó trên node controlplane là gì?</summary>
 
-   This value is also present in the output of the command you ran for the previous question. The MAC address is the value in the `link/ether` field of the output and is 6 hex numbers separated by `:`. Note that the value can be different each time you run the lab.
+   Giá trị này cũng có trong output của lệnh bạn chạy ở câu trước. MAC address là giá trị ở trường `link/ether`, gồm 6 số hex phân cách bởi `:`. Lưu ý giá trị có thể khác nhau mỗi lần chạy lab.
 
-   If the output for `eth0` is
+   Nếu output của `eth0` là
 
    ```
    3058: eth0@if3059: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default
@@ -68,44 +70,44 @@
      inet 192.8.234.3/24 brd 192.8.234.255 scope global eth0
    ```
 
-   then the MAC address is
+   thì MAC address là
 
    > `02:42:c0:08:ea:03`
 
    </details>
 
 1. <details>
-   <summary>What is the IP address assigned to node01?</summary>
+   <summary>Địa chỉ IP gán cho node01 là gì?</summary>
 
    ```
    kubectl get nodes -o wide
    ```
 
-   Note the value in `INTERNAL-IP` column for `node01`
+   Xem giá trị ở cột `INTERNAL-IP` của `node01`
 
    </details>
 
 1. <details>
-   <summary>What is the MAC address assigned to node01?</summary>
+   <summary>MAC address gán cho node01 là gì?</summary>
 
-   For this we will need to SSH onto `node01` so we can view its interfaces. We know what IP to look for, as we determined this in the previous question
+   Để làm câu này, ta cần SSH vào `node01` để xem các interface của nó. Ta đã biết cần tìm IP nào nhờ câu trước
 
    ```
    ssh node01
    ip a | grep -B2 X.X.X.X
    ```
 
-   where `X.X.X.X` is the IP address you got from the previous question. Again, look at the `link/ether` field.
+   trong đó `X.X.X.X` là địa chỉ IP bạn tìm được ở câu trước. Một lần nữa, hãy xem trường `link/ether`.
 
-   We could guess that the correct interface on `node01` is also `eth0` and simply run
+   Ta có thể đoán interface đúng trên `node01` cũng là `eth0` và chỉ cần chạy
 
    ```
    ip link show eth0
    ```
 
-   but it's best to be sure.
+   nhưng tốt nhất là nên kiểm tra chắc chắn.
 
-   Now return to `controlplane`
+   Giờ quay về `controlplane`
 
    ```
    exit
@@ -114,64 +116,66 @@
    </details>
 
 1. <details>
-   <summary>We use Containerd as our container runtime. What is the interface/bridge created by Containerd on this host?</summary>
+   <summary>Chúng ta dùng Containerd làm container runtime. Interface/bridge nào được Containerd tạo trên host này?</summary>
 
-   This is not immediately straight forward.
+   Câu này không hiển nhiên ngay lập tức.
 
    ```
    ip link show
    ```
 
-   Know that
+   Cần biết rằng
 
-   * Any interface with name beginning `eth` is a "physical" interface, and represents a network card attached to the host.
-   * Interface `lo` is the loopback, and covers all IP addresses starting with `127`. Every computer has this.
-   * Any interface with name beginning `veth` is a virtual network interface used for tunnelling between the host and the pod network. These connect with bridges, and the bridge interface name is listed with their details.
+   * Mọi interface có tên bắt đầu bằng `eth` là interface "vật lý", đại diện cho một card mạng gắn vào host.
+   * Interface `lo` là loopback, bao gồm mọi địa chỉ IP bắt đầu bằng `127`. Máy tính nào cũng có interface này.
+   * Mọi interface có tên bắt đầu bằng `veth` là network interface ảo, dùng làm "đường ống" nối giữa host và mạng của Pod. Chúng được nối vào các bridge, và tên interface của bridge được liệt kê trong thông tin của chúng (`master ...`).
 
-   We can see that for the two `veth` devices, they are associated with another device in the list `cni0`, therefore that is the answer.
+   Ta thấy hai thiết bị `veth` đều gắn với một thiết bị khác trong danh sách là `cni0`, do đó đáp án là `cni0`.
+
+   > 💡 **Bổ sung:** Thực ra bridge `cni0` được tạo bởi CNI plugin (`bridge`, ví dụ khi dùng Flannel) mà containerd gọi tới, không phải bởi bản thân containerd. Có thể liệt kê nhanh các bridge bằng `ip link show type bridge`. Tên bridge phụ thuộc CNI: Weave tạo `weave`, Flannel tạo `cni0` (và `flannel.1` cho VXLAN), Calico không dùng bridge mà định tuyến trực tiếp qua các interface `cali*`.
 
    </details>
 
 1. <details>
-   <summary>What is the state of the interface cni0?</summary>
+   <summary>Trạng thái của interface cni0 là gì?</summary>
 
-   You can see in the output of the previous command that the state field for `cni0` is
+   Trong output của lệnh ở câu trước, bạn sẽ thấy trường state của `cni0` là
 
    > `UP`
 
    </details>
 
 1. <details>
-   <summary>If you were to ping google from the controlplane node, which route does it take?</summary>
+   <summary>Nếu ping google từ node controlplane, gói tin sẽ đi theo route nào?</summary>
 
-   What is the IP address of the Default Gateway?
+   Địa chỉ IP của Default Gateway là gì?
 
-   Run
+   Chạy
 
    ```
    ip route show default
    ```
 
-   and note the output
+   và ghi lại output
 
    </details>
 
 1. <details>
-   <summary>What is the port the kube-scheduler is listening on in the controlplane node?</summary>
+   <summary>kube-scheduler đang lắng nghe trên port nào ở node controlplane?</summary>
 
-   Use the [netstat](https://linux.die.net/man/8/netstat) command to look at network sockets used by programs running on the host. There's a lot of output, so we will filter by process name, i.e. `kube-scheduler`
+   Dùng lệnh [netstat](https://linux.die.net/man/8/netstat) để xem các network socket được các chương trình chạy trên host sử dụng. Output khá dài, nên ta lọc theo tên process, tức `kube-scheduler`
 
    ```
    netstat -nplt | grep kube-scheduler
    ```
 
    <details>
-   <summary>What the netstat options used mean</summary>
+   <summary>Ý nghĩa các tùy chọn netstat đã dùng</summary>
 
-   * `-n` - Show IP addresses (don't try to resolve to host names)
-   * `-p` - Show the process names (e.g. `kube-scheduler`)
-   * `-l` - Include only _listening_ sockets
-   * `-t` - Include only TCP sockets
+   * `-n` - Hiển thị địa chỉ IP (không cố phân giải thành hostname)
+   * `-p` - Hiển thị tên process (ví dụ `kube-scheduler`)
+   * `-l` - Chỉ lấy các socket đang _lắng nghe_ (listening)
+   * `-t` - Chỉ lấy các socket TCP
 
    </details>
 
@@ -181,36 +185,37 @@
    tcp        0      0 127.0.0.1:10259         0.0.0.0:*               LISTEN      3291/kube-scheduler
    ```
 
-   We can see it's listening on localhost, port `10259`
+   Ta thấy nó đang lắng nghe trên localhost, port `10259`
+
+   > 💡 **Bổ sung:** Nếu không có `netstat`, dùng `ss -nplt | grep kube-scheduler` cho kết quả tương tự.
    </details>
 
 1. <details>
-   <summary>Notice that ETCD is listening on two ports. Which of these have more client connections established?</summary>
+   <summary>Để ý rằng ETCD đang lắng nghe trên hai port. Port nào có nhiều kết nối client được thiết lập hơn?</summary>
 
-   We use `netstat` with slightly different options and filter for `etcd`
+   Ta dùng `netstat` với các tùy chọn hơi khác và lọc theo `etcd`
 
    ```
    netstat -anp | grep etcd
    ```
 
    <details>
-   <summary>What the netstat options used mean</summary>
+   <summary>Ý nghĩa các tùy chọn netstat đã dùng</summary>
 
-   * `-a` - Include sockets in all states
-   * `-n` - Show IP addresses (don't try to resolve to host names)
-   * `-p` - Show the process names (e.g. `etcd`)
-
-   </details>
-
-   You can see that by far and away, the most used port is `2379`.
+   * `-a` - Lấy socket ở mọi trạng thái
+   * `-n` - Hiển thị địa chỉ IP (không cố phân giải thành hostname)
+   * `-p` - Hiển thị tên process (ví dụ `etcd`)
 
    </details>
 
-1. Information
+   Bạn sẽ thấy port được dùng nhiều nhất, vượt trội hẳn, là `2379`.
 
-   That's because `2379` is the port of ETCD to which API server connects to There are multiple concurrent connections so that API server can process multiple etcd operations simultaneously.
+   > 💡 **Bổ sung:** Để đếm nhanh, có thể dùng `netstat -anp | grep etcd | grep 2379 | wc -l` và so sánh với `2380`.
 
-    `2380` is only for etcd peer-to-peer connectivity when you have multiple controlplane nodes. In this case we don't.
+   </details>
 
+1. Thông tin thêm
 
+   Đó là vì `2379` là port của ETCD mà API server kết nối tới. Có nhiều kết nối đồng thời để API server có thể xử lý nhiều thao tác etcd cùng lúc.
 
+    `2380` chỉ dùng cho kết nối ngang hàng (peer-to-peer) giữa các etcd khi bạn có nhiều node controlplane. Trong trường hợp này thì không có.

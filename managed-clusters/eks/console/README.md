@@ -1,8 +1,8 @@
-# EKS cluster using the Console
+# Tạo EKS cluster bằng Console
 
-Last updated: December 2024
+Cập nhật lần cuối: tháng 12 năm 2024
 
-Create an EKS cluster using the KodeKloud AWS Playground's console. Due to policy restrictions in the playground, it is important to follow these instructions *to the letter*. Do not change any names for things like the cluster or role names or it will not work.
+Tạo một EKS cluster bằng console (giao diện web) của KodeKloud AWS Playground. Do các giới hạn về chính sách (policy) trong playground, bạn cần làm theo hướng dẫn này *chính xác từng chữ*. Không được đổi bất kỳ tên nào, chẳng hạn tên cluster hay tên role, nếu không sẽ không hoạt động.
 
-[Click here](./docs/01-sign-in.md) to get started!
+[Bấm vào đây](./docs/01-sign-in.md) để bắt đầu!
 

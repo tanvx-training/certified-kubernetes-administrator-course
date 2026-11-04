@@ -1,33 +1,39 @@
-# Boot the controlplane
+# Khởi động control plane
 
 [//]: # (host:controlplane)
 
 
 
-On the `controlplane` node
+Thực hiện trên node `controlplane`
 
-1.  Set shell variables for the pod and network network CIDRs. The API server advertise address is using the predefined variable described in the [previous section](./04-node-setup.md). Note that with bridged mode virtual machines (the default for this installation) it is important that neither of the following IP ranges overlap your home network which for nearly all broadband router default configurations is `192.168.0.0/24`
+1.  Đặt các biến shell cho dải CIDR của Pod và Service. Địa chỉ advertise của API server dùng biến đã được định nghĩa sẵn như mô tả ở [phần trước](./04-node-setup.md). Lưu ý rằng với máy ảo dùng chế độ bridged (mặc định của bản cài đặt này), điều quan trọng là cả hai dải IP dưới đây đều không được trùng với mạng gia đình của bạn — với hầu hết cấu hình mặc định của router băng rộng thì mạng này là `192.168.0.0/24`.
 
     ```bash
     POD_CIDR=10.244.0.0/16
     SERVICE_CIDR=10.96.0.0/16
     ```
 
-1.  Start controlplane
+    > 💡 **Bổ sung:** Có ba dải địa chỉ phải tách biệt hoàn toàn: dải IP của các node (mạng VM), dải IP của Pod (`--pod-network-cidr`, do CNI cấp phát cho từng Pod) và dải IP của Service (`--service-cidr`, các ClusterIP ảo do kube-proxy xử lý). Nếu chúng chồng lấn nhau, việc định tuyến sẽ bị sai và cluster hoạt động chập chờn hoặc không chạy được.
 
-    Here we are using arguments to `kubeadm` to ensure that it uses the networks and IP address we want rather than choosing defaults which may be incorrect.
+1.  Khởi động control plane
+
+    Ở đây chúng ta truyền tham số cho `kubeadm` để đảm bảo nó dùng đúng dải mạng và địa chỉ IP mong muốn, thay vì tự chọn giá trị mặc định có thể không đúng.
 
     ```bash
     sudo kubeadm init --pod-network-cidr $POD_CIDR --service-cidr $SERVICE_CIDR --apiserver-advertise-address $PRIMARY_IP
     ```
 
+    > 💡 **Bổ sung:** `kubeadm init` sẽ chạy preflight check, sinh các certificate trong `/etc/kubernetes/pki`, tạo các file kubeconfig (`admin.conf`, `kubelet.conf`, `controller-manager.conf`, `scheduler.conf`), ghi manifest static Pod của kube-apiserver, kube-controller-manager, kube-scheduler và etcd vào `/etc/kubernetes/manifests`, rồi cài các addon CoreDNS và kube-proxy. Nếu init thất bại và muốn làm lại, chạy `sudo kubeadm reset` trước.
+
 [//]: # (command:sleep 10)
 
-1.  Copy the `kubeadm join` command printed to your notepad to use on the worker nodes.
+1.  Copy lệnh `kubeadm join` được in ra vào notepad để dùng trên các worker node.
 
-1.  Set up the kubeconfig so it can be used by the user you are logged in as
+    > 💡 **Bổ sung:** Token trong lệnh join mặc định hết hạn sau 24 giờ. Nếu bị mất hoặc token đã hết hạn, bạn có thể tạo lệnh join mới trên control plane bằng `kubeadm token create --print-join-command`.
 
-    1.  Create directory for kubeconfig, copy the admin kubeconfig as the default kubeconfig for current user (`vagrant` on VirtualBox, `ubuntu` on Multipass and AWS) and set the correct file permissions.</br>Note that in Linux, the command `id -u` returns your user name on the system and `id -g` returns your group name.
+1.  Thiết lập kubeconfig để user đang đăng nhập có thể sử dụng
+
+    1.  Tạo thư mục cho kubeconfig, copy kubeconfig admin làm kubeconfig mặc định cho user hiện tại (`vagrant` trên VirtualBox, `ubuntu` trên Multipass và AWS) và đặt quyền file cho đúng.</br>Lưu ý: trên Linux, lệnh `id -u` trả về user ID (UID) và `id -g` trả về group ID (GID) của bạn trên hệ thống.
 
         ```bash
         {
@@ -38,62 +44,63 @@ On the `controlplane` node
         }
         ```
 
-    1.  Verify
+    1.  Kiểm tra
 
         ```bash
         kubectl get pods -n kube-system
         ```
 
-1.  Install Calico CNI for cluster networking
+        > 💡 **Bổ sung:** Ở thời điểm này các Pod `coredns` sẽ ở trạng thái `Pending` và node ở trạng thái `NotReady` — đây là bình thường vì chưa cài CNI. Chúng sẽ chuyển sang `Running`/`Ready` sau bước tiếp theo.
 
-    Calico is a CNI that supports Network Policies. An alternative CNI that's discussed in the course is Flannel, however Flannel does not support Netowrk Policy. It provides only the basic pod networking.
+1.  Cài Calico CNI cho mạng của cluster
 
-    1. Install the Tigera operator and custom resource definitions.
+    Calico là một CNI có hỗ trợ Network Policy. Một CNI thay thế được nhắc tới trong khóa học là Flannel, tuy nhiên Flannel không hỗ trợ Network Policy, nó chỉ cung cấp mạng Pod cơ bản.
+
+    1. Cài Tigera operator và các custom resource definition (CRD).
 
         ```bash
         kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.1/manifests/tigera-operator.yaml
         ```
 
-    1. Install Calico by creating the necessary custom resources. If using bridge networking for your virtual machines which is the default, we are going to have to make a modification to these custom resources to agree with the POD_CIDR we set above, or else the pod network will overlap your home network and the cluster won't work.
+    1. Cài Calico bằng cách tạo các custom resource cần thiết. Nếu máy ảo dùng mạng bridge (mặc định), chúng ta phải sửa các custom resource này cho khớp với `POD_CIDR` đã đặt ở trên, nếu không mạng Pod sẽ trùng với mạng gia đình của bạn và cluster sẽ không hoạt động.
 
-        1. Download the custom resource manifest
+        1. Tải manifest custom resource
 
             ```bash
             curl -LO https://raw.githubusercontent.com/projectcalico/calico/v3.30.1/manifests/custom-resources.yaml
             ```
 
-        1. Use `sed` to change the ipPool network in the manifest from the default of `192.168.0.0/16` to the value of `POD_IP` set above. You could do it by editing with `vi` but `sed` is faster.
+        1. Dùng `sed` để đổi dải mạng ipPool trong manifest từ giá trị mặc định `192.168.0.0/16` sang giá trị `POD_CIDR` đã đặt ở trên. Bạn có thể sửa bằng `vi` nhưng dùng `sed` nhanh hơn.
 
             ```bash
             sed -i "s#192.168.0.0/16#$POD_CIDR#" custom-resources.yaml
             ```
 
-        1. Apply the edited manifest
+        1. Apply manifest đã sửa
 
             ```bash
             kubectl apply -f custom-resources.yaml
             ```
 
-    It will take a minute or two for all the calico resources to be up and running. You can monitor the progress with the following command
+    Sẽ mất một hai phút để tất cả các resource của calico khởi chạy xong. Bạn có thể theo dõi tiến trình bằng lệnh sau
 
     ```
     watch kubectl get tigerastatus
     ```
 
-    Wait until all items in the list have a `True` status for available, then press `CTRL-C` to exit the `watch` command.
+    Đợi đến khi tất cả các mục trong danh sách có trạng thái `True` ở cột available, sau đó nhấn `CTRL-C` để thoát lệnh `watch`.
 
-    [Calico Installation Documentation](https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart)
+    [Tài liệu cài đặt Calico](https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart)
 
 [//]: # (command:sleep 120)
 
-1.  Verify controlplane
+1.  Kiểm tra control plane
 
     ```bash
     kubectl get pods -n kube-system
     ```
 
-[Kubernetes Documentation Link](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
+[Link tài liệu Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
 
-Next: [Join Workers](./06-workers.md)</br>
-Prev: [Node setup](./04-node-setup.md)
-
+Tiếp theo: [Join các worker](./06-workers.md)</br>
+Trước đó: [Chuẩn bị node](./04-node-setup.md)

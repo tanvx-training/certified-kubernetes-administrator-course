@@ -1,40 +1,44 @@
 # Service Account
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/service-account/)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/service-account/)
   
-In this section, we will explore **Service Accounts** in Kubernetes and understand their significance and usage.
+Trong phần này, chúng ta sẽ tìm hiểu về **ServiceAccount** trong Kubernetes, vai trò và cách sử dụng chúng.
 
-### Why Do You Need a Service Account in Your Cluster?
+### Vì sao cần ServiceAccount trong cluster?
 
-Kubernetes operates with two main types of users:
+Kubernetes có hai loại "người dùng" chính:
 
-1. **Human Users**: These are users who interact with the Kubernetes cluster through tools like `kubectl`.
-2. **Bots/Applications**: These include services like Prometheus, Jenkins, and other system applications.
+1. **Người dùng (Human Users)**: những người tương tác với cluster thông qua các công cụ như `kubectl` (admin, developer...).
+2. **Bot/Ứng dụng**: các dịch vụ như Prometheus, Jenkins và các ứng dụng hệ thống khác.
 
 
-Service accounts are primarily used to authenticate these bots or applications to the Kubernetes API server.
+ServiceAccount chủ yếu được dùng để xác thực (authenticate) các bot hoặc ứng dụng này với kube-apiserver.
 
-### Service Account Creation
+> 💡 **Bổ sung:** Kubernetes không có object "User" — user là danh tính được quản lý bên ngoài (certificate, OIDC...). Ngược lại, ServiceAccount là một object thực sự trong Kubernetes, thuộc về một namespace, được tạo bằng `kubectl create serviceaccount <tên>` (viết tắt `sa`).
+
+### Tạo ServiceAccount
 
 ![alt text](../../images/sa.png)
 
+> 💡 **Bổ sung:** Các lệnh cơ bản: `kubectl create serviceaccount dashboard-sa`, `kubectl get serviceaccount`, `kubectl describe serviceaccount dashboard-sa`. Sau khi tạo, hãy dùng RBAC (Role/ClusterRole + RoleBinding) để cấp quyền cho ServiceAccount, ví dụ `kubectl create rolebinding dashboard-sa-binding --role=pod-reader --serviceaccount=default:dashboard-sa`. Trong RBAC, danh tính của ServiceAccount có dạng `system:serviceaccount:<namespace>:<tên>`.
 
 
 
-### Service Accounts and Authentication
+
+### ServiceAccount và Authentication
 
 
 
-When you want to access the Kubernetes API from within a pod, you need to authenticate the pod with the API server. **Service accounts** are used for this authentication process.
+Khi muốn truy cập Kubernetes API từ bên trong một Pod, bạn cần xác thực Pod đó với kube-apiserver. **ServiceAccount** được dùng cho quá trình xác thực này.
 
-When a service account is created in Kubernetes, a secret token is also created. This token can be used as a bearer token that can be used to authenticate   to the API server. By default, this token is mounted as a volume in the pod and is accessible at the following path within the pod: `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+Trước Kubernetes v1.24, khi tạo một ServiceAccount, một Secret chứa token cũng được tự động tạo ra. Token này được dùng như một bearer token để xác thực với kube-apiserver. Mặc định, token được mount vào Pod dưới dạng volume và có thể truy cập bên trong Pod tại đường dẫn: `/var/run/secrets/kubernetes.io/serviceaccount/token`.
  
 
 ![alt text](../../images/sa2.png)
 
 
-By default, every Kubernetes namespace has a `default` service account. Every pod in that namespace is automatically assigned this `default` service account unless otherwise specified. If you want to use a different service account for a specific pod, you can specify it in the pod specification.
+Mặc định, mỗi namespace trong Kubernetes đều có một ServiceAccount tên là `default`. Mọi Pod trong namespace đó sẽ tự động được gán ServiceAccount `default` nếu không chỉ định khác. Nếu muốn dùng một ServiceAccount khác cho một Pod, bạn khai báo nó trong spec của Pod.
 
-here’s an example of how you can specify a service account for a pod in the pod specification:
+Dưới đây là ví dụ cách chỉ định ServiceAccount cho Pod trong spec:
 
 ```yaml
 apiVersion: v1
@@ -46,28 +50,32 @@ spec:
   
 ```
 
-to opt out of  serviceaccount automounting
+> 💡 **Bổ sung:** Bạn không thể thay đổi ServiceAccount của một Pod đang chạy — phải xóa và tạo lại Pod. Với Deployment thì có thể sửa `serviceAccountName` trong Pod template; Deployment sẽ tự rollout tạo Pod mới.
+
+Để tắt việc tự động mount token của ServiceAccount:
 
 ```yaml
 spec:
   automountServiceAccountToken: false
 ```
+
+> 💡 **Bổ sung:** `automountServiceAccountToken: false` có thể đặt ở Pod spec hoặc ngay trên object ServiceAccount; nếu cả hai cùng được đặt, giá trị trong Pod spec được ưu tiên. Nên tắt cho các ứng dụng không cần gọi Kubernetes API để giảm rủi ro bảo mật.
  
 
 
-### Enhanced Security Features (Kubernetes v1.22+)
+### Cải tiến bảo mật (Kubernetes v1.22+)
 
-These service account tokens do not have expiration or audience restrictions by default. However, Kubernetes v1.22 and later introduced improvements to enhance token security.
+Các token ServiceAccount kiểu cũ (lưu trong Secret) mặc định không có thời hạn và không giới hạn audience. Từ Kubernetes v1.22 trở đi đã có các cải tiến để tăng cường bảo mật cho token:
 
-- Audience Bound: The token is restricted to a specific audience (e.g., the Kubernetes API server).
-- Time Bound: The token has an expiration time (default of 1 hour).
-- Object Bound: The token is bound to specific objects, such as a pod or service account.
+- Audience Bound: token chỉ dùng được cho một audience cụ thể (ví dụ kube-apiserver).
+- Time Bound: token có thời gian hết hạn (mặc định khi dùng `kubectl create token` là 1 giờ).
+- Object Bound: token gắn với các object cụ thể, như Pod hoặc ServiceAccount — khi Pod bị xóa, token cũng mất hiệu lực.
 
-thereby enhanced security by limiting the scope of the token's validity and lifecycle.
+Nhờ đó, bảo mật được nâng cao bằng cách giới hạn phạm vi hiệu lực và vòng đời của token.
 
-so in v1.22, the TokenRequest API was introduced to request a token with a specific audience and expiration time. This API is used for obtaining tokens instead of using service account token Secret objects. Tokens obtained from the TokenRequest API are more secure than those stored in Secret objects because they have a bounded lifetime and are not readable by other API clients.
+Như vậy, TokenRequest API (đã có từ v1.12 và trở thành cơ chế mặc định cấp token cho Pod từ v1.22) được dùng để yêu cầu token với audience và thời hạn cụ thể. API này được dùng để lấy token thay cho việc dùng các Secret chứa token ServiceAccount. Token lấy từ TokenRequest API an toàn hơn token lưu trong Secret vì có thời hạn giới hạn và không thể bị các API client khác đọc.
 
-also in this version  the service account injected as projected volume as shown below
+Cũng từ phiên bản này, token của ServiceAccount được đưa vào Pod dưới dạng projected volume như hình dưới. Kubelet sẽ tự động làm mới (rotate) token trước khi hết hạn.
 
  
 
@@ -75,11 +83,11 @@ also in this version  the service account injected as projected volume as shown 
 
  
 
-In kubernetes. io/service-account-token type of Secret is used to store a tokencredential that identifies a service account.
-Since v1.22, this type of Secret is no longer used to mount credentials into Pods, and obtaining tokens via the TokenRequest API is recommended instead of using service account token Secret objects. Tokens obtained from the TokenRequest API are more secure than ones stored in Secret objects, because they have a bounded lifetime and are not readable by other API clients. You can use the kubectl create token command to obtain a token from the TokenRequest API. 
+Trong Kubernetes, Secret có type `kubernetes.io/service-account-token` được dùng để lưu thông tin token (token credential) định danh một ServiceAccount.
+Từ v1.22, loại Secret này không còn được dùng để mount thông tin xác thực vào Pod nữa, và Kubernetes khuyến nghị lấy token qua TokenRequest API thay vì dùng Secret chứa token ServiceAccount. Token lấy từ TokenRequest API an toàn hơn token lưu trong Secret vì có thời hạn giới hạn và không thể bị các API client khác đọc. Bạn có thể dùng lệnh `kubectl create token` để lấy token từ TokenRequest API.
 
-### Creating Service Account Tokens
-In Kubernetes v1.24, KEP-2799 introduced the reduction of automatically created token secrets for service accounts. You must now manually create service account token secrets using the kubectl create token command.
+### Tạo token cho ServiceAccount
+Từ Kubernetes v1.24, KEP-2799 (LegacyServiceAccountTokenNoAutoGeneration) đã loại bỏ việc tự động tạo Secret chứa token cho ServiceAccount. Giờ đây, khi cần token, bạn phải tạo thủ công bằng lệnh `kubectl create token`:
 
 ```bash
  kubectl create token <serviceaccount>
@@ -87,20 +95,25 @@ In Kubernetes v1.24, KEP-2799 introduced the reduction of automatically created 
 
 ![alt text](../../images/sa4.png)
 
+> 💡 **Bổ sung:**
+> - `kubectl create token` **không tạo Secret** nào cả; nó gọi TokenRequest API và in token ra màn hình. Mặc định token có hiệu lực 1 giờ; có thể đổi bằng `--duration`, ví dụ `kubectl create token dashboard-sa --duration=24h` (server có thể giới hạn thời hạn tối đa). Chỉ định namespace bằng `-n`.
+> - Vì thế, từ v1.24 lệnh `kubectl describe serviceaccount <tên>` sẽ hiển thị `Tokens: <none>`.
+> - Token là JWT, có thể giải mã phần payload (ví dụ trên jwt.io) để xem `aud`, `exp`, `sub` (`system:serviceaccount:<ns>:<tên>`).
+> - Từ v1.29, các token kiểu Secret cũ (legacy) không được sử dụng sẽ bị đánh dấu và tự động dọn dẹp (KEP-2799, LegacyServiceAccountTokenCleanUp).
 
-You should only create a service account token Secret object if you can't use the TokenRequest API to obtain a token, and the security exposure of persisting a non-expiring token credential in a readable API object is
-acceptable to you. for that 
 
-- Create a service account.
-- Create a secret for the service account.
-- In secret add an annotation `kubernetes.io/service-account.name: <serviceaccountname>` .
+Bạn chỉ nên tạo Secret chứa token ServiceAccount khi không thể dùng TokenRequest API để lấy token, và bạn chấp nhận được rủi ro bảo mật khi lưu một token không hết hạn trong một API object có thể đọc được. Khi đó:
+
+- Tạo một ServiceAccount.
+- Tạo một Secret cho ServiceAccount đó (type `kubernetes.io/service-account-token`).
+- Trong Secret, thêm annotation `kubernetes.io/service-account.name: <serviceaccountname>`. Token controller sẽ tự động điền token vào Secret này.
 
  
 
 ![alt text](../../images/sa5.png)
 
  
-#### K8s Reference Docs
+#### Tài liệu tham khảo K8s
 - https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
  
   

@@ -1,36 +1,37 @@
 # Node Pools
 
-1. Select **Node Pools** from the tab strip at the top.
+1. Chọn **Node Pools** từ thanh tab ở phía trên.
 
     ![image](../images/05-node-pools.png)
 
-    Note that this menu may also appear on the left:
+    Lưu ý rằng menu này cũng có thể xuất hiện ở bên trái:
 
     ![image](../images/05-node-pools-left.png)
 
-1. To comply with playground restrictions, we need to change some configuration. Click on the value in the **Node size** column...
+1. Để tuân thủ giới hạn của playground, chúng ta cần thay đổi một số cấu hình. Bấm vào giá trị trong cột **Node size**...
 
     ![image](../images/05a-node-pools.png)
 
 
-1.  You are now in the **Update Node Pool** screen
+1.  Bây giờ bạn đang ở màn hình **Update Node Pool**
 
-    1. Click on **Choose a size**
+    1. Bấm vào **Choose a size**
 
         ![image](../images/05b-node-pools.png)
 
-        And from the selection screen, choose `D2s_v3`
+        Và từ màn hình lựa chọn, chọn `D2s_v3`
 
         ![image](../images/05c-node-pools.png)
 
-        Press the `Select` button that appears at the bottom of the screen to return to **Update Node Pool**.
+        Bấm nút `Select` xuất hiện ở cuối màn hình để quay lại **Update Node Pool**.
 
-    1. Next to **Scale Method** click in `Manual` radio button, then change **Node count** to `2`
-
-
-    1. Press the `Update` button at the bottom of the screen to complete pool configuration.
+    1. Tại **Scale Method**, bấm chọn radio button `Manual`, sau đó đổi **Node count** thành `2`
 
 
-Next: [Networking](./06-networking.md)
+    1. Bấm nút `Update` ở cuối màn hình để hoàn tất cấu hình pool.
+
+> 💡 **Bổ sung:** Node pool là một nhóm các worker node có cùng cấu hình (kích thước VM, OS...). Trong AKS, mỗi node pool được triển khai dưới dạng một Virtual Machine Scale Set (VMSS) - đó là lý do tên node có dạng `aks-agentpool-xxxx-vmss000000`. `D2s_v3` là loại VM có 2 vCPU và 8 GiB RAM. Chọn `Manual` scale nghĩa là số node cố định, không bật cluster autoscaler.
+
+Tiếp theo: [Networking](./06-networking.md)
 
 

@@ -1,18 +1,20 @@
-# Backup and Restore Methods
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/backup-and-restore-methods/)
+# Các phương pháp Backup và Restore
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/backup-and-restore-methods/)
   
-In this section, we will take a look at backup and restore methods
+Trong phần này, chúng ta sẽ tìm hiểu các phương pháp backup và restore.
 
-## Backup Candidates
+## Những thứ cần backup
  
  ![bc](../../images/bc.PNG)
+
+Gồm ba nhóm chính: file cấu hình resource (resource configuration), cluster etcd (nơi lưu toàn bộ trạng thái cluster), và persistent volume (dữ liệu ứng dụng).
  
-## Resource Configuration
-- Imperative way
+## Cấu hình resource (Resource Configuration)
+- Cách imperative (dùng lệnh trực tiếp)
   
   ![rci](../../images/rci.PNG)
 
-- Declarative Way (Preferred approach)
+- Cách declarative (cách được khuyến nghị) – định nghĩa resource trong file rồi `kubectl apply`
   ```
   apiVersion: v1
   kind: Pod
@@ -28,26 +30,28 @@ In this section, we will take a look at backup and restore methods
   ```
  ![rcd](../../images/rcd.PNG)
  
-- A good practice is to store resource configurations on source code repositories like github.
+- Một thói quen tốt là lưu các file cấu hình resource trên kho mã nguồn như GitHub. Khi đó, kể cả mất toàn bộ cluster, bạn vẫn có thể deploy lại ứng dụng từ các file này.
 
   ![rcd1](../../images/rcd1.PNG)
 
 ## Backup - Resource Configs
+Nếu không chắc mọi resource đều được tạo theo cách declarative (có người tạo bằng lệnh imperative), cách tốt hơn là truy vấn kube-apiserver để lấy cấu hình của tất cả resource:
 
   ```
   $ kubectl get all --all-namespaces -o yaml > all-deploy-services.yaml (only for few resource groups)
   ```
 
-- There are many other resource groups that must be considered. There are tools like **`ARK`** or now called **`Velero`** by Heptio that can do this for you.
+- Lệnh trên chỉ lấy một số nhóm resource (`get all` không bao gồm ConfigMap, Secret, PVC, Ingress, RBAC...). Còn rất nhiều nhóm resource khác cần xem xét. Có những công cụ như **`ARK`**, nay gọi là **`Velero`** (ban đầu của Heptio), có thể làm việc này cho bạn.
 
   ![brc](../../images/brc.PNG)
   
 ## Backup - ETCD
-- So, instead of backing up resources as before, you may choose to backup the ETCD cluster itself. 
+- Thay vì backup từng resource như trên, bạn có thể chọn backup chính cluster etcd. etcd lưu thông tin về trạng thái của cluster, bao gồm các node và mọi resource được tạo bên trong cluster.
+- Khi cấu hình etcd, bạn chỉ định thư mục lưu toàn bộ dữ liệu (flag `--data-dir`). Bạn có thể dùng công cụ backup để sao lưu thư mục này.
   
   ![be](../../images/be.PNG)
   
-- You can take a snapshot of the etcd database by using **`etcdctl`** utility snapshot save command.
+- Ngoài ra, bạn có thể tạo snapshot cơ sở dữ liệu etcd bằng lệnh snapshot save của công cụ **`etcdctl`**.
   ```
   $ ETCDCTL_API=3 etcdctl snapshot save snapshot.db
   ```
@@ -57,13 +61,13 @@ In this section, we will take a look at backup and restore methods
   ![be1](../../images/be1.PNG)
   
 ## Restore - ETCD
-- To restore etcd from the backup at later in time. First stop kube-apiserver service
+- Để restore etcd từ bản backup sau này: trước tiên dừng dịch vụ kube-apiserver (vì quá trình restore etcd yêu cầu restart etcd cluster, và kube-apiserver phụ thuộc vào nó)
   ```
   $ service kube-apiserver stop
   ```
-- Run the etcdctl snapshot restore command
-- Update the etcd service
-- Reload system configs
+- Chạy lệnh etcdctl snapshot restore, chỉ định `--data-dir` mới. Khi restore, etcd khởi tạo cấu hình cluster mới và cấu hình các member như member mới của một cluster mới, để tránh member mới vô tình tham gia vào cluster cũ.
+- Cập nhật cấu hình dịch vụ etcd để dùng data directory mới
+- Reload cấu hình hệ thống
   ```
   $ systemctl daemon-reload
   ```
@@ -74,11 +78,11 @@ In this section, we will take a look at backup and restore methods
   
   ![er](../../images/er.PNG)
   
-- Start the kube-apiserver
+- Khởi động lại kube-apiserver
   ```
   $ service kube-apiserver start
   ```
-#### With all etcdctl commands specify the cert,key,cacert and endpoint for authentication.
+#### Với mọi lệnh etcdctl, cần chỉ định cert, key, cacert và endpoint để xác thực.
 ```
 $ ETCDCTL_API=3 etcdctl \
   snapshot save /tmp/snapshot.db \
@@ -89,8 +93,23 @@ $ ETCDCTL_API=3 etcdctl \
 ```
 
   ![erest](../../images/erest.PNG)
+
+> 💡 **Bổ sung – Lưu ý thực tế và khi thi:**
+> - Endpoint nên viết `https://127.0.0.1:2379` (dấu ngoặc vuông `[...]` chỉ dùng cho địa chỉ IPv6). Nếu etcd chạy cùng node (stacked etcd) và lắng nghe trên `127.0.0.1:2379` thì có thể bỏ qua `--endpoints` vì đây là giá trị mặc định.
+> - Trên cluster kubeadm, chứng chỉ server của etcd là `/etc/kubernetes/pki/etcd/server.crt` và `server.key` (tên `etcd-server.crt` trong ví dụ trên là của cluster dựng thủ công). Hãy luôn kiểm tra đường dẫn thực tế:
+>   ```
+>   grep -E 'cert|key|listen-client' /etc/kubernetes/manifests/etcd.yaml
+>   ```
+> - Các lệnh `snapshot status` và `snapshot restore` không cần kết nối tới etcd nên không cần cert/endpoint. Từ etcd v3.5, chúng được khuyến nghị chạy bằng `etcdutl`:
+>   ```
+>   etcdutl snapshot status /tmp/snapshot.db -w table
+>   etcdutl snapshot restore /tmp/snapshot.db --data-dir /var/lib/etcd-from-backup
+>   ```
+> - **Restore trên cluster kubeadm (stacked etcd)**: etcd và kube-apiserver chạy dưới dạng static Pod, không phải systemd service, nên không có `service kube-apiserver stop`. Quy trình là: restore snapshot vào thư mục mới → sửa `/etc/kubernetes/manifests/etcd.yaml`, đổi `hostPath.path` của volume `etcd-data` (và/hoặc `--data-dir`) sang thư mục mới → kubelet tự tạo lại Pod etcd. Xem chi tiết ở [Practice Test - Backup and Restore Methods](09-Practice-Test-Backup-and-Restore-Methods.md).
+> - **Restore với external etcd** (chạy như systemd service): restore vào thư mục mới, `chown -R etcd:etcd <thư-mục>`, sửa `--data-dir` trong unit file, rồi `systemctl daemon-reload && systemctl restart etcd`. Xem [Practice Test - Backup and Restore Methods 2](10-Practice-Test-Backup-and-Restore-Methods-2.md).
+> - Với managed Kubernetes (EKS, GKE, AKS), bạn không truy cập được etcd, nên backup bằng cách truy vấn API (vd Velero) là lựa chọn duy nhất.
   
-#### K8s Reference Docs
+#### Tài liệu tham khảo K8s
 - https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/
 
 

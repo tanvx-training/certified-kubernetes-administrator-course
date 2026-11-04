@@ -1,5 +1,5 @@
-# Pre-requisite for JSON PATH
+# Kiến thức nền tảng về JSON PATH
 
-  - I want to know more about JSON PATH and its [Pre-requisite](https://kodekloud.com/topic/pre-requisites-json-path/)  
+  - Tôi muốn tìm hiểu thêm về JSON PATH và [kiến thức nền tảng](https://kodekloud.com/topic/pre-requisites-json-path/) của nó
 
   

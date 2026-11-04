@@ -1,5 +1,5 @@
-# Installing Kubernetes the kubeadm way on  VirtualBox
+# Cài đặt Kubernetes bằng kubeadm trên VirtualBox
 
-Updated March 2024
+Cập nhật tháng 3/2024
 
-[Click here](./docs/01-prerequisites.md) to begin.
+[Bấm vào đây](./docs/01-prerequisites.md) để bắt đầu.

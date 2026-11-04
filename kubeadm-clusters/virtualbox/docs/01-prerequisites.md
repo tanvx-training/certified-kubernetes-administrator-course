@@ -1,108 +1,116 @@
-# Prerequisites
+# Điều kiện tiên quyết
 
-If you have an M-series (Apple Silicon) Mac, you cannot run VirtualBox. Please instead see our [Apple Silicon](../../apple-silicon/) guide.
+Nếu bạn dùng Mac chip M-series (Apple Silicon) thì không thể chạy VirtualBox. Hãy xem hướng dẫn [Apple Silicon](../../apple-silicon/) thay thế.
 
-## VM Hardware Requirements
+## Yêu cầu phần cứng cho VM
 
-* 8 GB of RAM (16 preferred)
-* 8-core/4-core hyperthreaded or better CPU, e.g. Core-i7/Core-i9 (will be slow otherwise)
-* 50 GB Disk space
+* 8 GB RAM (khuyến nghị 16 GB)
+* CPU 8 nhân, hoặc 4 nhân có hyperthreading trở lên, ví dụ Core-i7/Core-i9 (nếu yếu hơn sẽ chạy chậm)
+* 50 GB dung lượng ổ đĩa
 
 ## git
 
-Required to download the repo. It is normally pre-installed on Mac, but not on Windows. If you need to install it, see [here](https://git-scm.com/download).
+Cần git để tải repo về. Trên Mac git thường được cài sẵn, còn Windows thì không. Nếu cần cài, xem [tại đây](https://git-scm.com/download).
 
 ## VirtualBox
 
-Download and Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads) on any one of the supported platforms:
+Tải và cài [VirtualBox](https://www.virtualbox.org/wiki/Downloads) trên một trong các nền tảng được hỗ trợ:
 
- - Windows hosts
- - MacOS hosts x86 only. For Apple Silicon (M-series processors), see [here](../../apple-silicon/).
- - Linux distributions
+ - Máy host Windows
+ - Máy host MacOS, chỉ x86. Với Apple Silicon (bộ xử lý M-series), xem [tại đây](../../apple-silicon/).
+ - Các bản phân phối Linux
 
-This lab was last tested with VirtualBox 7.0.12, though newer versions should be ok.
+Lab này được kiểm thử lần cuối với VirtualBox 7.0.12, các phiên bản mới hơn cũng sẽ chạy được.
 
 ## Vagrant
 
-Once VirtualBox is installed you may choose to deploy virtual machines manually on it.
-Vagrant provides an easier way to deploy multiple virtual machines on VirtualBox more consistently.
+Sau khi cài VirtualBox, bạn có thể tự tạo máy ảo thủ công trên đó.
+Tuy nhiên, Vagrant giúp triển khai nhiều máy ảo trên VirtualBox dễ dàng và nhất quán hơn.
 
-Download and Install [Vagrant](https://www.vagrantup.com/) on your platform.
+Tải và cài [Vagrant](https://www.vagrantup.com/) cho nền tảng của bạn.
 
-This lab was last tested with Vagrant 2.3.7, though newer versions should be ok.
+Lab này được kiểm thử lần cuối với Vagrant 2.3.7, các phiên bản mới hơn cũng sẽ chạy được.
 
-## Lab Defaults
+> 💡 **Bổ sung:** Vagrant đọc file [Vagrantfile](../Vagrantfile) trong thư mục `virtualbox` để biết cần tạo bao nhiêu VM, cấu hình CPU/RAM, mạng và các script provisioning chạy khi VM khởi động lần đầu. Nhờ vậy cả lớp đều có một môi trường giống hệt nhau chỉ với `vagrant up`.
 
-The labs have been configured with the following networking defaults. If you change any of these after you have deployed any of the lab, you'll need to completely reset it and start again from the beginning:
+## Giá trị mặc định của lab
+
+Các lab đã được cấu hình với các giá trị mạng mặc định dưới đây. Nếu bạn thay đổi bất kỳ giá trị nào sau khi đã triển khai một phần lab, bạn sẽ phải reset hoàn toàn và làm lại từ đầu:
 
 ```bash
 vagrant destroy -f
 vagrant up
 ```
 
-If you do change any of these, **please consider that a personal preference and don't submit a PR for it**.
+Nếu bạn có thay đổi các giá trị này, **hãy coi đó là tùy chọn cá nhân và đừng gửi PR cho thay đổi đó**.
 
-### Virtual Machine Network
+### Mạng của máy ảo
 
-Due to how VirtualBox/Vagrant works, the networking for each VM requires two network adapters; one NAT (`enp0s3`) to communicate with the outside world, and one internal (`enp0s8`) which is attached to the VirtualBox network mentioned above. By default, Kubernetes components will connect to the default network adapter - the NAT one, which is *not* what we want, therefore we have pre-set an environment variable `PRIMARY_IP` on all VMs which is the IP address that Kubernetes components should be using. In the coming labs you will see this environment variable being used to ensure Kubernetes components bind to the correct network interface.
+Do cách VirtualBox/Vagrant hoạt động, mỗi VM cần hai network adapter: một adapter NAT (`enp0s3`) để giao tiếp với bên ngoài, và một adapter nội bộ (`enp0s8`) gắn vào mạng VirtualBox nói trên. Mặc định, các thành phần Kubernetes sẽ kết nối qua network adapter mặc định — tức adapter NAT — và đó *không* phải điều chúng ta muốn. Vì vậy, chúng tôi đã đặt sẵn biến môi trường `PRIMARY_IP` trên tất cả các VM, chứa địa chỉ IP mà các thành phần Kubernetes nên sử dụng. Trong các lab tiếp theo, bạn sẽ thấy biến này được dùng để đảm bảo các thành phần Kubernetes bind vào đúng network interface.
 
-`PRIMARY_IP` is defined as the IP address of the network interface on the node that is connected to the network having the default gateway, and is the interface that a node will use to talk to the other nodes. For those interested, this variable is assigned the result of the following command
+`PRIMARY_IP` được định nghĩa là địa chỉ IP của network interface trên node nối với mạng có default gateway, và đó là interface mà node dùng để nói chuyện với các node khác. Nếu bạn tò mò, biến này được gán bằng kết quả của lệnh sau
 
 ```bash
 ip route | grep default | awk '{ print $9 }'
 ```
 
+> 💡 **Bổ sung:** Vì sao điều này quan trọng? Với adapter NAT của VirtualBox, *mọi* VM đều nhận cùng một IP (thường là `10.0.2.15`), nên nếu kube-apiserver quảng bá (advertise) IP này hoặc kubelet đăng ký node với IP này thì các node không thể liên lạc với nhau. Đó là lý do khi chạy `kubeadm init` ta sẽ truyền `--apiserver-advertise-address` và cấu hình `--node-ip` cho kubelet bằng `PRIMARY_IP`. Bạn có thể kiểm tra IP mà node đang dùng bằng `kubectl get nodes -o wide` (cột `INTERNAL-IP`).
+
 #### Bridge Networking
 
-The default configuration in this lab is to bring the VMs up on bridged interfaces. What this means is that your Kubernetes nodes will appear as additional machines on your local network, their IP addresses being provided dynamically by your broadband router. This facilitates the use of your browser to connect to any NodePort services you deploy.
+Cấu hình mặc định của lab là khởi động VM trên các bridged interface. Nghĩa là các node Kubernetes sẽ xuất hiện như những máy bổ sung trong mạng nội bộ (LAN) của bạn, với địa chỉ IP do router mạng nhà bạn cấp phát động (DHCP). Điều này giúp bạn dùng trình duyệt để truy cập bất kỳ Service NodePort nào bạn triển khai.
 
-Should you have issues deploying bridge networking, please raise a [bug report](https://github.com/kodekloudhub/certified-kubernetes-administrator-course/issues) and include all details including the output of `vagrant up`.
+Nếu gặp vấn đề khi triển khai bridge networking, hãy tạo [bug report](https://github.com/kodekloudhub/certified-kubernetes-administrator-course/issues) kèm đầy đủ thông tin, bao gồm output của `vagrant up`.
 
-Then retry the lab in NAT mode. How to do this is covered in the [next section](./02-compute-resources.md).
+Sau đó thử lại lab ở chế độ NAT. Cách làm được trình bày ở [phần tiếp theo](./02-compute-resources.md).
 
 #### NAT Networking
 
-In NAT configuration, the network on which the VMs run is isolated from your broadband router's network by a NAT gateway managed by the hypervisor. This means that VMs can see out (and connect to Internet), but you can't see in (i.e. use browser to connect to NodePorts) without setting up individual port forwarding rules for every NodePort using the VirtualBox UI.
+Trong cấu hình NAT, mạng mà các VM chạy trên đó bị tách biệt khỏi mạng của router nhà bạn bởi một NAT gateway do hypervisor quản lý. Nghĩa là các VM có thể nhìn ra ngoài (và kết nối Internet), nhưng bạn không thể nhìn vào trong (tức là dùng trình duyệt để kết nối tới NodePort) nếu không tự thiết lập quy tắc port forwarding cho từng NodePort trong giao diện VirtualBox.
 
-The network used by the Virtual Box virtual machines is `192.168.56.0/24`.
+Mạng mà các máy ảo VirtualBox sử dụng là `192.168.56.0/24`.
 
-To change this, edit the [Vagrantfile](../Vagrantfile) in your cloned copy (do not edit directly in github), and set the new value for the network prefix at line 9. This should not overlap any of the other network settings.
+Để thay đổi, hãy sửa [Vagrantfile](../Vagrantfile) trong bản clone của bạn (không sửa trực tiếp trên github) và đặt giá trị mới cho network prefix ở dòng 9. Mạng này không được chồng lấn với bất kỳ thiết lập mạng nào khác.
 
-Note that you do not need to edit any of the other scripts to make the above change. It is all managed by shell variable computations based on the assigned VM  IP  addresses and the values in the hosts file (also computed).
+Lưu ý bạn không cần sửa các script khác để thực hiện thay đổi trên. Mọi thứ đều được tính toán bằng biến shell dựa trên địa chỉ IP gán cho VM và các giá trị trong file hosts (cũng được tính toán tự động).
 
-It is *recommended* that you leave the pod and service networks as the defaults. If you change them then you will also need to edit the Weave networking manifests to accommodate your change.
+*Khuyến nghị* giữ nguyên mạng Pod và mạng Service ở giá trị mặc định. Nếu thay đổi, bạn sẽ phải sửa cả manifest của CNI cho phù hợp.
 
-If you do decide to change any of these, please treat as personal preference and do not raise a pull request.
+> 💡 **Bổ sung:** Bản gốc nhắc tới manifest mạng Weave, nhưng hướng dẫn hiện tại (xem [05-controlplane](../../generic/05-controlplane.md)) dùng **Calico**. Weave Net đã ngừng được phát triển sau khi Weaveworks đóng cửa (2024), nên không còn được khuyến nghị.
+
+Nếu bạn quyết định thay đổi bất kỳ giá trị nào, hãy coi đó là tùy chọn cá nhân và đừng tạo pull request.
 
 
-### Pod Network
+### Mạng Pod
 
-The network used to assign IP addresses to pods is `10.244.0.0/16`.
+Mạng dùng để cấp phát địa chỉ IP cho các Pod là `10.244.0.0/16`.
 
-To change this, open all the `.md` files in the [docs](../docs/) directory in your favourite IDE and do a global replace on<br>
+Để thay đổi, mở tất cả các file `.md` trong thư mục [docs](../docs/) bằng IDE yêu thích và thay thế toàn cục (global replace)<br>
 `POD_CIDR=10.244.0.0/16`<br>
-with the new CIDR range.  This should not overlap any of the other network settings.
+bằng dải CIDR mới. Dải này không được chồng lấn với bất kỳ thiết lập mạng nào khác.
 
-### Service Network
+### Mạng Service
 
-The network used to assign IP addresses to Cluster IP services is `10.96.0.0/16`.
+Mạng dùng để cấp phát địa chỉ IP cho các Service Cluster IP là `10.96.0.0/16`.
 
-To change this, open all the `.md` files in the [docs](../docs/) directory in your favourite IDE and do a global replace on<br>
+Để thay đổi, mở tất cả các file `.md` trong thư mục [docs](../docs/) bằng IDE yêu thích và thay thế toàn cục<br>
 `SERVICE_CIDR=10.96.0.0/16`<br>
-with the new CIDR range.  This should not overlap any of the other network settings.
+bằng dải CIDR mới. Dải này không được chồng lấn với bất kỳ thiết lập mạng nào khác.
 
-## Running Commands in Parallel with tmux
+> 💡 **Bổ sung:** Có ba dải mạng cần phân biệt và **không được chồng lấn**: mạng của node (LAN/VirtualBox, vd `192.168.56.0/24` hoặc mạng nhà bạn), mạng Pod (`--pod-network-cidr`, do CNI cấp IP cho Pod) và mạng Service (`--service-cidr`, IP ảo cho ClusterIP do kube-proxy xử lý). Nếu chồng lấn, traffic sẽ bị định tuyến sai và cluster hoạt động thất thường. Lưu ý các lệnh thực tế nằm trong các file ở thư mục [generic](../../generic/), nên khi đổi CIDR hãy tìm-thay thế cả ở đó.
 
-If you are running this tutorial on an x86 Mac, you can instead use iterm2 to achive this. See the iterm2 setup in the [Apple Silicon guide](../../apple-silicon/docs/01-prerequisites.md#running-commands-in-parallel-with-iterm2).
+## Chạy lệnh song song với tmux
 
-[tmux](https://github.com/tmux/tmux/wiki) can be used to run the same commands on multiple compute instances at the same time. Labs in this tutorial may require running the same commands across multiple compute instances. In those cases you may consider using tmux and splitting a window into multiple panes with synchronize-panes enabled to speed up the provisioning process.
+Nếu bạn làm tutorial này trên Mac x86, có thể dùng iterm2 thay thế. Xem phần thiết lập iterm2 trong [hướng dẫn Apple Silicon](../../apple-silicon/docs/01-prerequisites.md#running-commands-in-parallel-with-iterm2).
 
-In order to use tmux, you must first connect to `controlplane` and run tmux there. From inside the tmux session you can open multiple panes and ssh to the worker nodes from these panes.
+[tmux](https://github.com/tmux/tmux/wiki) có thể dùng để chạy cùng một lệnh trên nhiều compute instance cùng lúc. Các lab trong tutorial này có thể yêu cầu chạy cùng một lệnh trên nhiều compute instance. Khi đó bạn có thể cân nhắc dùng tmux, chia cửa sổ thành nhiều pane và bật synchronize-panes để tăng tốc quá trình provisioning.
 
-*The use of tmux is optional and not required to complete this tutorial*.
+Để dùng tmux, trước tiên bạn phải kết nối vào `controlplane` và chạy tmux tại đó. Bên trong phiên tmux, bạn có thể mở nhiều pane và ssh tới các worker node từ các pane này.
+
+*Việc dùng tmux là tùy chọn, không bắt buộc để hoàn thành tutorial này*.
 
 ![tmux screenshot](../../../images/tmux-screenshot.png)
 
-> Enable synchronize-panes by pressing `CTRL+B` followed by `"` to split the window into two panes. In each pane (selectable with mouse), ssh to the host(s) you will be working with.</br>Next type `CTRL+X` at the prompt to begin sync. In sync mode, the dividing line between panes will be red. Everything you type or paste in one pane will be echoed in the other.<br>To disable synchronization type `CTRL+X` again.</br></br>Note that the `CTRL-X` key binding is provided by a `.tmux.conf` loaded onto the VM by the vagrant provisioner.<br/>To paste commands into a tmux pane, use `SHIFT-RightMouseButton`.
+> Để bật synchronize-panes, nhấn `CTRL+B` rồi `"` để chia cửa sổ thành hai pane. Trong mỗi pane (chọn bằng chuột), ssh tới host bạn sẽ làm việc.</br>Tiếp theo gõ `CTRL+X` tại dấu nhắc để bắt đầu đồng bộ. Ở chế độ đồng bộ, đường phân cách giữa các pane sẽ có màu đỏ. Mọi thứ bạn gõ hoặc dán vào một pane sẽ được lặp lại ở pane kia.<br>Để tắt đồng bộ, gõ lại `CTRL+X`.</br></br>Lưu ý phím tắt `CTRL-X` được cung cấp bởi file `.tmux.conf` mà vagrant provisioner nạp sẵn vào VM.<br/>Để dán lệnh vào một pane tmux, dùng `SHIFT-RightMouseButton` (Shift + chuột phải).
 
-Next: [Compute Resources](02-compute-resources.md)
+Tiếp theo: [Compute Resources](02-compute-resources.md)

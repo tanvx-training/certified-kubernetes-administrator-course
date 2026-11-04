@@ -1,45 +1,45 @@
-# Provisioning Compute Resources
+# Tạo tài nguyên tính toán (Compute Resources)
 
-We will provision the following infrastructure. The infrastructure will be created by Terraform, so as not to spend too much of the lab time just getting that provisioned, and to allow you to focus on the cluster installation.
+Chúng ta sẽ tạo hạ tầng như dưới đây. Hạ tầng sẽ được tạo bằng Terraform để không tốn quá nhiều thời gian lab chỉ cho việc dựng hạ tầng, giúp bạn tập trung vào việc cài đặt cluster.
 
 ![Infra](../../../images/kubeadm-aws-ha-architecture.png)
 
 
-As can be seen in this diagram, we will create three EC2 instances to form the cluster and a further one `student-node` from which to perform the configuration. We build the infrastructure using Terraform from AWS CloudShell (so you don't have to install Terraform on your workstation), then log into `student-node` which can access the cluster nodes. This relationship between `student-node` and the cluster nodes is similar to CKA Ultimate Mocks and how the real exam works - you start on a separate node (in this case `student-node`), then use SSH to connect to cluster nodes. Note that SSH connections are only possible in the direction of the arrows. It is not possible to SSH from e.g. `controlplane` directly to `node01`. You must `exit` to `student-node` first. This is also how it is in the exam. `student-node` assumes the role of a [bastion host](https://en.wikipedia.org/wiki/Bastion_host).
+Như trong sơ đồ, chúng ta sẽ tạo sáu EC2 instance để tạo thành cluster (3 control plane, 2 worker và 1 load balancer; bản gốc ghi nhầm là "ba") và thêm một instance `student-node` để thực hiện việc cấu hình. Chúng ta dựng hạ tầng bằng Terraform từ AWS CloudShell (nên bạn không phải cài Terraform trên máy của mình), sau đó đăng nhập vào `student-node`, máy có thể truy cập các node của cluster. Mối quan hệ giữa `student-node` và các node của cluster tương tự như CKA Ultimate Mocks và cách đề thi thật hoạt động — bạn bắt đầu trên một node riêng (ở đây là `student-node`), rồi dùng SSH để kết nối tới các node của cluster. Lưu ý rằng kết nối SSH chỉ thực hiện được theo chiều mũi tên. Không thể SSH từ, ví dụ, `controlplane` thẳng sang `node01`. Bạn phải `exit` về `student-node` trước. Trong đề thi cũng như vậy. `student-node` đóng vai trò một [bastion host](https://en.wikipedia.org/wiki/Bastion_host).
 
-We will also set up direct connection from your workstation to the node ports of the workers so that you can browse any NodePort services you create (see security below).
+Chúng ta cũng sẽ thiết lập kết nối trực tiếp từ máy của bạn tới các node port của worker để bạn có thể mở bằng trình duyệt bất kỳ NodePort Service nào bạn tạo (xem phần bảo mật bên dưới).
 
-Some basic security will be configured:
+Một số thiết lập bảo mật cơ bản sẽ được cấu hình:
 
-* Only the `student-node` will be able to access the cluster's API Server, and this is where you will run `kubectl` commands from when the cluster is running.
-* Only the `student-node` can SSH to the cluster nodes.
-* Ports required by Kubernetes itself (inc. etcd) and Calico CNI will be configured in security groups on the cluster nodes.
+* Chỉ `student-node` mới truy cập được API Server của cluster, và đây là nơi bạn sẽ chạy các lệnh `kubectl` khi cluster đã hoạt động.
+* Chỉ `student-node` mới SSH được tới các node của cluster.
+* Các port mà bản thân Kubernetes cần (bao gồm etcd) và Calico CNI sẽ được cấu hình trong security group trên các node của cluster.
 
-Security issues that would make this unsuitable for a genuine production cluster:
+Các vấn đề bảo mật khiến cách làm này không phù hợp cho một cluster production thật sự:
 
-* The kube nodes should be on private subnets (no direct access from the Internet) and placed behind a NAT gateway to allow them to download packages, or with a more extreme security posture, completely [airgapped](https://en.wikipedia.org/wiki/Air_gap_(networking)).
-* Access to API server and etcd would be more tightly controlled.
-* Use of default VPC is not recommended.
-* The node ports will be open to the world - i.e. anyone can connect to them.
-* A cloud load balancer coupled with an ingress controller would be provisioned to provide ingress to the cluster. It is _definitely_ not recommended to expose the worker nodes' node ports to the Internet as we are doing here!!!
+* Các kube node nên nằm trong private subnet (không truy cập trực tiếp được từ Internet) và đặt sau một NAT gateway để có thể tải package, hoặc với yêu cầu bảo mật cao hơn nữa thì hoàn toàn [airgapped](https://en.wikipedia.org/wiki/Air_gap_(networking)) (cách ly khỏi Internet).
+* Truy cập tới API server và etcd cần được kiểm soát chặt chẽ hơn.
+* Không khuyến nghị dùng default VPC.
+* Các node port sẽ được mở ra toàn thế giới — tức là ai cũng có thể kết nối tới.
+* Trong thực tế, ta sẽ tạo một cloud load balancer kết hợp với ingress controller để cung cấp ingress vào cluster. _Tuyệt đối_ không nên expose node port của worker node ra Internet như chúng ta đang làm ở đây!!!
 
-Other things that will be configured by the Terraform code
-* Host names set on the nodes: `loadbalancer`, `controlplane01`, `controlplane02`, `controlplane03`, `node01`, `node02`
-* Content of `/etc/hosts` set up on all nodes for easy use of `ssh` command from `student-node`.
-* Generation and distribution of a key pair for logging into instances via SSH.
+Những thứ khác sẽ được cấu hình bởi code Terraform
+* Hostname đặt trên các node: `loadbalancer`, `controlplane01`, `controlplane02`, `controlplane03`, `node01`, `node02`
+* Nội dung `/etc/hosts` được thiết lập trên tất cả các node để dễ dùng lệnh `ssh` từ `student-node`.
+* Tạo và phân phối một key pair để đăng nhập vào các instance qua SSH.
 
-Let's go ahead and get the infrastructure built!
+Nào, bắt tay vào dựng hạ tầng thôi!
 
-[Click here](https://kodekloud.com/topic/playground-aws/) to start a playground, and click `START LAB` to request a new AWS Cloud Playground instance. After a few seconds, you will receive a URL and your credentials to access AWS Cloud console. Sign into the console.
+[Bấm vào đây](https://kodekloud.com/topic/playground-aws/) để mở một playground, rồi bấm `START LAB` để yêu cầu một AWS Cloud Playground mới. Sau vài giây, bạn sẽ nhận được URL và thông tin đăng nhập để truy cập AWS Cloud console. Hãy đăng nhập vào console.
 
-Note that you must have KodeKloud Pro subscription to run an AWS playground. If you have your own AWS account, this should still work, however you will bear the cost for any resources created until you delete them.
+Lưu ý rằng bạn phải có gói KodeKloud Pro mới chạy được AWS playground. Nếu bạn có tài khoản AWS riêng, cách này vẫn hoạt động, tuy nhiên bạn sẽ phải trả chi phí cho mọi tài nguyên được tạo cho tới khi xóa chúng.
 
-We will run this entire lab in AWS CloudShell which is a Linux terminal you run inside the AWS console and has most of what we need preconfigured, such as git and the AWS credentials needed by Terraform. [Click here](https://us-east-1.console.aws.amazon.com/cloudshell/home?region=us-east-1) to open CloudShell - note that his link will not work until you have signed into the AWS console.
+Chúng ta sẽ chạy toàn bộ bài lab này trong AWS CloudShell — một terminal Linux chạy ngay trong AWS console và đã được cấu hình sẵn phần lớn những gì ta cần, như git và AWS credentials mà Terraform cần. [Bấm vào đây](https://us-east-1.console.aws.amazon.com/cloudshell/home?region=us-east-1) để mở CloudShell — lưu ý link này sẽ không hoạt động cho tới khi bạn đã đăng nhập vào AWS console.
 
 
-## Install Terraform
+## Cài đặt Terraform
 
-From the CloudShell command prompt...
+Từ dấu nhắc lệnh của CloudShell...
 
 ```bash
 curl -O https://releases.hashicorp.com/terraform/1.6.2/terraform_1.6.2_linux_amd64.zip
@@ -49,21 +49,21 @@ mv terraform ~/bin/
 terraform version
 ```
 
-## Clone this repo
+## Clone repo này
 
 ```bash
 git clone https://github.com/kodekloudhub/certified-kubernetes-administrator-course.git
 ```
 
-Now change into the `aws/terraform` directory
+Giờ chuyển vào thư mục `aws/terraform`
 
 ```bash
 cd certified-kubernetes-administrator-course/kubeadm-clusters/aws-ha/terraform
 ```
 
-## Provision the infrastructure
+## Tạo hạ tầng
 
-1. Run the terraform
+1. Chạy terraform
 
     ```bash
     terraform init
@@ -71,7 +71,7 @@ cd certified-kubernetes-administrator-course/kubeadm-clusters/aws-ha/terraform
     terraform apply
     ```
 
-    This should take about half a minute. If this all runs correctly, you will see something like the following at the end of all the output. IP addresses _will be different_ for you
+    Quá trình này mất khoảng nửa phút. Nếu mọi thứ chạy đúng, bạn sẽ thấy nội dung tương tự như sau ở cuối output. Địa chỉ IP của bạn _sẽ khác_
 
     ```
     Apply complete! Resources: 43 added, 0 changed, 0 destroyed.
@@ -93,71 +93,73 @@ cd certified-kubernetes-administrator-course/kubeadm-clusters/aws-ha/terraform
     EOT
     ```
 
-    Copy all these outputs to a notepad for later use.
+    Copy toàn bộ output này vào notepad để dùng sau.
 
-1. Wait for all instances to be ready (Instance state - `running`, Status check - `2/2 checks passed`). This will take 2-3 minutes. See [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:instanceState=running).
+1. Đợi tất cả các instance sẵn sàng (Instance state - `running`, Status check - `2/2 checks passed`). Việc này mất 2-3 phút. Xem tại [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:instanceState=running).
 
-1. Log into `student-node`
+1. Đăng nhập vào `student-node`
 
-    Copy the `ssh` command from the terraform output `connect_student_node`, e.g.
+    Copy lệnh `ssh` từ output `connect_student_node` của terraform, ví dụ
 
     ```
     ssh ubuntu@44.199.229.207
     ```
 
-    Note that the IP address _will be different_ for you.
+    Lưu ý địa chỉ IP của bạn _sẽ khác_.
 
-    You should arrive at a prompt that looks like this
+    Bạn sẽ thấy dấu nhắc lệnh trông như thế này
 
     ```
     ubuntu in 🌐 student-node in ~
     ❯
     ```
 
-## Prepare the student node
+## Chuẩn bị student node
 
-We will install kubectl here so that we can run commands against the cluster when it is built
+Chúng ta sẽ cài kubectl ở đây để có thể chạy lệnh tới cluster khi nó được dựng xong
 
-1. Install latest version of kubectl and place in the user programs directory
+1. Cài phiên bản kubectl mới nhất và đặt vào thư mục chương trình của user
     ```bash
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
     chmod +x kubectl
     sudo mv kubectl /usr/local/bin
     ```
 
-1. Check
+1. Kiểm tra
 
     ```bash
     kubectl version
     ```
 
-    It should amongst other things tell you
+    Trong output, ngoài các thông tin khác, nó sẽ báo
 
     > The connection to the server localhost:8080 was refused - did you specify the right host or port?
 
-    which is fine, since we haven't installed kubernetes yet.
+    điều này là bình thường, vì chúng ta chưa cài kubernetes.
 
-## Deleting the cluster
+    > 💡 **Bổ sung:** Khi không tìm thấy file kubeconfig (`~/.kube/config` hoặc biến `KUBECONFIG`), `kubectl` mặc định thử kết nối tới `localhost:8080`, nên mới có lỗi này. Trên cluster đã chạy, nếu gặp lỗi tương tự thì thường là do thiếu hoặc sai kubeconfig.
 
-If using KodeKloud playground, this isn't strictly necessary as resources will be deleted when the playground ends.
+## Xóa cluster
 
-If you are using your own account, this is *crucial* as you will be billed for the resources created until you delete them - unless of course you want to keep it around and pay. Recall that this is *not* a production hardened installation and could pose a security risk to your account if you leave it lying around.
+Nếu dùng KodeKloud playground, bước này không thực sự cần thiết vì tài nguyên sẽ bị xóa khi playground kết thúc.
 
-To delete
+Nếu bạn dùng tài khoản riêng, bước này là *cực kỳ quan trọng* vì bạn sẽ bị tính tiền cho các tài nguyên đã tạo cho tới khi xóa chúng — trừ khi bạn muốn giữ lại và chịu trả phí. Hãy nhớ rằng đây *không* phải là một bản cài đặt đã được gia cố cho production và có thể gây rủi ro bảo mật cho tài khoản của bạn nếu cứ để đó.
 
-1. Return to the CloudShell terminal
-1. In the same directory where you ran `terraform apply`, run
+Để xóa
+
+1. Quay lại terminal CloudShell
+1. Trong chính thư mục bạn đã chạy `terraform apply`, chạy
 
     ```
     terraform destroy -auto-approve
     ```
 
-## Notes on the terraform code
+## Ghi chú về code terraform
 
-Those of you who are also studying our Terraform courses should look at the terraform files and try to understand what is happening here.
+Những ai đang học các khóa Terraform của chúng tôi nên xem các file terraform và thử hiểu những gì đang diễn ra ở đây.
 
-One point of note is that for the `node` instances, we create network interfaces for them as separate resources, then attach these ENIs to the instances when they are built. The reason for this is so that the IP addresses of the instances can be known in advance, such that during instance creation `/etc/hosts` may be created by the user_data script.
+Một điểm cần chú ý là với các instance `node`, chúng ta tạo network interface (ENI) cho chúng như những resource riêng biệt, rồi gắn các ENI này vào instance khi instance được tạo. Lý do là để biết trước địa chỉ IP của các instance, nhờ đó trong quá trình tạo instance, script user_data có thể tạo sẵn `/etc/hosts`.
 
 
-Next: [Connectivity](./03-connectivity.md)<br/>
-Prev: [Prerequisites](./01-prerequisites.md)
+Tiếp theo: [Kết nối](./03-connectivity.md)<br/>
+Trước đó: [Điều kiện tiên quyết](./01-prerequisites.md)

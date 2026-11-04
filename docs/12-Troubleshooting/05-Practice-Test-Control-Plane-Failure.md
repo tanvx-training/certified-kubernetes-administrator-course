@@ -1,3 +1,3 @@
-# Practice Test - Control Plane Failure
+# Practice Test - Control Plane Failure (Bài thực hành)
 
-  - Lets Debug the Failure of [Control Plane](https://kodekloud.com/topic/practice-test-control-plane-failure/)
+  - Cùng debug lỗi của [Control Plane](https://kodekloud.com/topic/practice-test-control-plane-failure/)

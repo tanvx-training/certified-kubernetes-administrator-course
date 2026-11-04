@@ -1,22 +1,23 @@
-# Kubeadm Cluster Installations
+# Cài đặt cluster bằng Kubeadm
 
-In this section we present various labs for building kubeadm clusters
+Trong phần này, chúng tôi giới thiệu nhiều bài lab khác nhau để tự dựng cluster bằng kubeadm.
 
-* AWS - Using KodeKloud AWS Playground
+* AWS - Sử dụng KodeKloud AWS Playground
 
-    In these labs terraform is used to provision the virtual machines, leaving you to configure the cluster.
-    * [3 Node Cluster](./aws/)
-    * [5 Node Highly Available Cluster](./aws-ha/)
+    Trong các bài lab này, terraform được dùng để tạo sẵn các máy ảo, phần cấu hình cluster sẽ do bạn tự thực hiện.
+    * [Cluster 3 node](./aws/)
+    * [Cluster 5 node có tính sẵn sàng cao (Highly Available)](./aws-ha/)
 
 * Apple Silicon
 
-    For users of Mac with M-series processors, this is a lab that provisions a 2 or 3 node cluster (depending on how much memory your Mac has) using [Multipass](https://multipass.run/).
+    Dành cho người dùng máy Mac chip M-series: bài lab này tạo một cluster 2 hoặc 3 node (tùy theo dung lượng RAM của máy Mac) bằng [Multipass](https://multipass.run/).
 
-    * [2/3 Node Cluster](./apple-silicon/)
+    * [Cluster 2/3 node](./apple-silicon/)
 
-* Vagrant and VirtualBox
+* Vagrant và VirtualBox
 
-    For users of Windows and Mac x86, provision a 3 node cluster on your laptop.
+    Dành cho người dùng Windows và Mac x86: tạo một cluster 3 node ngay trên laptop của bạn.
 
-    * [3 Node Cluster](./virtualbox/)
+    * [Cluster 3 node](./virtualbox/)
 
+> 💡 **Bổ sung:** Đề thi CKA có thể yêu cầu cài đặt hoặc upgrade cluster bằng `kubeadm`, vì vậy tự tay dựng cluster ít nhất một lần là cách ôn tập rất hiệu quả. Hãy chú ý các bước chuẩn bị node (kernel module, sysctl, cấu hình cgroup của containerd), `kubeadm init`, cài CNI và `kubeadm join` — đây là những chỗ dễ sai nhất.

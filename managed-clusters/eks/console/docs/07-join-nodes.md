@@ -1,20 +1,20 @@
-# Join Worker Nodes
+# Join các Worker Node
 
-Now that CloudFormation has created the EC2 instances for the worker nodes, we need to join them to the cluster. Once again, if this is a lab or KKE task, the following must be done at the *lab* terminal.
+Bây giờ CloudFormation đã tạo xong các EC2 instance cho worker node, chúng ta cần join chúng vào cluster. Một lần nữa, nếu đây là bài lab hoặc task KKE, các bước sau phải được thực hiện ở terminal của *lab*.
 
-1. Return to the CloudShell terminal. If you closed it, press the button at the top to reopen it. If it tells you the session is closed due to inactivity, hit Enter to restart it.
-1. Download the node configmap
+1. Quay lại terminal CloudShell. Nếu bạn đã đóng nó, hãy bấm nút ở phía trên để mở lại. Nếu nó báo phiên làm việc đã bị đóng do không hoạt động, hãy bấm Enter để khởi động lại.
+1. Tải file configmap cho node về
 
     ```
     curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/aws-auth-cm.yaml
     ```
-1. Now edit it in `vi`
+1. Bây giờ chỉnh sửa nó bằng `vi`
 
     ```
     vi aws-auth-cm.yaml
     ```
 
-    Where it says `rolearn: <ARN of instance role (not instance profile)>`, you need to delete `<ARN of instance role (not instance profile)>` and paste in the value for `NodeInstanceRole` you got from the previous section. When you are done, it should look something like this (though the actual value will be different for you).
+    Ở chỗ ghi `rolearn: <ARN of instance role (not instance profile)>`, bạn cần xóa `<ARN of instance role (not instance profile)>` và dán vào giá trị `NodeInstanceRole` đã lấy ở phần trước. Khi xong, file sẽ trông tương tự như sau (tuy nhiên giá trị thực tế của bạn sẽ khác).
 
     ```yaml
     apiVersion: v1
@@ -31,20 +31,24 @@ Now that CloudFormation has created the EC2 instances for the worker nodes, we n
             - system:nodes
     ```
 
-1. Save and exit from vi, then apply the configmap
+    > 💡 **Bổ sung:** ConfigMap `aws-auth` ánh xạ IAM role của các EC2 instance sang người dùng Kubernetes `system:node:<tên-DNS-private>` thuộc các group `system:bootstrappers` và `system:nodes`. Đây chính là các group mà Node authorizer và các ClusterRoleBinding mặc định dùng để cấp quyền cho kubelet đăng ký node và cập nhật trạng thái - tương tự cơ chế TLS bootstrapping mà bạn học trong phần bảo mật của CKA. Nếu thiếu bước này, kubelet trên các instance sẽ bị từ chối khi gọi tới API server và node sẽ không bao giờ xuất hiện trong `kubectl get nodes`.
+
+1. Lưu và thoát khỏi vi (`:wq`), sau đó apply configmap
 
     ```
     kubectl apply -f aws-auth-cm.yaml
     ```
 
-    It will take a minute or so for all nodes to join the cluster
+    Sẽ mất khoảng một phút để tất cả các node join vào cluster
 
     ```
     kubectl get nodes
     ```
 
-Congratulations! Your cluster is now up and you can create resources.
+    > 💡 **Mẹo:** Dùng `kubectl get nodes --watch` (hoặc `-w`) để theo dõi các node chuyển sang trạng thái `Ready` mà không cần chạy lại lệnh nhiều lần. Bấm `Ctrl+C` để thoát.
 
-Prev: [Add Cluster Nodes](./06-nodes.md)<br/>
-Next: [Accessing Node Port services](./08-node-port.md)
+Chúc mừng! Cluster của bạn đã hoạt động và bạn có thể tạo tài nguyên.
+
+Trước: [Thêm các node vào Cluster](./06-nodes.md)<br/>
+Tiếp theo: [Truy cập các NodePort service](./08-node-port.md)
 

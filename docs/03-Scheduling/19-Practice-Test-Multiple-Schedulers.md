@@ -1,8 +1,8 @@
-# Practice Test - Multiple Schedulers
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-multiple-schedulers/)
+# Practice Test - Multiple Schedulers (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-multiple-schedulers/)
   
-Solutions to practice test - multiple schedulers
-- Run the command 'kubectl get pods --namespace=kube-system'
+Lời giải cho bài practice test - Multiple Schedulers
+- Chạy lệnh 'kubectl get pods --namespace=kube-system' (xác định tên Pod của default scheduler)
   
   <details>
 
@@ -11,7 +11,7 @@ Solutions to practice test - multiple schedulers
   ```
   </details>
 
-- Run the command 'kubectl describe pod kube-scheduler-controlplane --namespace=kube-system'
+- Chạy lệnh 'kubectl describe pod kube-scheduler-controlplane --namespace=kube-system' (xác định image mà default scheduler đang dùng)
 
   <details>
 
@@ -20,7 +20,7 @@ Solutions to practice test - multiple schedulers
   ```
   </details>
   
-- Use the imperative command to create the configmap with option --from-file
+- Dùng lệnh imperative để tạo ConfigMap với option --from-file (ConfigMap này chứa file cấu hình `KubeSchedulerConfiguration` của scheduler mới, sẽ được mount vào Pod scheduler)
 
   <details>
 
@@ -29,7 +29,7 @@ Solutions to practice test - multiple schedulers
   ```
   </details>
 
-- Use the file at /root/my-scheduler.yaml to create your own scheduler with correct image.
+- Dùng file /root/my-scheduler.yaml để tạo scheduler của riêng bạn với image đúng (thường là cùng image với default scheduler đã xác định ở câu 2).
 
 
   <details>
@@ -39,7 +39,7 @@ Solutions to practice test - multiple schedulers
   ```
   </details>
 
-- Set schedulerName property on pod specification to the name of the new scheduler. File is located at /root/nginx-pod.yaml
+- Đặt thuộc tính schedulerName trong spec của Pod thành tên của scheduler mới. File nằm ở /root/nginx-pod.yaml
   
   <details>
 
@@ -50,5 +50,11 @@ Solutions to practice test - multiple schedulers
   $ kubectl create -f /root/nginx-pod.yaml
   ```
   </details>
+
+> 💡 **Mẹo:**
+> - Tên trong `schedulerName` của Pod phải trùng khớp với `profiles[].schedulerName` trong file `my-scheduler-config.yaml`.
+> - `schedulerName` nằm trong `spec` (cùng cấp với `containers`), và không thể sửa trên Pod đã tạo — phải xóa và tạo lại Pod.
+> - Nếu Pod `Pending`, kiểm tra Pod `my-scheduler` có ở trạng thái `Running` không và xem log của nó: `kubectl logs my-scheduler -n kube-system`.
+> - Xác nhận Pod được lập lịch bởi scheduler nào: `kubectl get events -o wide | grep Scheduled`.
 
 

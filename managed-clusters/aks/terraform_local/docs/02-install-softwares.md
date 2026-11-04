@@ -1,12 +1,12 @@
-# Install Software
+# Cài đặt phần mềm
 
-For best results install required software using package managers.
+Để có kết quả tốt nhất, hãy cài các phần mềm cần thiết bằng trình quản lý gói (package manager).
 
-* Windows - Use [chocolatey package manager](https://github.com/kodekloudhub/community-faq/blob/main/docs/how-tos/howto-package-management-on-windows.md)
-* macOS - Use [HomeBrew](https://brew.sh/)
-* Linux - Use the builtin package managers e.g. `apt`, `yum` etc.
+* Windows - Dùng [trình quản lý gói chocolatey](https://github.com/kodekloudhub/community-faq/blob/main/docs/how-tos/howto-package-management-on-windows.md)
+* macOS - Dùng [HomeBrew](https://brew.sh/)
+* Linux - Dùng trình quản lý gói có sẵn, ví dụ `apt`, `yum`, v.v.
 
-Install the following if you don't aloready have it.
+Cài đặt những phần mềm sau nếu bạn chưa có.
 
 * [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform)
 * `kubectl`
@@ -21,38 +21,40 @@ Install the following if you don't aloready have it.
         choco install -y azure-cli
         ```
 
+> 💡 **Bổ sung:** Ngoài ra bạn cũng cần `git` để clone repository ở bước dưới. Trên macOS có thể cài nhanh mọi thứ bằng `brew install terraform kubectl azure-cli git` (với terraform, HashiCorp khuyến nghị dùng tap `hashicorp/tap/terraform`).
 
-# Verify the installations
 
-Open a new shell and verify that each of the above is correctly installed:
+# Kiểm tra cài đặt
 
-1. To verify Terraform, open powershell and type
+Mở một shell mới và kiểm tra xem từng phần mềm ở trên đã được cài đặt đúng chưa:
+
+1. Để kiểm tra Terraform, mở powershell (hoặc terminal) và gõ
     ```
     terraform version
     ```
-1. To verify kubectl version, open powershell and type
+1. Để kiểm tra phiên bản kubectl, mở powershell (hoặc terminal) và gõ
     ```
     kubectl version --client
     ```
-1. To verify Azure CLI version, open powershell and type
+1. Để kiểm tra phiên bản Azure CLI, mở powershell (hoặc terminal) và gõ
     ```
     az version
     ```
 
-    Note that you may get an error here on Windows. If you do, then fix it by running the following in a command prompt started `as Administrator`
+    Lưu ý rằng bạn có thể gặp lỗi ở bước này trên Windows. Nếu gặp, hãy sửa bằng cách chạy lệnh sau trong một command prompt được mở bằng quyền `as Administrator`
 
     ```
     "C:\Program Files\Microsoft SDKs\Azure\CLI2\python.exe" -m pip install pywin32 --force-reinstall
     ```
 
 
-# Clone the repository
+# Clone repository
 
 ```bash
 git clone https://github.com/kodekloudhub/certified-kubernetes-administrator-course.git
 cd certified-kubernetes-administrator-course/managed-clusters/aks/terraform_local
 ```
 
-Once you have verified the software packages and cloned the repository, please proceed with next step.
+Khi bạn đã kiểm tra các gói phần mềm và clone repository xong, hãy chuyển sang bước tiếp theo.
 
-Next: [Setting Variable](./03-setting-variable.md)
+Tiếp theo: [Thiết lập biến môi trường](./03-setting-variable.md)

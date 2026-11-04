@@ -1,28 +1,35 @@
 # Namespaces
-  - Take me to [Video Tutorial](https://kodekloud.com/topic/namespaces/)
+  - Xem [Video hướng dẫn](https://kodekloud.com/topic/namespaces/)
   
-In this section, we will take a look at **`Namespaces`**
+Trong phần này, chúng ta sẽ tìm hiểu về **`Namespaces`**
 
-So far in this course we have created **`Objects`** such as **`PODs`**, **`Deployments`** and **`Services`** in our cluster. Whatever we have been doing we have been doing in a **`NAMESPACE`**.
-- This namespace is the **`default`** namespace in kubernetes. It is automatically created when kubernetes is setup initially.
+Cho đến giờ trong khóa học, chúng ta đã tạo các **`Object`** như **`Pod`**, **`Deployment`** và **`Service`** trong cluster. Tất cả những gì ta làm đều diễn ra bên trong một **`NAMESPACE`**.
+- Namespace này là namespace **`default`** của Kubernetes. Nó được tạo tự động khi Kubernetes được cài đặt lần đầu.
 
   ![ns](../../images/ns.PNG)
+
+> 💡 **Bổ sung:** Namespace là cơ chế phân vùng logic (cách ly theo tên) các resource bên trong một cluster. Ngoài `default`, Kubernetes còn tự tạo:
+> - `kube-system`: chứa các thành phần hệ thống (CoreDNS, kube-proxy, các static Pod của control plane...).
+> - `kube-public`: resource có thể đọc công khai, kể cả với người dùng chưa xác thực.
+> - `kube-node-lease`: chứa các object Lease dùng làm heartbeat của node, giúp control plane phát hiện node bị lỗi.
+>
+> Lưu ý không phải resource nào cũng thuộc namespace: Node, PersistentVolume, StorageClass, ClusterRole, Namespace... là resource cấp cluster. Kiểm tra bằng `kubectl api-resources --namespaced=false`.
  
-- You can create your own namespaces as well.
+- Bạn cũng có thể tạo namespace của riêng mình.
 
   ![ns3](../../images/ns3.PNG)
   
-- To list the pods in default namespace
+- Liệt kê các Pod trong namespace default
   ```
   $ kubectl get pods
   ```
-- To list the pods in another namespace. Use **`kubectl get pods`** command along with the **`--namespace`** flag or argument.
+- Liệt kê các Pod trong một namespace khác: dùng lệnh **`kubectl get pods`** kèm flag **`--namespace`**.
   ```
   $ kubectl get pods --namespace=kube-system
   ```
   ![ns8](../../images/ns8.PNG)
   
-- Here we have a pod definition file, when we create a pod with pod-definition file, the pod is created in the default namespace.
+- Ở đây ta có một file định nghĩa Pod. Khi tạo Pod bằng file này, Pod sẽ được tạo trong namespace default.
 
 ```
 apiVersion: v1
@@ -40,13 +47,13 @@ spec:
   ```
   $ kubectl create -f pod-definition.yaml
   ```
-- To create the pod with the pod-definition file in another namespace, use the **`--namespace`** option.
+- Để tạo Pod từ file định nghĩa trong một namespace khác, dùng tùy chọn **`--namespace`**.
   ```
   $ kubectl create -f pod-definition.yaml --namespace=dev
   ```
   ![ns9](../../images/ns9.PNG)
 
-- If you want to make sure that this pod gets you created in the **`dev`** env all the time, even if you don't specify in the command line, you can move the **`--namespace`** definition into the pod-definition file.
+- Nếu muốn đảm bảo Pod này luôn được tạo trong môi trường **`dev`**, kể cả khi không chỉ định trên dòng lệnh, bạn có thể đưa phần khai báo namespace vào trong file định nghĩa Pod.
 ```
 apiVersion: v1
 kind: Pod
@@ -64,7 +71,7 @@ spec:
   
   ![ns10](../../images/ns10.PNG)
   
-- To create a new namespace, create a namespace definition as shown below and then run **`kubectl create`**
+- Để tạo namespace mới, viết file định nghĩa namespace như dưới đây rồi chạy **`kubectl create`**
 ```
 apiVersion: v1
 kind: Namespace
@@ -75,23 +82,28 @@ metadata:
   ```
   $ kubectl create -f namespace-dev.yaml
   ```
-  Another way to create a namespace
+  Một cách khác để tạo namespace
   ```
   $ kubectl create namespace dev
   ```
   ![ns11](../../images/ns11.PNG)
   
-- By default, we will be in a **`default`** namespace. To switch to a particular namespace permenently run the below command.
+- Mặc định, chúng ta ở trong namespace **`default`**. Để chuyển hẳn sang một namespace cụ thể, chạy lệnh dưới đây.
   ```
   $ kubectl config set-context $(kubectl config current-context) --namespace=dev
   ```
-- To view pods in all namespaces
+
+> 💡 **Bổ sung:** Cách viết ngắn tương đương: `kubectl config set-context --current --namespace=dev`. Kiểm tra namespace đang dùng: `kubectl config view --minify | grep namespace`. Trong kỳ thi CKA, mỗi câu hỏi thường chỉ định namespace cụ thể - an toàn nhất là luôn thêm `-n <namespace>` vào lệnh thay vì đổi context mặc định.
+
+- Xem Pod trong tất cả các namespace
   ```
   $ kubectl get pods --all-namespaces
   ```
   ![ns12](../../images/ns12.PNG)
+
+> 💡 **Bổ sung:** `--all-namespaces` có thể viết tắt là `-A`, và `--namespace` viết tắt là `-n`, ví dụ `kubectl get pods -A`, `kubectl get pods -n kube-system`.
   
-- To limit resources in a namespace, create a resource quota. To create one start with **`ResourceQuota`** definition file.
+- Để giới hạn tài nguyên trong một namespace, hãy tạo resource quota. Bắt đầu bằng một file định nghĩa **`ResourceQuota`**.
 ```
 apiVersion: v1
 kind: ResourceQuota
@@ -110,12 +122,14 @@ spec:
   $ kubectl create -f compute-quota.yaml
   ```
   ![ns13](../../images/ns13.PNG)
+
+> 💡 **Bổ sung:** Khi namespace có ResourceQuota giới hạn `requests.cpu`/`requests.memory` (hoặc `limits.*`), mọi Pod mới tạo trong namespace đó **bắt buộc** phải khai báo requests/limits tương ứng, nếu không sẽ bị từ chối. Có thể dùng LimitRange để đặt giá trị mặc định. Xem mức sử dụng quota bằng `kubectl describe resourcequota -n dev`.
   
-K8s Reference Docs:
+Tài liệu tham khảo K8s:
 - https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 - https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/
 - https://kubernetes.io/docs/tasks/administer-cluster/namespaces/
 - https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/
 - https://kubernetes.io/docs/tasks/access-application-cluster/list-all-running-container-images/
   
-  
+

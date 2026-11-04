@@ -1,12 +1,12 @@
-# Test the cluster
+# Kiểm thử cluster
 
-Here we will test the cluster by creating a workload with a node port service and get the results using `curl`
+Ở bước này, chúng ta sẽ kiểm thử cluster bằng cách tạo một workload kèm một NodePort Service và lấy kết quả bằng `curl`
 
-Do the following on `controlplane`
+Thực hiện các bước sau trên `controlplane`
 
 [//]: # (host:controlplane)
 
-1. Deploy and expose an nginx pod
+1. Deploy và expose một Pod nginx
 
     ```bash
     kubectl create deployment nginx --image nginx:alpine
@@ -18,28 +18,30 @@ Do the following on `controlplane`
 
 [//]: # (command:kubectl wait deployment -n default nginx --for condition=Available=True --timeout=90s)
 
-2.  Hit the new service
+2.  Gọi tới Service mới
 
     ```bash
     curl http://node01:$PORT_NUMBER
     curl http://node02:$PORT_NUMBER
     ```
 
-    If you get this error:
+    Nếu bạn gặp lỗi này:
     ```
     curl: (7) Failed to connect to node01 port 30659 after 0 ms: Connection refused
     ```
-    Wait a few seconds and try again. Both should return the nginx welcome message as HTML text.
+    Hãy đợi vài giây rồi thử lại. Cả hai lệnh đều phải trả về trang chào mừng của nginx dưới dạng HTML.
 
-Congratulations! You now have a working kubeadm cluster.
+    > 💡 **Bổ sung:** NodePort Service mở cùng một port (mặc định trong dải 30000-32767) trên **mọi** node, nên dù Pod nginx chỉ chạy trên một node, bạn vẫn gọi được qua cả `node01` và `node02` — kube-proxy sẽ chuyển tiếp traffic tới Pod. Nếu chỉ một node trả lời được, hãy kiểm tra CNI (Pod của calico trên node kia) và cấu hình `ip_forward`/`br_netfilter` ở bước chuẩn bị node.
 
-## Viewing service with a browser
+Chúc mừng! Bạn đã có một cluster kubeadm hoạt động.
 
-### VirtualBox or Apple Silicon
+## Xem Service bằng trình duyệt
 
-If you installed the cluster with bridge networking (the default), then you can view NodePort services with your browser.
+### VirtualBox hoặc Apple Silicon
 
-Run the following command on `controlplane` to get browser address, then copy the output to your browser:
+Nếu bạn cài cluster với mạng bridge (mặc định), bạn có thể xem các NodePort Service bằng trình duyệt.
+
+Chạy lệnh sau trên `controlplane` để lấy địa chỉ cho trình duyệt, rồi copy kết quả vào trình duyệt:
 
 ```bash
 echo "http://$(dig +short node01):$PORT_NUMBER"
@@ -47,18 +49,18 @@ echo "http://$(dig +short node01):$PORT_NUMBER"
 
 ### AWS
 
-1. Refer to the outputs of the terraform run and get the IP address for either `node01` or `node02`. If you did not note these down, you can find the IP addresses from the [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:) by looking in the `Public IPv4 ...` column (scroll right if this column is not in view).
-1. Form a URL using the IP address (it will be different for you) and the NodePort number output from step 1 above, e.g.
+1. Xem output của lần chạy terraform và lấy địa chỉ IP của `node01` hoặc `node02`. Nếu chưa ghi lại, bạn có thể tìm các địa chỉ IP trong [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:) ở cột `Public IPv4 ...` (cuộn sang phải nếu không thấy cột này).
+1. Ghép URL từ địa chỉ IP (của bạn sẽ khác) và số NodePort in ra ở bước 1 phía trên, ví dụ
 
     ```
     http://54.167.161.210:32182
     ```
-1. Paste URL to your browser
+1. Dán URL vào trình duyệt
 
-You may also copy the KUBECONFIG to `student-node` thus allowing you to run `kubectl` commands from there:
+Bạn cũng có thể copy KUBECONFIG sang `student-node` để chạy được các lệnh `kubectl` từ đó:
 
-1. Return to `student-node`.
-1. Run the following:
+1. Quay lại `student-node`.
+1. Chạy lệnh sau:
 
     ```bash
     mkdir ~/.kube
@@ -67,6 +69,4 @@ You may also copy the KUBECONFIG to `student-node` thus allowing you to run `kub
     ```
 
 
-Prev: [Worker nodes](./06-workers.md)
-
-
+Trước đó: [Các worker node](./06-workers.md)

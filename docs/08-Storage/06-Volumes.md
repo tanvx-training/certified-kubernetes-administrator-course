@@ -1,24 +1,49 @@
 # Volumes
 
-  - Take me to [Lecture](https://kodekloud.com/topic/volumes/)
+  - Xem [Bài giảng](https://kodekloud.com/topic/volumes/)
 
-In this section, we will take a look at **Volumes**
+Trong phần này, chúng ta sẽ tìm hiểu về **Volumes**
 
-- We discussed about Docker storage, If we don't attach the volume in the container runtime, when container destroyed and then all data will be lost. So, We need to persist data into the Docker container so we attach a volume to the containers when they are created.
-- The data are processed by the container is now placed in this volume thereby retaining it permanently. Even if the container is deleted the data remains in the volume.
+- Như đã tìm hiểu ở phần Docker storage, nếu không gắn volume cho container thì khi container bị xóa, toàn bộ dữ liệu sẽ mất. Vì vậy, để lưu trữ dữ liệu bền vững, ta gắn volume vào container khi tạo chúng.
+- Dữ liệu do container xử lý lúc này được đặt trong volume, nhờ đó được giữ lại lâu dài. Ngay cả khi container bị xóa, dữ liệu vẫn còn trong volume.
 
-- In the Kubernetes world, the PODs created in Kubernetes are transient in nature. When a POD is created to process data and then deleted, the data processed by it gets deleted as well. 
-- For example, We create a simple POD that generated a random between 1 and 100 and writes that to a file at `/opt/number.out`. To persist into the volume.
-- We create a volume for that. In this case I specify a path `/data` on the host. Files are stored in the directory data on my node. We use the volumeMounts field in each container to mount the data-volume to the directory `/opt` within the container. The random number will now be written to `/opt` mount inside the container, which happens to be on the data-volume which is in fact `/data` directory on the host. When the pod gets deleted, the file with the random number still lives on the host.
+- Trong thế giới Kubernetes, các Pod có bản chất tạm thời (transient). Khi một Pod được tạo ra để xử lý dữ liệu rồi bị xóa, dữ liệu nó đã xử lý cũng bị xóa theo.
+- Ví dụ, ta tạo một Pod đơn giản sinh ra một số ngẫu nhiên từ 1 đến 100 và ghi vào file `/opt/number.out`. Ta muốn lưu kết quả này vào volume để không bị mất.
+- Ta tạo một volume cho việc đó. Trong ví dụ này, ta chỉ định đường dẫn `/data` trên host, nghĩa là các file được lưu trong thư mục `/data` trên node. Ta dùng trường `volumeMounts` trong mỗi container để mount `data-volume` vào thư mục `/opt` bên trong container. Số ngẫu nhiên giờ sẽ được ghi vào `/opt` bên trong container, mà thực chất nằm trên `data-volume`, tức thư mục `/data` trên host. Khi Pod bị xóa, file chứa số ngẫu nhiên vẫn còn trên host.
 
 ![class-14](../../images/class14.PNG)
 
+> 💡 **Bổ sung:** Manifest tương ứng với ví dụ trên (dạng `hostPath`):
+>
+> ```yaml
+> apiVersion: v1
+> kind: Pod
+> metadata:
+>   name: random-number-generator
+> spec:
+>   containers:
+>   - name: alpine
+>     image: alpine
+>     command: ["/bin/sh", "-c"]
+>     args: ["shuf -i 0-100 -n 1 >> /opt/number.out;"]
+>     volumeMounts:
+>     - mountPath: /opt
+>       name: data-volume
+>   volumes:
+>   - name: data-volume
+>     hostPath:
+>       path: /data
+>       type: DirectoryOrCreate
+> ```
+>
+> Trường `hostPath.type` (tùy chọn) có các giá trị hay gặp: `Directory` (thư mục phải tồn tại sẵn), `DirectoryOrCreate` (tự tạo nếu chưa có), `File`, `FileOrCreate`... Ngoài `hostPath`, một loại volume rất hay gặp khi thi là `emptyDir`: thư mục rỗng được tạo khi Pod chạy trên node và **bị xóa khi Pod bị xóa** — thường dùng để chia sẻ dữ liệu giữa các container trong cùng một Pod (vd sidecar đọc log).
 
 
-## Volume Storage Options
 
-- In the volumes, hostPath volume type is fine with the single node. It's not recommended for use with the multi node cluster.
-- In the Kubernetes, it supports several types of standard storage solutions such as NFS, GlusterFS, CephFS or public cloud solutions like AWS EBS, Azure Disk or Google's Persistent Disk.
+## Các lựa chọn lưu trữ cho Volume
+
+- Volume kiểu `hostPath` phù hợp khi chỉ có một node. Không nên dùng nó cho cluster nhiều node, vì mỗi node có thư mục `/data` riêng và dữ liệu giữa các node không giống nhau (Pod chạy lại trên node khác sẽ không thấy dữ liệu cũ).
+- Kubernetes hỗ trợ nhiều giải pháp lưu trữ chuẩn như NFS, GlusterFS, CephFS hoặc các giải pháp public cloud như AWS EBS, Azure Disk hay Google Persistent Disk.
 
 ![class-15](../../images/class15.PNG)
 
@@ -32,7 +57,9 @@ volumes:
     fsType: ext4
 ```
 
-#### Kubernetes Volumes Reference Docs
+> 💡 **Bổ sung:** Ví dụ `awsElasticBlockStore` ở trên là volume plugin in-tree kiểu cũ; nó đã bị deprecated từ v1.19 và **bị gỡ bỏ hoàn toàn từ Kubernetes v1.27** (tương tự `gcePersistentDisk`, `azureDisk`...). Trên cluster hiện đại, hãy dùng CSI driver tương ứng, thường thông qua PersistentVolume/PersistentVolumeClaim và StorageClass (các phần tiếp theo) thay vì khai báo trực tiếp trong Pod.
+
+#### Tài liệu tham khảo Kubernetes Volumes
 
 - https://kubernetes.io/docs/concepts/storage/volumes/
 - https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/

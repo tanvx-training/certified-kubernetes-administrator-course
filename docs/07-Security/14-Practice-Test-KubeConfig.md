@@ -1,8 +1,8 @@
-# Practice Test - KubeConfig
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-kubeconfig/)
+# Practice Test - KubeConfig (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-kubeconfig/)
  
-Solutions to the practice test - kubeconfig
-- Look for the kube config file under `/root/.kube`
+Lời giải cho bài practice test - kubeconfig
+- Tìm file kubeconfig trong thư mục `/root/.kube`
   
   <details>
   ```
@@ -10,7 +10,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
     
-- Run the kubectl config view command and count the number of clusters
+- Chạy lệnh kubectl config view và đếm số cluster
 
   <details>
   ```
@@ -18,7 +18,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
     
-- Run the command `kubectl config view` and count the number of users
+- Chạy lệnh `kubectl config view` và đếm số user
 
   <details>
   ```
@@ -26,7 +26,17 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- How many contexts are defined in the default kubeconfig file?
+- Có bao nhiêu context được định nghĩa trong file kubeconfig mặc định?
+  
+  <details>
+  ```
+  $ kubectl config view
+  ```
+  </details>
+
+  (Có thể dùng `kubectl config get-contexts` để xem nhanh.)
+  
+- Chạy lệnh 'kubectl config view' và tìm tên user.
   
   <details>
   ```
@@ -34,7 +44,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- Run the command 'kubectl config view' and look for the user name.
+- Tên của cluster được cấu hình trong file kubeconfig mặc định là gì?
   
   <details>
   ```
@@ -42,15 +52,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- What is the name of the cluster configured in the default kubeconfig file?
-  
-  <details>
-  ```
-  $ kubectl config view
-  ```
-  </details>
-  
-- Run the command 'kubectl config view --kubeconfig my-kube-config'
+- Chạy lệnh 'kubectl config view --kubeconfig my-kube-config'
   
   <details>
   ```
@@ -58,7 +60,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- How many contexts are configured in the 'my-kube-config' file?
+- Có bao nhiêu context được cấu hình trong file 'my-kube-config'?
   
   <details>
   ```
@@ -66,7 +68,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- What user is configured in the 'research' context?
+- User nào được cấu hình trong context 'research'?
   
   <details>
   ```
@@ -74,7 +76,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
     
-- What is the name of the client-certificate file configured for the 'aws-user'?
+- Tên file client-certificate được cấu hình cho 'aws-user' là gì?
   
   <details>
   ```
@@ -82,15 +84,17 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- What is the current context set to in the 'my-kube-config' file?
+- Current context trong file 'my-kube-config' đang là gì?
   
   <details>
   ```
   $ kubectl config view --kubeconfig my-kube-config
   ```
   </details>
+
+  (Hoặc dùng `kubectl config current-context --kubeconfig my-kube-config`.)
   
-- Run the command kubectl config --kubeconfig=/root/my-kube-config use-context research
+- Chạy lệnh kubectl config --kubeconfig=/root/my-kube-config use-context research
   
   <details>
   ```
@@ -98,7 +102,7 @@ Solutions to the practice test - kubeconfig
   ```
   </details>
   
-- Replace the contents in the default kubeconfig file with the content from my-kube-config file.
+- Thay thế nội dung file kubeconfig mặc định bằng nội dung của file my-kube-config.
   
   <details>
   ```
@@ -106,8 +110,10 @@ Solutions to the practice test - kubeconfig
   $ cp /root/my-kube-config .kube/config
   ```
   </details>
+
+  (Cách khác không cần ghi đè file: `export KUBECONFIG=/root/my-kube-config`. Tuy nhiên biến môi trường chỉ có hiệu lực trong phiên shell hiện tại, trừ khi được thêm vào `~/.bashrc`.)
   
-- The path to certificate is incorrect in the kubeconfig file. Fix it. All users certificates are stored at /etc/kubernetes/pki/users
+- Đường dẫn tới certificate trong file kubeconfig bị sai. Hãy sửa lại. Tất cả certificate của user được lưu tại /etc/kubernetes/pki/users
   
  <details>
   $ kubectl get pods
@@ -122,8 +128,4 @@ Solutions to the practice test - kubeconfig
   No resources found in default namespace.
  </details>
 
-
-
-
-
-
+> 💡 **Giải thích:** Khi `kubectl get pods` báo lỗi kiểu `unable to read client-cert ... no such file or directory`, hãy liệt kê thư mục `/etc/kubernetes/pki/users/<user>/` để tìm đúng tên file, rồi sửa trường `client-certificate` (và `client-key` nếu cần) trong `/root/.kube/config` cho khớp. Trong bài lab, file đúng là `dev-user.crt` thay vì tên bị gõ sai trong kubeconfig.

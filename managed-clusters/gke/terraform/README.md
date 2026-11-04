@@ -1,9 +1,9 @@
-# GKE with Terraform
+# Tạo GKE bằng Terraform
 
-Last updated: March 2025
+Cập nhật lần cuối: tháng 3 năm 2025
 
-In this guide, we will deploy a GKE cluster which is compliant with the KodeKloud playground security and usage policies using terraform from within Cloud Shell. Running Cloud Shell from within the GCP console has the advantage that all the authentication and project details are already set in the environment.
+Trong hướng dẫn này, chúng ta sẽ triển khai một GKE cluster tuân thủ các chính sách bảo mật và sử dụng của KodeKloud playground, bằng terraform chạy ngay trong Cloud Shell. Chạy Cloud Shell từ trong GCP console có ưu điểm là toàn bộ thông tin xác thực và chi tiết project đã được thiết lập sẵn trong môi trường.
 
-Since this is a Google product, it will work best in Chrome browser. Other mainstream browsers *should* be fine.
+Vì đây là sản phẩm của Google nên nó sẽ hoạt động tốt nhất trên trình duyệt Chrome. Các trình duyệt phổ biến khác *hẳn là* cũng dùng được.
 
-[Click here](./docs/01-sign-in.md) to get started!
+[Bấm vào đây](./docs/01-sign-in.md) để bắt đầu!

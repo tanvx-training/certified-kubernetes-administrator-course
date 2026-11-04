@@ -1,31 +1,31 @@
-# Practice Test - Taints and Tolerations
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-taints-and-tolerations/)
+# Practice Test - Taints và Tolerations (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-taints-and-tolerations/)
 
-Solutions to the Practice Test - Taints and Tolerations
+Lời giải cho bài Practice Test - Taints và Tolerations
 
 1.  <details>
-    <summary>How many nodes exist on the system?</summary>
+    <summary>Hệ thống có bao nhiêu node?</summary>
 
     ```
     $ kubectl get nodes
     ```
 
-    Count the nodes
+    Đếm số node
 
     </details>
 
 1.  <details>
-    <summary>Do any taints exist on node01 node?</summary>
+    <summary>Node node01 có taint nào không?</summary>
 
     ```
     $ kubectl describe node node01
     ```
 
-    Find the `Taints` property in the output.
+    Tìm thuộc tính `Taints` trong output.
     </details>
 
 1.  <details>
-    <summary>Create a taint on node01 with key of spray, value of mortein and effect of NoSchedule</summary>
+    <summary>Tạo taint trên node01 với key là spray, value là mortein và effect là NoSchedule</summary>
 
     ```
     kubectl taint nodes node01 spray=mortein:NoSchedule
@@ -33,7 +33,7 @@ Solutions to the Practice Test - Taints and Tolerations
     </details>
 
 1.  <details>
-    <summary>Create a new pod with the nginx image and pod name as mosquito.</summary>
+    <summary>Tạo một Pod mới dùng image nginx, tên Pod là mosquito.</summary>
 
     ```
     kubectl run mosquito --image nginx
@@ -41,39 +41,39 @@ Solutions to the Practice Test - Taints and Tolerations
     </details>
 
 1.  <details>
-    <summary>What is the state of the POD?</summary>
+    <summary>Trạng thái của Pod là gì?</summary>
 
     ```
     kubectl get pods
     ```
 
-    Check the `STATUS` column
+    Xem cột `STATUS`
     </details>
 
 1.  <details>
-    <summary>Why do you think the pod is in a pending state?</summary>
+    <summary>Theo bạn, tại sao Pod ở trạng thái Pending?</summary>
 
-    Mosqitoes don't like mortein!
+    Muỗi (mosquito) thì sợ thuốc xịt muỗi Mortein!
 
-    So the answer is that the pod cannot tolerate the taint on the node.
+    Vậy câu trả lời là: Pod không tolerate được taint trên node. (Node controlplane cũng có taint `NoSchedule`, nên không còn node nào nhận Pod. Xem phần `Events` của `kubectl describe pod mosquito` sẽ thấy thông báo dạng `0/2 nodes are available: ... untolerated taint ...`.)
 
     </details>
 
 1.  <details>
-    <summary>Create another pod named bee with the nginx image, which has a toleration set to the taint mortein.</summary>
+    <summary>Tạo một Pod khác tên bee với image nginx, có toleration cho taint mortein.</summary>
 
-    Allegedly bees are immune to mortein!
+    Nghe nói loài ong (bee) miễn nhiễm với mortein!
 
-    1.  Create a YAML skeleton for the pod imperatively
+    1.  Tạo khung YAML cho Pod bằng cách imperative
 
         ```
         kubectl run bee --image nginx --dry-run=client -o yaml > bee.yaml
         ```
-    1.  Edit the file to add the toleration
+    1.  Sửa file để thêm toleration
         ```
         vi bee.yaml
         ```
-    1. Add the toleration. This goes at the same indentation level as `containers` as it is a POD setting.
+    1. Thêm toleration. Phần này đặt cùng mức thụt lề với `containers` vì đây là thiết lập của Pod (thuộc `spec`).
         ```yaml
           tolerations:
           - key: spray
@@ -81,26 +81,28 @@ Solutions to the Practice Test - Taints and Tolerations
             effect: NoSchedule
             operator: Equal
         ```
-    1. Save and exit, then create pod
+    1. Lưu và thoát, sau đó tạo Pod
         ```
         kubectl create -f bee.yaml
         ```
     </details>
 
-1. Information only.
+1. Câu hỏi chỉ mang tính thông tin.
 
 1.  <details>
-    <summary>Do you see any taints on controlplane node?</summary>
+    <summary>Node controlplane có taint nào không?</summary>
 
     ```
     kubectl describe node controlplane
     ```
 
-    Examine the `Taints` property.
+    Xem thuộc tính `Taints`.
     </details>
 
 1.  <details>
-    <summary>Remove the taint on controlplane, which currently has the taint effect of NoSchedule.</summary>
+    <summary>Xóa taint trên controlplane (taint đang có effect NoSchedule).</summary>
+
+    Dấu `-` ở cuối nghĩa là xóa taint.
 
     ```
     kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-
@@ -108,7 +110,7 @@ Solutions to the Practice Test - Taints and Tolerations
     </details>
 
 1.  <details>
-    <summary>What is the state of the pod mosquito now?</summary>
+    <summary>Bây giờ trạng thái của Pod mosquito là gì?</summary>
 
     ```
     $ kubectl get pods
@@ -116,13 +118,11 @@ Solutions to the Practice Test - Taints and Tolerations
     </details>
 
 1.  <details>
-    <summary>Which node is the POD mosquito on now?</summary>
+    <summary>Pod mosquito hiện đang chạy trên node nào?</summary>
 
     ```
     $ kubectl get pods -o wide
     ```
 
-    This also explains why the `mosquito` pod colud schedule anywhere. It also could not tolerate `controlplane` taints, which we have now removed.
+    Điều này cũng giải thích vì sao trước đó Pod `mosquito` không thể được lập lịch ở bất kỳ đâu: nó cũng không tolerate được taint của `controlplane`, taint mà giờ ta đã xóa. Vì vậy Pod được đặt lên `controlplane`.
     </details>
-
-

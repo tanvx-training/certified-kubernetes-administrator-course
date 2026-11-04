@@ -1,89 +1,89 @@
-# Practice Test - Deployments
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-tests-deployments/)
+# Practice Test - Deployments (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-tests-deployments/)
 
-Solutions to the deployments practice test
+Lời giải cho bài practice test Deployments
 1. <details>
-   <summary>How many pods exist on the system?</summary>
+   <summary>Có bao nhiêu Pod đang tồn tại trên hệ thống?</summary>
 
    ```bash
    kubectl get pods
    ```
 
-   Count the number of pods (if any)
+   Đếm số Pod hiển thị (nếu có).
 
    </details>
 
 1. <details>
-   <summary>How many ReplicaSets exist on the system?</summary>
+   <summary>Có bao nhiêu ReplicaSet đang tồn tại trên hệ thống?</summary>
 
    ```bash
    kubectl get replicasets
    ```
 
-   Count the number of ReplicaSets  (if any)
+   Đếm số ReplicaSet hiển thị (nếu có).
 
    </details>
 
 1. <details>
-   <summary>How many Deployments exist on the system?</summary>
+   <summary>Có bao nhiêu Deployment đang tồn tại trên hệ thống?</summary>
 
    ```bash
    kubectl get deployments
    ```
 
-   Count the number of Deployments  (if any)
+   Đếm số Deployment hiển thị (nếu có).
 
    </details>
 
 1. <details>
-   <summary>How many Deployments exist on the system now?</summary>
+   <summary>Bây giờ có bao nhiêu Deployment trên hệ thống?</summary>
 
    ```bash
    kubectl get deployments
    ```
 
-   Count the number of Deployments  (if any)
+   Đếm số Deployment hiển thị (nếu có).
 
    </details>
 
 1. <details>
-   <summary>How many ReplicaSets exist on the system now?</summary>
+   <summary>Bây giờ có bao nhiêu ReplicaSet trên hệ thống?</summary>
 
    ```bash
    kubectl get replicasets
    ```
 
-   Count the number of ReplicaSets  (if any)
+   Đếm số ReplicaSet hiển thị (nếu có).
 
    </details>
 
 1. <details>
-   <summary>How many Pods exist on the system?</summary>
+   <summary>Có bao nhiêu Pod trên hệ thống?</summary>
 
    ```bash
    kubectl get pods
    ```
 
-   Count the number of pods  (if any)
+   Đếm số Pod hiển thị (nếu có).
 
    </details>
 
 1. <details>
-   <summary>Out of all the existing PODs, how many are ready?</summary>
+   <summary>Trong số các Pod hiện có, bao nhiêu Pod đang ready?</summary>
 
-   From the output of the previous command, check the `READY` column
+   Từ output của lệnh trước, xem cột `READY`.
    </details>
 
 1. <details>
-   <summary>What is the image used to create the pods in the new deployment?</summary>
+   <summary>Image nào được dùng để tạo các Pod trong Deployment mới?</summary>
 
    ```
    kubectl describe deployment
    ```
 
-   Look under the containers section.
+   Xem trong mục containers.
 
-   Another way - run the following and check the `IMAGES` column
+   Một cách khác - chạy lệnh sau và xem cột `IMAGES`
 
    ```
    kubectl get deployment -o wide
@@ -91,34 +91,36 @@ Solutions to the deployments practice test
    </details>
 
 1. <details>
-   <summary>Why do you think the deployment is not ready?</summary>
+   <summary>Theo bạn, vì sao Deployment không ready?</summary>
 
    ```
    kubectl describe pods
    ```
 
-   Look under the events section.
+   Xem trong mục events.
    </details>
 
 1. <details>
-   <summary>Create a new Deployment using the deployment-definition-1.yaml file located at /root/.</br>There is an issue with the file, so try to fix it.</summary>
+   <summary>Tạo một Deployment mới bằng file deployment-definition-1.yaml nằm ở /root/.</br>File này có lỗi, hãy thử sửa nó.</summary>
 
    ```
    kubectl create -f deployment-definition-1.yaml
    ```
 
-   Note the error
+   Để ý thông báo lỗi.
 
-   Edit the file with `vi`...
+   Sửa file bằng `vi`...
 
-   The value for **`kind`** is incorrect. It should be **`Deployment`** with a capital **`D`**. Update the deployment definition and create the deployment with the above command.
+   Giá trị của **`kind`** bị sai. Nó phải là **`Deployment`** với chữ **`D`** viết hoa. Sửa file định nghĩa Deployment rồi tạo Deployment bằng lệnh ở trên.
+
+   > 💡 **Bổ sung:** Giá trị `kind` (và cả tên trường trong YAML) phân biệt chữ hoa/thường. Lỗi thường gặp có dạng `no matches for kind "deployment" in version "apps/v1"`.
 
    </details>
 
 1. <details>
-   <summary>Create a new Deployment with the below attributes using your own deployment definition file.</summary>
+   <summary>Tạo một Deployment mới với các thuộc tính dưới đây, sử dụng file định nghĩa Deployment do bạn tự viết.</summary>
 
-   Create a deployment definition file in `vi`, e.g. `my-deployment.yaml` with the following
+   Tạo file định nghĩa Deployment trong `vi`, ví dụ `my-deployment.yaml`, với nội dung sau
 
     ```yaml
     apiVersion: apps/v1
@@ -146,10 +148,13 @@ Solutions to the deployments practice test
    kubectl create -f my-deployment.yaml
    ```
 
-   Or we could create it imperatively...
+   Hoặc có thể tạo theo cách imperative...
 
    ```
    kubectl create deployment httpd-frontend --image=httpd:2.4-alpine --replicas=3
    ```
+
+   > 💡 **Mẹo thi:** Kết hợp hai cách: dùng lệnh imperative kèm `--dry-run=client -o yaml > my-deployment.yaml` để sinh file YAML chuẩn, chỉnh sửa thêm nếu cần, rồi `kubectl create -f my-deployment.yaml`. Cách này nhanh và tránh lỗi thụt lề.
+
    </details>
 

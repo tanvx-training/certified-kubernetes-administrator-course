@@ -1,17 +1,19 @@
-# Practice Test - Init-Containers
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-init-containers/)
+# Practice Test - Init-Containers (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-init-containers/)
   
-Solutions to practice test - init-containers
-- Identify the pod that has an initContainer configured.
+Lời giải cho bài practice test - init-containers
+- Xác định Pod có cấu hình initContainer.
 
   <details>
   ```
   $ kubectl get pods
   $ kubectl describe pods
   ```
+
+  Tìm Pod có mục `Init Containers:` trong output của `kubectl describe`.
   </details>
   
-- What is the image used by the initContainer on the blue pod?
+- initContainer trên Pod blue dùng image gì?
   
   <details>
   ```
@@ -19,7 +21,7 @@ Solutions to practice test - init-containers
   ```
   </details>
     
-- Run the command kubectl describe pod blue and check the state field of the initContainer.
+- Chạy lệnh kubectl describe pod blue và kiểm tra trường State của initContainer.
 
   <details>
   ```
@@ -27,15 +29,17 @@ Solutions to practice test - init-containers
   ```
   </details>
   
-- Check the reason field of the initContainer
+- Kiểm tra trường Reason của initContainer
   
   <details>
   ```
   $ kubectl describe pod blue
   ```
+
+  Init container đã chạy xong nên State là `Terminated` với Reason là `Completed`.
   </details>
   
-- Run the command kubectl describe pod purple
+- Chạy lệnh kubectl describe pod purple
   
   <details>
   ```
@@ -43,23 +47,27 @@ Solutions to practice test - init-containers
   ```
   </details>
   
-- Run the kubectl describe pod purple command and look at the container state
+- Chạy lệnh kubectl describe pod purple và xem trạng thái (State) của container
   
   <details>
   ```
   $ kubectl describe pod purple
   ```
+
+  Container chính đang ở trạng thái `Waiting` (Reason `PodInitializing`) vì các init container chưa chạy xong.
   </details>
   
-- Check the commands used in the initContainers. The first one sleeps for 600 seconds (10 minutes) and the second one sleeps for 1200 seconds (20 minutes)
+- Kiểm tra các command được dùng trong initContainers. Cái đầu tiên sleep 600 giây (10 phút) và cái thứ hai sleep 1200 giây (20 phút)
   
   <details>
   ```
   $ kubectl describe pod purple
   ```
+
+  > 💡 **Giải thích:** Init container chạy **tuần tự**, nên thời gian chờ là tổng của hai cái: 10 + 20 = 30 phút trước khi ứng dụng chính khởi động.
   </details>
   
-- Update the pod red to use an initContainer that uses the busybox image and sleeps for 20 seconds
+- Cập nhật Pod red để dùng một initContainer dùng image busybox và sleep 20 giây
   
   <details>
   ```
@@ -68,15 +76,17 @@ Solutions to practice test - init-containers
   ```
   </details>
   
-  Update the red.yaml with sleep 20 seconds
+  Cập nhật red.yaml, thêm initContainer với lệnh sleep 20 giây
   
   <details>
   ```
   $ kubectl create -f red.yaml
   ```
   </details>
+
+  > 💡 **Gợi ý:** Phần cần thêm vào `spec` của red.yaml: `initContainers:` với một phần tử có `name: red-initcontainer`, `image: busybox`, `command: ["sleep", "20"]`. Nhớ xóa phần `status` trong file xuất ra trước khi tạo lại (hoặc dùng `kubectl replace --force -f red.yaml`).
   
-- Check the command used by the initContainer. Looks like there is a type in sleep command. Fix it, it should be **`sleep 2`** not **`sleeeep 2`**
+- Kiểm tra command được dùng bởi initContainer. Có vẻ có lỗi gõ (typo) trong lệnh sleep. Hãy sửa lại: phải là **`sleep 2`** chứ không phải **`sleeeep 2`**
   
   <details>
   ```
@@ -84,7 +94,9 @@ Solutions to practice test - init-containers
   $ kubectl get pod orange -o yaml > orange.yaml
   $ kubectl delete pod orange
   
-  Update the orange.yaml with correct sleep command and recreate the pod
+  Cập nhật orange.yaml với lệnh sleep đúng rồi tạo lại Pod
   $ kubectl create -f orange.yaml
   ```
+
+  > 💡 **Mẹo:** Dấu hiệu nhận biết: Pod ở trạng thái `Init:Error` hoặc `Init:CrashLoopBackOff`. Xem nguyên nhân bằng `kubectl logs orange -c <tên-init-container>` (sẽ thấy lỗi kiểu `sleeeep: not found`).
  </details>

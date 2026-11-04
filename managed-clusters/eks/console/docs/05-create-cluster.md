@@ -1,24 +1,26 @@
-# Create Cluster
+# Tạo Cluster
 
-Now you should be on the Review and Create page. Here we will launch the control plane. No nodes are ready yet - this comes later.
+Bây giờ bạn sẽ ở trang Review and Create. Tại đây chúng ta sẽ khởi tạo control plane. Lúc này chưa có node nào sẵn sàng - việc đó sẽ làm ở bước sau.
 
-1. Review the information that you entered or selected on the previous pages. If you need to make changes, choose an `Edit` button next to the section you want to change. After that, scroll to the end and press `Create`. The Status field shows "Creating" while the cluster is provisioned. This will take *at least* 10 minutes, so go and make a cup of tea! You may need to press the refresh button periodically (indicated by arrow) to ensure the information is up to date.
+1. Xem lại thông tin bạn đã nhập hoặc chọn ở các trang trước. Nếu cần thay đổi, hãy bấm nút `Edit` bên cạnh phần muốn sửa. Sau đó cuộn xuống cuối và bấm `Create`. Trường Status sẽ hiển thị "Creating" trong khi cluster đang được khởi tạo. Quá trình này sẽ mất *ít nhất* 10 phút, vậy hãy đi pha một tách trà! Bạn có thể cần bấm nút refresh (được chỉ bằng mũi tên) định kỳ để đảm bảo thông tin được cập nhật.
 
-1. Wait for the control plane to deploy. When the control plane is deployed, the status will change from "Creating" to "Active"
+1. Chờ control plane được triển khai. Khi control plane triển khai xong, trạng thái sẽ đổi từ "Creating" sang "Active"
 
     ![](../images/05-creating.png)
 
-1. **IMPORTANT**: if you are building the cluster as part of a lab or KKE task, you must enter all the following commands at the *lab* terminal, not CloudShell, or the grader will not be able to connect to your cluster.<br/><br/>Once the cluster is created, enable kubectl to communicate with your cluster by adding a new context to the kubectl config file by executing the following command in CloudShell, which you can invoke by pressing the cloudshell button indicated by the number `3` in the image above. This will open a cloudshell prompt below the EKS console into which you can paste and run the following:
+1. **QUAN TRỌNG**: nếu bạn dựng cluster như một phần của bài lab hoặc task KKE (KodeKloud Engineer), bạn phải nhập tất cả các lệnh dưới đây ở terminal của *lab*, không phải CloudShell, nếu không hệ thống chấm điểm sẽ không thể kết nối tới cluster của bạn.<br/><br/>Khi cluster đã được tạo, hãy cho phép kubectl giao tiếp với cluster bằng cách thêm một context mới vào file cấu hình kubectl, thông qua việc chạy lệnh sau trong CloudShell. Bạn có thể mở CloudShell bằng cách bấm nút cloudshell được đánh số `3` trong hình ở trên. Thao tác này sẽ mở một dấu nhắc lệnh cloudshell bên dưới EKS console, nơi bạn có thể dán và chạy lệnh sau:
 
     ```
     aws eks update-kubeconfig --region us-east-1 --name demo-eks
     ```
 
-    Check it is connecting. You should see some resources. All pods are in Pending state because we have yet to create nodes to run them on.
+    Kiểm tra xem đã kết nối được chưa. Bạn sẽ thấy một số tài nguyên. Tất cả các Pod đều ở trạng thái Pending vì chúng ta chưa tạo node nào để chạy chúng.
 
     ```
     kubectl get all -A
     ```
 
-Prev: [Networking](./04-networking.md)<br/>
-Next: [Add nodes](./06-nodes.md)
+    > 💡 **Bổ sung:** `aws eks update-kubeconfig` ghi thông tin cluster vào `~/.kube/config` và đặt context mới làm context hiện tại. Trong kubeconfig này, kubectl dùng lệnh `aws eks get-token` để lấy token xác thực bằng chính danh tính IAM của bạn. Các Pod đang Pending (ví dụ `coredns`) là do scheduler không tìm được node nào để gán chúng - đúng như dự kiến ở giai đoạn này.
+
+Trước: [Networking](./04-networking.md)<br/>
+Tiếp theo: [Thêm node](./06-nodes.md)

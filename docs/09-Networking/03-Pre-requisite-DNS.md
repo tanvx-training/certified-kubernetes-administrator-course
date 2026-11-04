@@ -1,12 +1,12 @@
-# Pre-requisite DNS
+# Kiến thức nền tảng: DNS
 
-  - Take me to [Lecture](https://kodekloud.com/topic/prerequsite-dns/)
+  - Đi tới [Lecture](https://kodekloud.com/topic/prerequsite-dns/)
 
-In this section, we will take a look at **DNS in the Linux**
+Trong phần này, chúng ta sẽ tìm hiểu **DNS trên Linux**
 
-## Name Resolution 
+## Phân giải tên (Name Resolution)
 
-- With help of the `ping` command. Checking the reachability of the IP Addr on the Network.
+- Dùng lệnh `ping` để kiểm tra một địa chỉ IP trong mạng có liên lạc được không.
 
 ```
 $ ping 172.17.0.64
@@ -15,14 +15,14 @@ PING 172.17.0.64 (172.17.0.64) 56(84) bytes of data.
 64 bytes from 172.17.0.64: icmp_seq=2 ttl=64 time=0.415 ms
 
 ```
-- Checking with their hostname
+- Thử ping bằng hostname
 
 ```
 $ ping web
 ping: unknown host web
 
 ```
-- Adding entry in the `/etc/hosts` file to resolve by their hostname.
+- Thêm entry vào file `/etc/hosts` để có thể phân giải theo hostname.
 
 ```
 $ cat >> /etc/hosts
@@ -31,7 +31,7 @@ $ cat >> /etc/hosts
 
 # Ctrl + c to exit
 ```
-- It will look into the `/etc/hosts` file.
+- Lúc này hệ thống sẽ tra cứu trong file `/etc/hosts`.
 
 ```
 $ ping web
@@ -44,9 +44,11 @@ $ ssh web
 $ curl http://web
 ```
 
+> 💡 **Bổ sung:** Host tin tưởng hoàn toàn nội dung `/etc/hosts` mà không kiểm chứng — bạn có thể ánh xạ bất kỳ tên nào tới bất kỳ IP nào. Cách này chỉ phù hợp với vài máy; khi số máy tăng lên, việc cập nhật `/etc/hosts` trên từng host trở nên khó quản lý, nên người ta chuyển sang dùng một DNS server tập trung.
+
 ## DNS
 
-- Every host has a DNS resolution configuration file at `/etc/resolv.conf`.
+- Mỗi host có một file cấu hình phân giải DNS tại `/etc/resolv.conf`.
 
 ```
 $ cat /etc/resolv.conf
@@ -54,7 +56,7 @@ nameserver 127.0.0.53
 options edns0
 ```
 
-- To change the order of dns resolution, we need to do changes into the `/etc/nsswitch.conf` file.
+- Để thay đổi thứ tự phân giải tên (file `/etc/hosts` trước hay DNS trước), cần chỉnh file `/etc/nsswitch.conf`.
 
 ```
 $ cat /etc/nsswitch.conf
@@ -64,7 +66,9 @@ networks:       files
 
 ```
 
-- If it fails in some conditions.
+> 💡 **Bổ sung:** `hosts: files dns` nghĩa là tra `/etc/hosts` (files) trước, nếu không thấy mới hỏi DNS server. Vì vậy nếu một tên có ở cả hai nơi, giá trị trong `/etc/hosts` sẽ thắng. `nameserver 127.0.0.53` là stub resolver cục bộ của `systemd-resolved` trên Ubuntu; xem DNS server thực sự đang dùng bằng `resolvectl status`.
+
+- Nếu phân giải thất bại trong một số trường hợp (ví dụ chưa có DNS server nào biết tên đó).
 
 ```
 $ ping wwww.github.com
@@ -72,7 +76,7 @@ ping: www.github.com: Temporary failure in name resolution
 
 ```
 
-- Adding well known public nameserver in the `/etc/resolv.conf` file.
+- Thêm một nameserver công cộng phổ biến vào file `/etc/resolv.conf`.
 
 ```
 $ cat /etc/resolv.conf
@@ -88,21 +92,31 @@ PING github.com (140.82.121.3) 56(84) bytes of data.
 
 ```
 
-## Domain Names
+> 💡 **Bổ sung:** Thông thường bạn cấu hình DNS server nội bộ để chuyển tiếp (forward) các tên không biết ra nameserver công cộng như `8.8.8.8`, thay vì thêm vào từng host. Trên các hệ thống dùng `systemd-resolved` hoặc NetworkManager, `/etc/resolv.conf` thường được tự sinh ra và có thể bị ghi đè — hãy cấu hình qua công cụ tương ứng.
+
+## Tên miền (Domain Names)
 
 ![net-8](../../images/net8.PNG)
+
+> 💡 **Bổ sung:** Tên miền có cấu trúc phân cấp, đọc từ phải sang trái: `.` (root) → top-level domain (`.com`, `.net`, `.io`...) → tên miền (`google`) → subdomain (`www`, `mail`, `maps`...). Khi phân giải, DNS server nội bộ sẽ hỏi lần lượt root server → server của `.com` → server của `google.com`, rồi cache kết quả trong một khoảng thời gian (TTL).
 
 ## Search Domain
 
 ![net-9](../../images/net9.PNG)
 
-## Record Types
+> 💡 **Bổ sung:** Thêm dòng `search mycompany.com` vào `/etc/resolv.conf` cho phép bạn gõ tên ngắn `web` và hệ thống tự thử `web.mycompany.com`. Kubernetes dùng chính cơ chế này: `/etc/resolv.conf` trong Pod có dòng `search <namespace>.svc.cluster.local svc.cluster.local cluster.local`, nhờ vậy bạn có thể gọi Service chỉ bằng tên ngắn.
+
+## Các loại Record (Record Types)
 
 ![net-10](../../images/net10.PNG)
 
-## Networking Tools
+> 💡 **Bổ sung:** `A` ánh xạ tên → IPv4, `AAAA` ánh xạ tên → IPv6, `CNAME` ánh xạ tên → một tên khác (alias). Ngoài ra còn hay gặp `PTR` (tra ngược IP → tên), `SRV` (dùng cho service discovery, Kubernetes có tạo SRV record cho các named port của Service), `MX`, `TXT`, `NS`.
 
-- Useful networking tools to test dns name resolution.
+## Công cụ mạng (Networking Tools)
+
+- Một số công cụ hữu ích để kiểm tra phân giải tên DNS.
+
+> 💡 **Bổ sung:** `nslookup` và `dig` **chỉ truy vấn DNS server**, chúng không đọc file `/etc/hosts`. Vì vậy một tên có trong `/etc/hosts` có thể `ping` được nhưng `nslookup` lại không tìm thấy. Nếu muốn kiểm tra theo đúng thứ tự trong `nsswitch.conf`, dùng `getent hosts <tên>`.
 
 #### nslookup 
 

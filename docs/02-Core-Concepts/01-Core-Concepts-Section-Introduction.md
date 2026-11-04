@@ -1,13 +1,13 @@
-# Core Concepts Section Introduction
+# Giới thiệu phần Core Concepts (Khái niệm cốt lõi)
 
- - Take me to the [Video Tutorial](https://kodekloud.com/topic/core-concepts-section-introduction/)
+ - Xem [Video hướng dẫn](https://kodekloud.com/topic/core-concepts-section-introduction/)
  
-In this section, we will take a look at the below
-- Cluster Architecture  
-- API Primitives
-- Services & Other Network Primitives
+Trong phần này, chúng ta sẽ tìm hiểu các nội dung sau
+- Kiến trúc cluster (Cluster Architecture)
+- Các đối tượng API cơ bản (API Primitives)
+- Service và các thành phần mạng cơ bản khác
 
-k8s reference docs:
+Tài liệu tham khảo K8s:
 - https://kubernetes.io/docs/concepts/overview/kubernetes-api/
 - https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/
 - https://kubernetes.io/docs/concepts/architecture/

@@ -1,16 +1,18 @@
-# Mock Exam 2 Solution
+# Lời giải Mock Exam 2
   
   
-  1. Run the below command for solution:
+  1. Chạy lệnh dưới đây để giải:
 
      <details>
 
      ```
      ETCDCTL_API=3 etcdctl snapshot save --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --endpoints=127.0.0.1:2379 /opt/etcd-backup.db
      ```
+
+     > 💡 **Bổ sung:** Đừng học thuộc đường dẫn certificate – hãy lấy từ manifest của static Pod etcd: `grep -E 'cert|key|listen-client' /etc/kubernetes/manifests/etcd.yaml` (các flag `--trusted-ca-file`, `--cert-file`, `--key-file`, `--listen-client-urls`). Từ etcd v3.4, `ETCDCTL_API=3` là mặc định nên có thể bỏ qua, nhưng ghi rõ cũng không sao. Sau khi backup, kiểm tra file bằng `etcdutl snapshot status /opt/etcd-backup.db` (hoặc `etcdctl snapshot status`, đã deprecated từ etcd v3.5).
      </details>
 
-  2. Run the below command for solution:
+  2. Chạy lệnh dưới đây để giải:
 
      <details>
  
@@ -38,9 +40,11 @@
       restartPolicy: Always
      status: {}
      ```
+
+     > 💡 **Bổ sung:** Sinh khung bằng `kubectl run redis-storage --image=redis:alpine --dry-run=client -o yaml > redis.yaml`, rồi thêm `volumes` (ở cấp `spec`) và `volumeMounts` (ở cấp container). Volume `emptyDir` tồn tại theo vòng đời của Pod: Pod bị xóa thì dữ liệu cũng mất.
      </details>
  
-  3. Run the below command for solution:
+  3. Chạy lệnh dưới đây để giải:
 
      <details>
 
@@ -59,9 +63,11 @@
            capabilities:
              add: ["SYS_TIME"]
      ```
+
+     > 💡 **Bổ sung:** `capabilities` chỉ khai báo được trong `securityContext` ở cấp **container**, không có ở cấp Pod. Tra nhanh bằng `kubectl explain pod.spec.containers.securityContext.capabilities`.
      </details>
 
-  4. Run the below command for solution:
+  4. Chạy lệnh dưới đây để giải:
 
      <details>
      
@@ -98,13 +104,15 @@
          persistentVolumeClaim:
            claimName: my-pvc
      ```
+
+     > 💡 **Bổ sung:** Trước khi tạo PVC, chạy `kubectl get pv` để xem PV có sẵn: PVC chỉ bind được khi `accessModes`, `storageClassName` khớp và dung lượng PV ≥ dung lượng yêu cầu. Sau khi tạo, kiểm tra `kubectl get pvc my-pvc` phải ở trạng thái `Bound`; nếu `Pending` thì `kubectl describe pvc my-pvc` để xem lý do.
      </details>
 
-  5. Run the below command for solution:
+  5. Chạy lệnh dưới đây để giải:
 
      <details>
  
-     For Kubernetes Version <=1.17
+     Với Kubernetes phiên bản <=1.17
  
      ```
      kubectl run nginx-deploy --image=nginx:1.16 --replicas=1 --record
@@ -113,7 +121,7 @@
      kubectl rollout history deployment nginx-deploy
      ```
  
-     For Kubernetes Version >1.17
+     Với Kubernetes phiên bản >1.17
  
      ```
      kubectl create deployment nginx-deploy --image=nginx:1.16 --dry-run=client -o yaml > deploy.yaml
@@ -145,9 +153,15 @@
      kubectl set image deployment/nginx-deploy nginx=nginx:1.17 --record
      kubectl rollout history deployment nginx-deploy
      ```
+
+     > 💡 **Bổ sung (cập nhật cho phiên bản mới):**
+     > - Từ v1.18, `kubectl run` chỉ tạo Pod; các flag như `--replicas` không còn tác dụng với `kubectl run`, vì vậy cách thứ nhất chỉ dùng được trên cluster rất cũ.
+     > - Flag `--record` đã bị deprecated. Cách được khuyến nghị để ghi lại lý do thay đổi (cột `CHANGE-CAUSE` trong `rollout history`) là gán annotation: `kubectl annotate deployment nginx-deploy kubernetes.io/change-cause="update image to nginx:1.17"`.
+     > - Tên container trong `set image` (`nginx=...`) phải khớp tên container trong Deployment. `kubectl create deployment` tự đặt tên container theo tên image (ở đây là `nginx`); kiểm tra bằng `kubectl get deploy nginx-deploy -o jsonpath='{.spec.template.spec.containers[*].name}'`.
+     > - Theo dõi tiến trình bằng `kubectl rollout status deployment nginx-deploy`.
      </details>
   
-  6. Run the below command for solution:
+  6. Chạy lệnh dưới đây để giải:
 
      <details>
  
@@ -173,10 +187,11 @@
       kubectl create rolebinding developer-role-binding --role=developer --user=john --namespace=development
       kubectl auth can-i update pods --as=john --namespace=development
       ```
-  
+
+      > 💡 **Bổ sung:** Giá trị `request` là nội dung file CSR (ví dụ `/root/CKA/john.csr`) được mã hóa base64 trên **một dòng**: `cat /root/CKA/john.csr | base64 | tr -d "\n"`. Với `signerName: kubernetes.io/kube-apiserver-client`, `usages` phải có `client auth`. Sau khi approve, kiểm tra `kubectl get csr john-developer` có trạng thái `Approved,Issued`. Lệnh `kubectl auth can-i ... --as=john` trả về `yes` nghĩa là RBAC đã cấu hình đúng.
      </details>
  
-  7. Run the below command for solution:
+  7. Chạy lệnh dưới đây để giải:
 
      <details>
  
@@ -186,44 +201,47 @@
      kubectl run test-nslookup --image=busybox:1.28 --rm -it --restart=Never -- nslookup nginx-resolver-service
      kubectl run test-nslookup --image=busybox:1.28 --rm -it --restart=Never -- nslookup nginx-resolver-service > /root/CKA/nginx.svc
  
-     Get the IP of the nginx-resolver pod and replace the dots(.) with hyphon(-) which will be used below.
+     Lấy IP của Pod nginx-resolver và thay dấu chấm (.) bằng dấu gạch ngang (-), giá trị này sẽ được dùng ở lệnh bên dưới.
  
      kubectl get pod nginx-resolver -o wide
      kubectl run test-nslookup --image=busybox:1.28 --rm -it --restart=Never -- nslookup <P-O-D-I-P.default.pod> > /root/CKA/nginx.pod
  
      ```
+
+     > 💡 **Bổ sung:** Bản ghi DNS của Pod có dạng `<pod-ip-dùng-dấu-gạch>.<namespace>.pod.cluster.local`, ví dụ Pod IP `10.244.1.5` trong namespace `default` → `10-244-1-5.default.pod.cluster.local`. Còn Service có dạng `<service>.<namespace>.svc.cluster.local`. Dùng image `busybox:1.28` vì `nslookup` trong các bản busybox mới hơn hay cho kết quả lỗi/khó đọc.
  
      </details>
 
-  8. Run the below command for solution:
+  8. Chạy lệnh dưới đây để giải:
 
      <details>
  
      ```
      kubectl run nginx-critical --image=nginx --dry-run=client -o yaml > static.yaml
      
-     cat static.yaml - Copy the contents of this file.
+     cat static.yaml - Copy nội dung của file này.
  
      kubectl get nodes -o wide
      ssh node01 
      OR
      ssh <IP of node01>
  
-     Check if static-pod directory is present which is /etc/kubernetes/manifests if not then create it.
+     Kiểm tra thư mục static Pod /etc/kubernetes/manifests đã tồn tại chưa, nếu chưa thì tạo mới.
      mkdir -p /etc/kubernetes/manifests
  
-     Paste the contents of the file(static.yaml) copied in the first step to file nginx-critical.yaml.
+     Dán nội dung file (static.yaml) đã copy ở bước đầu tiên vào file nginx-critical.yaml.
  
-     Move/copy the nginx-critical.yaml to path /etc/kubernetes/manifests/
+     Di chuyển/copy file nginx-critical.yaml vào đường dẫn /etc/kubernetes/manifests/
  
      cp nginx-critical.yaml /etc/kubernetes/manifests
  
-     Go back to master node
+     Quay lại master node
  
      kubectl get pods 
      ```
+
+     > 💡 **Bổ sung:** Thư mục static Pod trên node01 không nhất thiết là `/etc/kubernetes/manifests` – hãy kiểm tra `staticPodPath` trong file cấu hình kubelet (`grep staticPodPath /var/lib/kubelet/config.yaml`, hoặc xem flag `--config` qua `ps aux | grep kubelet`). Nếu phải tạo hoặc đổi thư mục này, cần khởi động lại kubelet (`systemctl restart kubelet`). Pod sẽ hiện ra với tên `nginx-critical-node01`. Nhớ `exit` khỏi node01 trước khi làm câu tiếp theo.
  
      </details>
 
   
-

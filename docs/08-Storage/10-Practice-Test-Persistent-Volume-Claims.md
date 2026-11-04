@@ -1,10 +1,12 @@
-# Practice Test - Persistent Volume Claims
+# Practice Test - Persistent Volume Claims (Bài thực hành)
 
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-persistent-volume-claims/)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-persistent-volume-claims/)
 
-#### Solution
+#### Lời giải
 
-  1. Check the Solution
+Lời giải cho bài practice test.
+
+  1. Xem lời giải
 
      <details>
 
@@ -14,7 +16,7 @@
     
      </details>
 
-  2. Check the Solution
+  2. Xem lời giải
 
      <details>
 
@@ -23,7 +25,7 @@
       ```
      </details>
  
-  3. Check the Solution
+  3. Xem lời giải
 
      <details>
 
@@ -32,7 +34,7 @@
       ```
      </details>
 
-  4. Check the Solution
+  4. Xem lời giải
     
      <details>
 
@@ -60,9 +62,12 @@
             # this field is optional
             type: Directory
       ```
+
+     > 💡 Pod `webapp` ghi log vào `/log` trong container; mount thư mục `/var/log/webapp` của node vào đó bằng `hostPath` để log được giữ lại trên node. Pod không sửa được phần `volumes` khi đang chạy, nên hãy `kubectl get pod webapp -o yaml > webapp.yaml`, sửa file, rồi `kubectl replace --force -f webapp.yaml`.
+
       </details>
 
-  5. Check the Solution
+  5. Xem lời giải
 
      <details>
 
@@ -82,7 +87,7 @@
 
      </details>
 
-  6. Check the Solution
+  6. Xem lời giải
 
      <details>
 
@@ -100,34 +105,43 @@
       ```
      </details>
 
-  7. Check the Solution
+  7. Xem lời giải
 
      <details>
 
       ```
       PENDING
       ```
+
+     > 💡 PVC ở trạng thái `Pending` vì không tìm được PV phù hợp để bind.
+
      </details>
 
-  8. Check the Solution
+  8. Xem lời giải
 
      <details>
 
       ```
       AVAILABLE
       ```
+
+     > 💡 PV `pv-log` vẫn `Available` vì chưa bind với PVC nào.
+
      </details>
 
-  9. Check the Solution
+  9. Xem lời giải
 
      <details>
 
       ```
       Access Modes Mismatch
       ```
+
+     > 💡 PV hỗ trợ `ReadWriteMany` còn PVC lại yêu cầu `ReadWriteOnce` nên không khớp. Dùng `kubectl describe pvc claim-log-1` và `kubectl get pv` để so sánh cột ACCESS MODES.
+
      </details>
 
-  10. Check the Solution
+  10. Xem lời giải
 
       <details>
  
@@ -145,16 +159,19 @@
        ```
       </details>
 
-  11. Check the Solution
+  11. Xem lời giải
 
       <details>
  
        ```
        100Mi
        ```
+
+      > 💡 PVC xin 50Mi nhưng dung lượng hiển thị là 100Mi, vì PVC bind với cả PV `pv-log` (100Mi) — quan hệ PV/PVC là 1-1, PVC nhận toàn bộ dung lượng của PV.
+
       </details>
 
-  12. Check the Solution
+  12. Xem lời giải
 
       <details>
  
@@ -181,34 +198,43 @@
        ```
       </details>
 
-  13. Check the Solution
+  13. Xem lời giải
 
       <details>
  
        ```
        Retain
        ```
+
+      > 💡 PV tạo thủ công mặc định có `persistentVolumeReclaimPolicy: Retain`. Xem cột RECLAIM POLICY trong `kubectl get pv`.
+
       </details>
 
-  14. Check the Solution
+  14. Xem lời giải
 
       <details>
  
        ```
        The PV is not delete but not available
        ```
+
+      > 💡 Với `Retain`, khi xóa PVC thì PV không bị xóa nhưng cũng không sẵn sàng để PVC khác sử dụng (chuyển sang trạng thái `Released`).
+
       </details>
 
-  15. Check the Solution
+  15. Xem lời giải
 
       <details>
  
        ```
        The PVC is stuck in `terminating` state
        ```
+
+      > 💡 PVC kẹt ở `Terminating` nhờ cơ chế bảo vệ (finalizer `kubernetes.io/pvc-protection`): Kubernetes không xóa PVC khi nó còn đang được Pod sử dụng.
+
       </details>
 
-  16. Check the Solution
+  16. Xem lời giải
 
       <details>
  
@@ -217,7 +243,7 @@
        ```
       </details>
 
-  17. Check the Solution
+  17. Xem lời giải
 
       <details>
  
@@ -226,7 +252,7 @@
        ```
       </details>
 
-  18. Check the Solution
+  18. Xem lời giải
 
       <details>
  
@@ -235,11 +261,14 @@
        ```
       </details>
 
-  19. Check the Solution
+  19. Xem lời giải
 
       <details>
  
        ```
        Released
        ```
+
+      > 💡 Sau khi xóa Pod, PVC được xóa hẳn; PV chuyển sang `Released` (dữ liệu vẫn còn). Muốn dùng lại PV này, quản trị viên phải xóa trường `spec.claimRef` của PV (hoặc xóa và tạo lại PV).
+
       </details>

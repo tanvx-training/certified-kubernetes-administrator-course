@@ -1,9 +1,9 @@
-# Practice Test - Network Policies
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-network-policies/)
+# Practice Test - Network Policies (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-network-policies/)
 
-Solutions to practice test - network policies
+Lời giải cho bài practice test - Network Policies
 
-- Run the command 'kubectl get networkpolicy'
+- Chạy lệnh 'kubectl get networkpolicy'
   
   <details>
   
@@ -13,7 +13,7 @@ Solutions to practice test - network policies
   
   </details>
   
-- Run the command 'kubectl get networkpolicy'
+- Chạy lệnh 'kubectl get networkpolicy'
    
   <details>
   
@@ -23,7 +23,7 @@ Solutions to practice test - network policies
   
   </details>
   
-- Run the command 'kubectl get networkpolicy' and look under pod selector
+- Chạy lệnh 'kubectl get networkpolicy' và xem cột pod selector
   
   <details>
   
@@ -32,8 +32,10 @@ Solutions to practice test - network policies
   ```
   
   </details>
+
+  > 💡 Sau đó dùng `kubectl get pods --show-labels` (hoặc `kubectl get pods -l <label>`) để tìm Pod khớp với pod selector đó.
   
-- Run the command 'kubectl describe networkpolicy' and look under PolicyTypes
+- Chạy lệnh 'kubectl describe networkpolicy' và xem mục PolicyTypes
   
   <details>
   
@@ -43,7 +45,7 @@ Solutions to practice test - network policies
   
   </details>
   
-- What is the impact of the rule configured on this Network Policy?
+- Rule được cấu hình trên Network Policy này có tác động gì?
   
   <details>
   
@@ -52,8 +54,10 @@ Solutions to practice test - network policies
   ```
   
   </details>
+
+  > 💡 Giải thích: policy `payroll-policy` chọn Pod payroll và chỉ cho phép ingress từ các Pod có label `name=internal` tới TCP port 8080; mọi traffic khác đi vào payroll đều bị chặn. Lưu ý: đáp án gốc ghi "blocked", nhưng theo cấu hình trên thì traffic từ internal tới payroll (port 8080) là **được phép** — hãy đối chiếu với các lựa chọn thực tế trong lab (thường đáp án đúng là "Traffic from Internal to Payroll POD is allowed").
   
-- What is the impact of the rule configured on this Network Policy?
+- Rule được cấu hình trên Network Policy này có tác động gì?
   
   <details>
   
@@ -62,12 +66,14 @@ Solutions to practice test - network policies
   ```
   
   </details>
+
+  > 💡 Đáp án: Pod internal có thể truy cập port 8080 của Pod payroll.
   
-- Access the UI of these applications using the link given above the terminal.
+- Truy cập giao diện của các ứng dụng này thông qua link ở phía trên terminal.
 
-- Only internal applications can access payroll service
+- Chỉ các ứng dụng internal mới có thể truy cập Service payroll.
 
-- Perform a connectivity test using the User Interface of the Internal Application to access the 'external-service' at port '8080'.
+- Thực hiện kiểm tra kết nối từ giao diện của ứng dụng Internal tới 'external-service' tại port '8080'.
   
   <details>
   
@@ -76,8 +82,10 @@ Solutions to practice test - network policies
   ```
   
   </details>
+
+  > 💡 Đáp án: thành công — vì chưa có Network Policy nào chọn Pod internal nên egress của nó không bị hạn chế.
   
-- Answer file located at /var/answers/answer-internal-policy.yaml
+- File đáp án nằm tại /var/answers/answer-internal-policy.yaml
   
   <details>
   
@@ -86,5 +94,7 @@ Solutions to practice test - network policies
   ```
   
   </details>
+
+  > 💡 Yêu cầu: tạo policy `internal-policy` cho Pod `internal` chỉ cho phép egress tới `payroll` (port 8080) và `mysql` (port 3306). Policy có `podSelector` chọn `name: internal`, `policyTypes: [Egress]`, và hai phần tử trong `egress`, mỗi phần tử gồm một `to.podSelector` (`name: payroll` / `name: mysql`) cùng `ports` tương ứng. Lưu ý: nếu Pod cần phân giải tên Service qua DNS, phải cho phép thêm egress port 53 (TCP/UDP).
   
   

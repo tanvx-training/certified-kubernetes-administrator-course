@@ -1,63 +1,65 @@
-# Practice Test - Practice Test Service Accounts
-  - Take me to [Practice Test](https://uklabs.kodekloud.com/topic/practice-test-service-accounts-2/)
+# Practice Test - Service Accounts (Bài thực hành)
+  - Đi tới [Practice Test](https://uklabs.kodekloud.com/topic/practice-test-service-accounts-2/)
 
-Solutions to the Practice Test Service Accounts
+Lời giải cho bài practice test - Service Accounts
 1.  <details>
-    <summary>How many service accounts exist in the default namespace?</summary>
+    <summary>Có bao nhiêu ServiceAccount trong namespace default?</summary>
 
-    Run the command `kubectl get serviceaccounts` and count the number of accounts.
+    Chạy lệnh `kubectl get serviceaccounts` (viết tắt `kubectl get sa`) và đếm số lượng.
 
     </details>
 
 1.  <details>
-    <summary>What is the secret token used by the default service account?</summary>
+    <summary>Secret token mà ServiceAccount default đang dùng là gì?</summary>
 
-    Run the command `kubectl describe serviceaccount default` and look at the `Tokens` field.
+    Chạy lệnh `kubectl describe serviceaccount default` và xem trường `Tokens`.
 
     > `none`
 
-    </dtails>
+    💡 Vì sao: từ Kubernetes v1.24, ServiceAccount không còn được tự động tạo Secret chứa token. Token cho Pod được cấp qua TokenRequest API và mount bằng projected volume, nên trường `Tokens` hiển thị `<none>`.
+
+    </details>
 
 1.  <details>
-    <summary>We just deployed the Dashboard application.<br/>Inspect the deployment. What is the image used by the deployment?</summary>
+    <summary>Chúng ta vừa triển khai ứng dụng Dashboard.<br/>Kiểm tra Deployment. Deployment này dùng image nào?</summary>
 
 
-    Run the command `kubectl describe deployment` and look at the `Image` field
+    Chạy lệnh `kubectl describe deployment` và xem trường `Image`
 
     > `gcr.io/kodekloud/customimage/my-kubernetes-dashboard`
 
     </details>
 
-1. Information only.
+1. Chỉ là thông tin (không cần trả lời).
 
 1.  <details>
-    <summary>What is the state of the dashboard? Have the pod details loaded successfully?</summary>
+    <summary>Trạng thái của dashboard là gì? Thông tin Pod đã được tải thành công chưa?</summary>
 
-    Open the `web-dashboard` link located above the terminal and inspect the status. We can see an error message, therefore the status is...
+    Mở link `web-dashboard` ở phía trên terminal và kiểm tra trạng thái. Ta thấy có thông báo lỗi, do đó trạng thái là...
 
     > `Failed`
 
     </details>
 
 1.  <details>
-    <summary>What type of account does the Dashboard application use to query the Kubernetes API?</summary>
+    <summary>Ứng dụng Dashboard dùng loại account nào để truy vấn Kubernetes API?</summary>
 
-    As evident from the error in the web-dashboard UI, the pod makes use of a service account to query the Kubernetes API.
+    Như thấy rõ từ thông báo lỗi trên giao diện web-dashboard, Pod dùng một ServiceAccount để truy vấn Kubernetes API.
 
     > Service Account
 
     </details>
 
 1.  <details>
-    <summary>Which account does the Dashboard application use to query the Kubernetes API?</summary>
+    <summary>Ứng dụng Dashboard dùng account nào để truy vấn Kubernetes API?</summary>
 
-    To find this, we need to insect the YAML of the running pod. The correct field for specifying a pod's service account is `serviceAccountName`. To save looking at _all_ the YAML, we can use `grep` command to extract only that field:
+    Để tìm ra, ta cần kiểm tra YAML của Pod đang chạy. Trường dùng để chỉ định ServiceAccount của Pod là `serviceAccountName`. Để khỏi phải đọc _toàn bộ_ YAML, ta có thể dùng lệnh `grep` để lọc riêng trường đó:
 
     ```
     kubectl get po -o yaml | grep 'serviceAccountName:'
     ```
 
-    You could also do it with JSONPath. First get the name of the pod using `kubectl get pods`. It will be different each time you run this lab. Then the command is e.g.
+    Bạn cũng có thể dùng JSONPath. Trước tiên lấy tên Pod bằng `kubectl get pods` (tên này sẽ khác nhau mỗi lần chạy lab). Sau đó chạy lệnh, ví dụ:
 
     ```
     kubectl get po web-dashboard-65b9cf6cbb-79vbs -o jsonpath='{.spec.serviceAccountName}'
@@ -68,57 +70,57 @@ Solutions to the Practice Test Service Accounts
     </details>
 
 1.  <details>
-    <summary>Inspect the Dashboard Application POD and identify the Service Account mounted on it.</summary>
+    <summary>Kiểm tra Pod của ứng dụng Dashboard và xác định ServiceAccount được mount vào nó.</summary>
 
-    This is the same as the previous question.
+    Câu này giống câu trước.
 
     > `default`
 
     </details>
 
 1.  <details>
-    <summary>At what location is the ServiceAccount credentials available within the pod?</summary>
+    <summary>Thông tin xác thực của ServiceAccount nằm ở vị trí nào bên trong Pod?</summary>
 
-    Know that service account tokens are mounted in pods as a volume mount, so it is the `volumeMounts` section in which we look.
+    Token của ServiceAccount được mount vào Pod dưới dạng volume mount, vì vậy ta cần xem phần `volumeMounts`.
 
     ```
     kubectl describe pod
     ```
 
-    Find the `Mounts` section which represents mounted volumes, and you will see a path to the mounted service account. From the anwsers, choose the one with the correct path prefix
+    Tìm phần `Mounts` (danh sách các volume được mount), bạn sẽ thấy đường dẫn tới ServiceAccount được mount (đầy đủ là `/var/run/secrets/kubernetes.io/serviceaccount`, chứa các file `token`, `ca.crt`, `namespace`). Trong các đáp án, chọn đáp án có tiền tố đường dẫn đúng
 
     > `/var/run/secrets`
 
     </details>
 
 1.  <details>
-    <summary> Create a new ServiceAccount named <b>dashboard-sa</b>.</summary>
+    <summary> Tạo một ServiceAccount mới tên là <b>dashboard-sa</b>.</summary>
 
-    Run the command `kubectl create serviceaccount dashboard-sa`
+    Chạy lệnh `kubectl create serviceaccount dashboard-sa`
 
     </details>
 
-1. Information only
+1. Chỉ là thông tin (không cần trả lời). Lab đã cấp thêm quyền cho `dashboard-sa` bằng RBAC (các file cấu hình nằm tại `/var/rbac`) — có thể kiểm tra bằng `kubectl auth can-i list pods --as=system:serviceaccount:default:dashboard-sa`.
 
-1.  Now we are going to test the service account's access to the dashboard.
+1.  Bây giờ chúng ta sẽ kiểm tra quyền truy cập của ServiceAccount thông qua dashboard.
 
-    1. Generate a token
+    1. Tạo token
 
         ```
         kubectl create token dashboard-sa
         ```
 
-        This will generate a long string of characters.
+        Lệnh này sẽ sinh ra một chuỗi ký tự dài (một JWT, mặc định hết hạn sau 1 giờ; lệnh không tạo Secret nào).
 
-    1. Select all the output using your mouse and copy it.
-    1. Return to the dashboard UI, and paste this to the `Token` field
-    1. Press Load Dashboard. It should now display the pod
+    1. Dùng chuột bôi đen toàn bộ output và copy.
+    1. Quay lại giao diện dashboard và dán vào ô `Token`
+    1. Nhấn Load Dashboard. Lúc này dashboard sẽ hiển thị Pod
 
 1.  <details>
-    <summary>Edit the deployment to change ServiceAccount from <b>default</b> to <b>dashboard-sa</b>.</summary>
+    <summary>Sửa Deployment để đổi ServiceAccount từ <b>default</b> sang <b>dashboard-sa</b>.</summary>
 
-    1. Use command `kubectl edit deployment web-dashboard`, which opens the running deployment in `vi`
-    1. Move dowm to the deployment spec and insert the service account as shown:
+    1. Dùng lệnh `kubectl edit deployment web-dashboard`, lệnh này mở Deployment đang chạy trong `vi`
+    1. Di chuyển xuống phần spec của Pod template và chèn ServiceAccount như dưới đây:
 
       ```yaml
       apiVersion: apps/v1
@@ -150,7 +152,7 @@ Solutions to the Practice Test Service Accounts
             labels:
               name: web-dashboard
           spec:
-            serviceAccountName: dashboard-sa    # <- Insert this line
+            serviceAccountName: dashboard-sa    # <- Chèn dòng này
             containers:
             - env:
               - name: PYTHONUNBUFFERED
@@ -163,8 +165,10 @@ Solutions to the Practice Test Service Accounts
                 protocol: TCP
       ```
 
-    1. Save and exit `vi`. The deployment will be updated
+    1. Lưu và thoát `vi`. Deployment sẽ được cập nhật và tạo Pod mới với ServiceAccount mới
+
+    💡 Cách nhanh hơn: `kubectl set serviceaccount deployment web-dashboard dashboard-sa`
 
     </details>
 
-1. Reload the dashboard and verify it works without pasting a token.
+1. Tải lại dashboard và xác nhận nó hoạt động mà không cần dán token (vì token của `dashboard-sa` giờ đã được tự động mount vào Pod).

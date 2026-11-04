@@ -1,77 +1,82 @@
-# Practice Test - CNI weave
+# Practice Test - CNI Weave (Bài thực hành)
 
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-cni-weave/)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-cni-weave/)
 
-#### Solution
+#### Lời giải
 
   1. <details>
-      <summary>Inspect the kubelet service and identify the container runtime value is set for Kubernetes.</summary>
+      <summary>Kiểm tra service kubelet và xác định giá trị container runtime được thiết lập cho Kubernetes.</summary>
 
-      Check kubelet unit file
+      Xem unit file của kubelet
 
       ```bash
       systemctl cat kubelet
       ```
 
-      Note from the output this line
+      Chú ý dòng sau trong output
 
       ```
       EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
       ```
 
-      Inspect this file
+      Kiểm tra file này
 
       ```bash
       cat /var/lib/kubelet/kubeadm-flags.env
       ```
 
-      Answer can be found as value of `--container-runtime`
+      Đáp án là giá trị của `--container-runtime`
 
       > REMOTE
+
+      > 💡 **Bổ sung:** Flag `--container-runtime` (giá trị `remote`) đã bị deprecated từ v1.24 và bị loại bỏ ở v1.27, vì sau khi bỏ dockershim thì mọi runtime đều là "remote" (qua CRI). Trên các phiên bản mới, file này chỉ còn `--container-runtime-endpoint` (ví dụ `unix:///var/run/containerd/containerd.sock`) — nhìn vào đó để biết runtime là containerd hay CRI-O. Cũng có thể xem cột `CONTAINER-RUNTIME` trong `kubectl get nodes -o wide`.
 
       </details>
 
   2. <details>
-      <summary>What is the path configured with all binaries of CNI supported plugins?</summary>
+      <summary>Đường dẫn nào được cấu hình chứa tất cả các file thực thi (binary) của các CNI plugin được hỗ trợ?</summary>
 
-      This is the standard location for the installation of CNI plugins
+      Đây là vị trí tiêu chuẩn để cài đặt các CNI plugin
 
       | `/opt/cni/bin`
 
      </details>
 
   3. <details>
-      <summary>Identify which of the below plugins is not available in the list of available CNI plugins on this host?</summary>
+      <summary>Plugin nào dưới đây không có trong danh sách CNI plugin khả dụng trên host này?</summary>
 
       ```bash
       ls -l /opt/cni/bin
       ```
 
-      Find the option from the given answers not in the output opf the above
+      Tìm trong các đáp án cho sẵn lựa chọn không xuất hiện trong output của lệnh trên
 
       > cisco
 
      </details>
 
   4. <details>
-      <summary>What is the CNI plugin configured to be used on this kubernetes cluster?</summary>
+      <summary>CNI plugin nào được cấu hình để sử dụng trên Kubernetes cluster này?</summary>
 
-      From the available options, we need to recognise which of the four is not the name of a container networking provider. Of the three that are, only one of them is present in `/opt/cni/bin`
+      Trong các lựa chọn, cần nhận ra lựa chọn nào trong bốn cái không phải là tên của một nhà cung cấp mạng cho container. Trong ba cái còn lại, chỉ một cái có mặt trong `/opt/cni/bin`
 
       > flannel
 
-      Note that `bridge` is a mechanism for connecting networks together, and not a network _provider_.
+      Lưu ý rằng `bridge` là một cơ chế để nối các mạng với nhau, không phải một _nhà cung cấp_ mạng (network provider).
+
+      > 💡 **Bổ sung:** Cách chắc chắn nhất là xem file cấu hình trong `/etc/cni/net.d/` (ví dụ `ls /etc/cni/net.d/` sẽ thấy `10-flannel.conflist`) hoặc kiểm tra các Pod của CNI đang chạy: `kubectl get pods -A | grep -iE 'flannel|calico|cilium|weave'`.
      </details>
 
   5. <details>
-      <summary>What binary executable file will be run by kubelet after a container and its associated namespace are created.</summary>
+      <summary>File thực thi nào sẽ được kubelet chạy sau khi một container và namespace liên quan của nó được tạo?</summary>
 
-      Following on from Q4...
+      Tiếp nối từ câu 4...
 
       > flannel
 
-      All the files in `/opt/cni/bin` are binary executables with tasks related to configuring network namespaces. After the network namespace is configured using the other programs, `flannel` implements the network.
+      Tất cả các file trong `/opt/cni/bin` đều là file thực thi làm các tác vụ liên quan đến cấu hình network namespace. Sau khi network namespace được cấu hình bằng các chương trình khác, `flannel` triển khai mạng.
 
-      [This is a great article](https://tonylixu.medium.com/k8s-network-cni-introduction-b035d42ad68f) on what the programs in `/opt/cni/bin` are for.
+      [Đây là một bài viết rất hay](https://tonylixu.medium.com/k8s-network-cni-introduction-b035d42ad68f) về công dụng của các chương trình trong `/opt/cni/bin`.
+
+      > 💡 **Bổ sung:** Chính xác hơn, ở các phiên bản Kubernetes hiện tại, container runtime (containerd) mới là thành phần gọi CNI plugin, không phải kubelet. Plugin được gọi là giá trị `type` trong file cấu hình ở `/etc/cni/net.d/`. Với Flannel, plugin `flannel` sẽ ủy quyền (delegate) tiếp cho plugin `bridge` và IPAM `host-local` để tạo interface và cấp IP.
      </details>
-

@@ -1,8 +1,21 @@
-# Certified Kubernetes Administrator (CKA) Course
+# Khóa học Certified Kubernetes Administrator (CKA)
 
-These are notes from the [Certified Kubernetes Administrator Course](https://kodekloud.com/courses/certified-kubernetes-administrator-cka/) hosted on KodeKloud.
+Đây là bộ ghi chú (bản tiếng Việt) của [Khóa học Certified Kubernetes Administrator](https://kodekloud.com/courses/certified-kubernetes-administrator-cka/) trên KodeKloud.
 
-# Sections
+> 💡 **Bổ sung — Tổng quan về kỳ thi CKA hiện tại:**
+> - CKA là kỳ thi **thực hành hoàn toàn (performance-based)**: bạn làm bài trực tiếp trên terminal với các cluster Kubernetes thật, không có câu hỏi trắc nghiệm. Thời gian làm bài là **2 giờ**, điểm đạt là **66%**, thi online có giám sát (proctored) qua trình duyệt bảo mật của PSI.
+> - Phiên bản Kubernetes dùng trong đề thi được cập nhật theo các bản phát hành mới (thường chỉ trễ vài minor version so với bản mới nhất), nên hãy luyện tập trên phiên bản gần đây.
+> - Từ **18/02/2025**, CNCF cập nhật curriculum với trọng số các domain như sau:
+>   - Troubleshooting — 30%
+>   - Cluster Architecture, Installation & Configuration — 25%
+>   - Services & Networking — 20%
+>   - Workloads & Scheduling — 15%
+>   - Storage — 10%
+> - Curriculum mới bổ sung (hoặc nhấn mạnh hơn) các chủ đề như: **Helm** và **Kustomize**, **CRD** và operator, **Gateway API**, các interface mở rộng (CNI, CSI, CRI), dynamic volume provisioning với StorageClass, autoscaling workload. Một số chủ đề trong khóa học gốc (ví dụ cài cluster "the hard way") không còn là trọng tâm. Luôn đối chiếu với [curriculum chính thức](https://github.com/cncf/curriculum).
+> - Trong lúc thi được phép mở tài liệu chính thức (như `kubernetes.io/docs`) theo danh sách trong Candidate Handbook. Khi đăng ký thi, bạn được kèm 2 lượt dùng trình giả lập killer.sh và 1 lần thi lại miễn phí. Chứng chỉ có hiệu lực **2 năm**.
+> - Mẹo chung: thành thạo các lệnh imperative của `kubectl` (`kubectl run`, `kubectl create ... --dry-run=client -o yaml`), luôn kiểm tra đúng **context/namespace** trước khi làm mỗi câu, và quản lý thời gian — bỏ qua câu khó, quay lại sau.
+
+# Mục lục
 
 - [01-Introduction](docs/01-Introduction)
 
@@ -205,7 +218,7 @@ These are notes from the [Certified Kubernetes Administrator Course](https://kod
   - [03-Provision-VMs-with-Vagrant](docs/11-Install-Kubernetes-the-kubeadm-way/03-Provision-VMs-with-Vagrant.md)
   - [04-Demo-Deployment-with-Kubeadm](docs/11-Install-Kubernetes-the-kubeadm-way/04-Demo-Deployment-with-Kubeadm.md)
   - [05-Practice-Test-Deploy-Kubernetes-Cluster-using-Kubeadm](docs/11-Install-Kubernetes-the-kubeadm-way/05-Practice-Test-Deploy-Kubernetes-Cluster-using-Kubeadm.md)
-  - [BONUS 1 - Various kubeadm cluster configurations](./kubeadm-clusters) - Including for Apple M1/M2!
+  - [BONUS 1 - Various kubeadm cluster configurations](./kubeadm-clusters) - Bao gồm cả Apple M1/M2!
   - [BONUS 2 - Installing Managed Clusters in Cloud Playgrounds](./managed-clusters/)
 
 

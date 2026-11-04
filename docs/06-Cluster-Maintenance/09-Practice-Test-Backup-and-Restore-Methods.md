@@ -1,10 +1,10 @@
-# Practice Test - Backup and Restore Methods
-Take me to [Practice Test](https://kodekloud.com/topic/practice-test-backup-and-restore-methods/)
+# Practice Test - Backup and Restore Methods (Bài thực hành)
+Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-backup-and-restore-methods/)
 
-Solutions to practice test - Backup and Restore Methods
+Lời giải cho bài practice test - Backup and Restore Methods
 
 1.  <details>
-    <summary>How many deployments exist in the cluster?</summary>
+    <summary>Có bao nhiêu Deployment trong cluster?</summary>
 
     ```
     kubectl get deployments
@@ -12,43 +12,43 @@ Solutions to practice test - Backup and Restore Methods
     </details>
 
 1.  <details>
-    <summary>What is the version of ETCD running on the cluster?</summary>
+    <summary>Phiên bản ETCD đang chạy trên cluster là gì?</summary>
 
     ```
     kubectl describe pod -n kube-system etcd-controlplane
     ```
 
-    Find the entry for `Image`
+    Tìm dòng `Image` (phần tag của image chính là phiên bản etcd)
     </details>
 
 1.  <details>
-    <summary>At what address can you reach the ETCD cluster from the controlplane node?</summary>
+    <summary>Từ node controlplane, có thể kết nối tới cluster ETCD qua địa chỉ nào?</summary>
 
     ```
     kubectl describe pod -n kube-system etcd-controlplane
     ```
 
-    Under `Command` find `--listen-client-urls`
+    Trong mục `Command`, tìm `--listen-client-urls`
     </details>
 
 1.  <details>
-    <summary>Where is the ETCD server certificate file located?</summary>
+    <summary>File certificate của ETCD server nằm ở đâu?</summary>
 
-    On kubeadm clusters like this one, the default location for certificate files is `/etc/kubernetes/pki/etcd`
+    Với cluster kubeadm như cluster này, vị trí mặc định của các file certificate là `/etc/kubernetes/pki/etcd`
 
-    Choose the correct certificate
+    Chọn đúng certificate (giá trị của flag `--cert-file` trong manifest etcd, thường là `/etc/kubernetes/pki/etcd/server.crt`)
     </details>
 
 1.  <details>
-    <summary>Where is the ETCD CA Certificate file located?</summary>
+    <summary>File CA Certificate của ETCD nằm ở đâu?</summary>
 
-    On kubeadm clusters like this one, the default location for certificate files is `/etc/kubernetes/pki/etcd`
+    Với cluster kubeadm như cluster này, vị trí mặc định của các file certificate là `/etc/kubernetes/pki/etcd`
 
-    Choose the correct certificate
+    Chọn đúng certificate (giá trị của flag `--trusted-ca-file`, thường là `/etc/kubernetes/pki/etcd/ca.crt`)
     </details>
 
 1.  <details>
-    <summary>Take a snapshot of the ETCD database using the built-in snapshot functionality.</br>Store the backup file at location <b>/opt/snapshot-pre-boot.db</b></summary>
+    <summary>Tạo snapshot cơ sở dữ liệu ETCD bằng tính năng snapshot có sẵn.</br>Lưu file backup tại <b>/opt/snapshot-pre-boot.db</b></summary>
 
     ```
     ETCDCTL_API=3 etcdctl snapshot save \
@@ -57,21 +57,23 @@ Solutions to practice test - Backup and Restore Methods
       --key=/etc/kubernetes/pki/etcd/server.key \
       /opt/snapshot-pre-boot.db
     ```
+
+    > 💡 **Bổ sung:** Không cần `--endpoints` vì etcd lắng nghe trên `127.0.0.1:2379` (giá trị mặc định). Có thể kiểm tra snapshot bằng `etcdutl snapshot status /opt/snapshot-pre-boot.db -w table` (hoặc `etcdctl snapshot status ...` trên bản etcd cũ).
     </details> 
 
-1. Information only.
+1. Chỉ là thông tin.
 
 
 1.  <details>
-    <summary>Wake up! We have a conference call! After the reboot the master nodes came back online, but none of our applications are accessible. Check the status of the applications on the cluster. What's wrong?</summary>
+    <summary>Dậy đi! Có cuộc họp khẩn! Sau khi reboot, các master node đã online trở lại, nhưng không ứng dụng nào truy cập được. Hãy kiểm tra trạng thái các ứng dụng trên cluster. Có vấn đề gì?</summary>
 
-    > All of the above
+    > All of the above (Tất cả các đáp án trên – Deployment, Service, Pod đều biến mất)
     </details>
 
 1.  <details>
-    <summary>Luckily we took a backup. Restore the original state of the cluster using the backup file.</summary>
+    <summary>May mắn là chúng ta đã có bản backup. Hãy restore lại trạng thái ban đầu của cluster bằng file backup.</summary>
 
-    1. Restore the backup to a new directory
+    1. Restore bản backup vào một thư mục mới
 
         ```
         ETCDCTL_API=3 etcdctl snapshot restore \
@@ -79,9 +81,11 @@ Solutions to practice test - Backup and Restore Methods
           /opt/snapshot-pre-boot.db
         ```
 
-    1. Modify the `etcd` pod to use the new directory.
+        > 💡 Với etcd v3.5+, lệnh tương đương được khuyến nghị là `etcdutl snapshot restore /opt/snapshot-pre-boot.db --data-dir /var/lib/etcd-from-backup`. Lệnh restore làm việc trực tiếp trên file nên không cần cert. Thư mục đích không được tồn tại sẵn (hoặc phải rỗng).
 
-        To do this, we need to edit the `volumes` section and change the `hostPath` to be the directory we restored to.
+    1. Sửa Pod `etcd` để dùng thư mục mới.
+
+        Để làm việc này, cần sửa mục `volumes` và đổi `hostPath` thành thư mục mà ta vừa restore vào.
 
         ```
         vi /etc/kubernetes/manifests/etcd.yaml
@@ -94,16 +98,18 @@ Solutions to practice test - Backup and Restore Methods
               type: DirectoryOrCreate
             name: etcd-certs
           - hostPath:
-              path: /var/lib/etcd      # <- change this
+              path: /var/lib/etcd      # <- thay đổi giá trị này
               type: DirectoryOrCreate
             name: etcd-data
         ```
 
-        New value: `/var/lib/etcd-from-backup`
+        Giá trị mới: `/var/lib/etcd-from-backup`
 
-        Save this and wait for up to a minute for the `etcd` pod to reload.
+        Lưu lại và chờ tối đa khoảng một phút để Pod `etcd` được tạo lại.
 
-    1. Verify
+        > 💡 **Giải thích:** Vì etcd là static Pod, kubelet theo dõi thư mục `/etc/kubernetes/manifests` và tự tạo lại Pod khi file manifest thay đổi. Chỉ cần đổi `hostPath` là đủ: thư mục trên host được mount vào container tại `/var/lib/etcd`, nên `--data-dir` bên trong container không cần sửa. Trong lúc etcd khởi động lại, `kubectl` có thể tạm thời không phản hồi; có thể theo dõi bằng `crictl ps | grep etcd`. Nếu Pod etcd không lên được, kiểm tra log bằng `crictl logs <container-id>` hoặc `journalctl -u kubelet`.
+
+    1. Kiểm tra lại
 
         ```
         kubectl get deployments
@@ -111,4 +117,4 @@ Solutions to practice test - Backup and Restore Methods
         ```
     </details>
 
-See also: https://github.com/kodekloudhub/community-faq/blob/main/docs/etcd-faq.md
+Xem thêm: https://github.com/kodekloudhub/community-faq/blob/main/docs/etcd-faq.md

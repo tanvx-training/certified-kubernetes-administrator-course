@@ -1,8 +1,8 @@
-# Practice Test - Commands and Arguments
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-commands-and-arguments/)
+# Practice Test - Commands and Arguments (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-commands-and-arguments/)
   
-Solutions to practice test - commands and arguments
-- Run the command 'kubectl get pods' and count the number of pods.
+Lời giải cho bài practice test - commands and arguments
+- Chạy lệnh 'kubectl get pods' và đếm số lượng Pod.
   
   <details>
   
@@ -11,7 +11,7 @@ Solutions to practice test - commands and arguments
   ```
   </details>
   
-- Run the command 'kubectl describe pod' and look for command option
+- Chạy lệnh 'kubectl describe pod' và tìm tùy chọn command.
 
   <details>
   
@@ -20,13 +20,19 @@ Solutions to practice test - commands and arguments
   ```
   </details>
   
-- Set the command option to ['sleep', '5000']. Answer file at: /var/answers/answer-ubuntu-sleeper-2.yaml
+- Đặt tùy chọn command thành ['sleep', '5000']. File đáp án tại: /var/answers/answer-ubuntu-sleeper-2.yaml
 
-- Both sleep and 1200 should be defined as a string. Answer file at: /var/answers/answer-ubuntu-sleeper-3.yaml
+  > 💡 **Gợi ý:** Có thể tạo nhanh bằng `kubectl run ubuntu-sleeper-2 --image=ubuntu --dry-run=client -o yaml --command -- sleep 5000 > pod.yaml` rồi `kubectl apply -f pod.yaml`.
 
-- Answer file at: /var/answers/answer-ubuntu-sleeper-3-2.yaml
+- Cả sleep và 1200 đều phải được định nghĩa dưới dạng chuỗi (string). File đáp án tại: /var/answers/answer-ubuntu-sleeper-3.yaml
 
-- Inspect the file 'Dockerfile' given at /root/webapp-color. What command is run at container startup?
+  > 💡 **Giải thích:** Nếu viết `command: ["sleep", 1200]`, YAML hiểu `1200` là số nguyên và API server sẽ báo lỗi vì `command` phải là mảng các string. Hãy viết `"1200"`.
+
+- File đáp án tại: /var/answers/answer-ubuntu-sleeper-3-2.yaml
+
+  > 💡 **Giải thích:** Câu này yêu cầu sửa giá trị sleep của Pod đang chạy. Vì không thể thay đổi `command` của Pod đang chạy, cần xóa Pod và tạo lại: `kubectl edit pod ubuntu-sleeper-3` (sửa rồi lưu → bị từ chối, bản sửa được lưu vào `/tmp/`), sau đó `kubectl replace --force -f /tmp/kubectl-edit-xxxx.yaml`.
+
+- Xem file 'Dockerfile' tại /root/webapp-color. Command nào được chạy khi container khởi động?
   
   <details>
   
@@ -35,25 +41,29 @@ Solutions to practice test - commands and arguments
   ```
   </details>
   
-- Inspect the file 'Dockerfile2' given at /root/webapp-color. What command is run at container startup?
+- Xem file 'Dockerfile2' tại /root/webapp-color. Command nào được chạy khi container khởi động?
 
   <details>
   ```
   python app.py --color red
   ```
+
+  > 💡 **Giải thích:** Dockerfile2 có `ENTRYPOINT ["python", "app.py"]` và `CMD ["--color", "red"]`, nên CMD được nối vào sau ENTRYPOINT.
   </details>
   
-- The 'command' (entrypoint) is overridden in the pod definition. So the answer is --color green
+- 'command' (entrypoint) bị ghi đè trong file định nghĩa Pod. Vì vậy đáp án là --color green
 
-- Inspect the two files under directory 'webapp-color-3'. What command is run at container startup?
+- Xem hai file trong thư mục 'webapp-color-3'. Command nào được chạy khi container khởi động?
 
   <details>
   
   ```
   python app.py --color pink
   ```
+
+  > 💡 **Giải thích:** Trong file định nghĩa Pod, `command` ghi đè ENTRYPOINT của Dockerfile và `args` ghi đè CMD. Hãy kết hợp giá trị sau khi ghi đè: `command` + `args`.
   </details>
   
-- Answer file located at /var/answers/answer-webapp-color-green.yaml
+- File đáp án tại /var/answers/answer-webapp-color-green.yaml
 
-
+  > 💡 **Gợi ý:** Truyền argument `--color green` cho container mà không đổi command: `kubectl run webapp-green --image=kodekloud/webapp-color -- --color green`.

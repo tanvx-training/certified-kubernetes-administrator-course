@@ -1,9 +1,8 @@
-# Provision VMs with Vagrant tool
+# Cấp phát VM bằng công cụ Vagrant
 
-  - Take me to [Lecture](https://kodekloud.com/topic/deploy-with-kubeadm-provision-vms-with-vagrant/)
+  - Xem [Bài giảng](https://kodekloud.com/topic/deploy-with-kubeadm-provision-vms-with-vagrant/)
 
-If you want to build your own cluster, check these out. They are more up to date than the video currently :smile:
+Nếu bạn muốn tự dựng cluster của riêng mình, hãy xem các hướng dẫn dưới đây. Chúng được cập nhật mới hơn so với video hiện tại :smile:
 
 * [Kubeadm Clusters](../../kubeadm-clusters/)
 * [Managed Clusters](../../managed-clusters/)
-

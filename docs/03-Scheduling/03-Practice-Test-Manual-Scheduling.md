@@ -1,10 +1,10 @@
-# Practice Test - Manual Scheduling
-  - Take me to [Practice Test](https://kodekloud.com/topic/practice-test-manual-scheduling/)
+# Practice Test - Manual Scheduling (Bài thực hành)
+  - Đi tới [Practice Test](https://kodekloud.com/topic/practice-test-manual-scheduling/)
 
-Solutions to Practice Test - Manual Scheduling
+Lời giải cho bài Practice Test - Manual Scheduling
 
 1.  <details>
-    <summary>A pod definition file nginx.yaml is given. Create a pod using the file.</summary>
+    <summary>Cho sẵn file định nghĩa Pod nginx.yaml. Hãy tạo Pod từ file này.</summary>
 
     ```
     kubectl create -f nginx.yaml
@@ -12,35 +12,35 @@ Solutions to Practice Test - Manual Scheduling
     </details>
 
 1.  <details>
-    <summary>What is the status of the created POD?</summary>
+    <summary>Trạng thái của Pod vừa tạo là gì?</summary>
 
     ```
     kubectl get pods
     ```
 
-    Examine the `STATUS` column
+    Xem cột `STATUS`
     </details>
 
 1.  <details>
-    <summary>Why is the POD in a pending state?</br>Inspect the environment for various kubernetes control plane components.</summary>
+    <summary>Tại sao Pod ở trạng thái Pending?</br>Kiểm tra các thành phần control plane của Kubernetes trong môi trường.</summary>
 
     ```
     kubectl get pods --namespace kube-system
     ```
 
-    There is a key pod missing here!
+    Thiếu một Pod quan trọng ở đây! (Không có `kube-scheduler`, nên không ai gán node cho Pod.)
     </details>
 
 1.  <details>
-    <summary>Manually schedule the pod on node01.</summary>
+    <summary>Lập lịch thủ công Pod lên node01.</summary>
 
-    We will have to delete and recereate the pod, as the only property that may be edited on a running container is `image`
+    Ta phải xóa và tạo lại Pod, vì `nodeName` không thể sửa trên một Pod đang tồn tại (với Pod đang chạy, hầu như chỉ có thể sửa một số trường như `image`, `activeDeadlineSeconds`, `tolerations` (chỉ được thêm)).
 
     ```
     vi nginx.yaml
     ```
 
-    Make the following edit
+    Sửa file như sau
 
     ```yaml
     ---
@@ -59,11 +59,15 @@ Solutions to Practice Test - Manual Scheduling
     kubectl delete -f nginx.yaml
     kubectl create -f nginx.yaml
     ```
+
+    > 💡 **Mẹo:** Có thể gộp hai lệnh trên thành `kubectl replace --force -f nginx.yaml`. Kiểm tra kết quả bằng `kubectl get pods -o wide` (cột `NODE`).
     </details>
 
 1.  <details>
-    <summary>Now schedule the same pod on the controlplane node.</summary>
+    <summary>Bây giờ hãy lập lịch chính Pod đó lên node controlplane.</summary>
 
-    Repeat the steps as per the previous question. Edit `nodeName` to be `controlplane`
+    Lặp lại các bước như câu trước, sửa `nodeName` thành `controlplane`.
+
+    Lưu ý: dù node controlplane có taint `node-role.kubernetes.io/control-plane:NoSchedule`, Pod vẫn chạy được vì `nodeName` bỏ qua scheduler (taint `NoSchedule` chỉ được scheduler xét đến).
   </details>
 
