@@ -264,3 +264,15 @@
   - [01-Server for testing network policies](docs/17-tips-and-tricks/docs/01-server-for-testing-network-policies.md)
   - [02-Client-for-testing-network-things](docs/17-tips-and-tricks/docs/02-client--for-testing-network-things.md)
 
+
+- [18-CKAD-Exercises](docs/18-CKAD-Exercises/) - Bài tập thực hành CKAD (dịch từ [dgkanatsios/CKAD-exercises](https://github.com/dgkanatsios/CKAD-exercises))
+  - [01-Core-Concepts](docs/18-CKAD-Exercises/01-Core-Concepts.md)
+  - [02-Multi-Container-Pods](docs/18-CKAD-Exercises/02-Multi-Container-Pods.md)
+  - [03-Pod-Design](docs/18-CKAD-Exercises/03-Pod-Design.md)
+  - [04-Configuration](docs/18-CKAD-Exercises/04-Configuration.md)
+  - [05-Observability](docs/18-CKAD-Exercises/05-Observability.md)
+  - [06-Services-and-Networking](docs/18-CKAD-Exercises/06-Services-and-Networking.md)
+  - [07-State-Persistence](docs/18-CKAD-Exercises/07-State-Persistence.md)
+  - [08-Helm](docs/18-CKAD-Exercises/08-Helm.md)
+  - [09-Custom-Resource-Definitions](docs/18-CKAD-Exercises/09-Custom-Resource-Definitions.md)
+  - [10-Podman](docs/18-CKAD-Exercises/10-Podman.md)
